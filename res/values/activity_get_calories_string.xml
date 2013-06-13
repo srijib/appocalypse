@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="get_calories_error_image_not_found">Can\'t get calories because image wasn\'t saved.</string>
+</resources>

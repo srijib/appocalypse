@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="camera_error_camera_unavailable">Camera is not available. It is either not present or busy.</string>
+	<string name="camera_error_file_not_saved">Image could not be saved.</string>
+	<string name="camera_image_saved">Image saved.</string>
+	<string name="camera_error_media_not_ready">Image can not be saved because the SDCard is either not present on your device or is busy.</string>
+</resources>

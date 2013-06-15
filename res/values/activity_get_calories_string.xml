@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="get_calories_error_image_not_found">Can\'t get calories because image wasn\'t saved.</string>
+	<string name="get_calories_error_no_internet_connection">Can\'t fetch Nutrition Information because you\'re not connected to the Internet.</string>
+	<string name="get_calories_error_operation_failed">An error occurred while trying to fetch the Nutrition Information. Sorry :(</string>
 </resources>

@@ -8,9 +8,10 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
 import com.wks.calorieapp.R;
-import com.wks.calorieapp.utils.ApplicationEnvironment;
+import com.wks.calorieapp.utils.FileSystem;
 import com.wks.calorieapp.views.CameraPreview;
 
+import android.graphics.drawable.Drawable;
 import android.hardware.Camera;
 import android.hardware.Camera.PictureCallback;
 import android.os.Bundle;
@@ -24,6 +25,7 @@ import android.view.Menu;
 import android.view.View;
 import android.widget.Button;
 import android.widget.FrameLayout;
+import android.widget.ImageButton;
 import android.widget.Toast;
 
 public class CameraActivity extends Activity
@@ -37,7 +39,7 @@ public class CameraActivity extends Activity
 
 	private Button buttonOk;
 	private Button buttonCancel;
-	private Button buttonTakePicture;
+	private ImageButton buttonTakePicture;
 	private CameraPreview preview;
 	
 	private String fileName = "";
@@ -55,7 +57,10 @@ public class CameraActivity extends Activity
 
 	private void setupView ()
 	{
-		buttonTakePicture = ( Button ) findViewById ( R.id.camera_button_take_picture );
+		Drawable d=getResources().getDrawable(R.drawable.bg_actionbar);  
+		getActionBar().setBackgroundDrawable(d);
+		
+		buttonTakePicture = ( ImageButton ) findViewById ( R.id.camera_button_take_picture );
 		buttonOk = ( Button ) findViewById ( R.id.camera_button_ok );
 		buttonCancel = ( Button ) findViewById ( R.id.camera_button_cancel );
 
@@ -184,7 +189,7 @@ public class CameraActivity extends Activity
 
 			setFileName( generateFileName () );
 
-			String picturesDir = ApplicationEnvironment
+			String picturesDir = FileSystem
 					.getPicturesDirectory ( CameraActivity.this );
 
 			File imageFile = new File ( picturesDir + getFileName() );

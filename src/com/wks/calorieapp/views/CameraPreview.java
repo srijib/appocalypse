@@ -2,9 +2,8 @@ package com.wks.calorieapp.views;
 
 import java.io.IOException;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
-
-import com.wks.calorieapp.controllers.CameraActivity;
 
 import android.content.Context;
 import android.hardware.Camera;
@@ -26,6 +25,10 @@ public class CameraPreview extends SurfaceView implements Callback
 {
 	private static final String TAG = CameraPreview.class.getCanonicalName ();
 
+	private static final int JPEG_QUALITY = 90;
+
+	private static final int PICTURE_WIDTH = 300;
+
 	private Context context;// useless
 	private Camera camera = null;
 	private SurfaceHolder holder;
@@ -44,14 +47,17 @@ public class CameraPreview extends SurfaceView implements Callback
 	{
 		try
 		{
-			this.camera = Camera.open ( getCameraId(CameraInfo.CAMERA_FACING_BACK) );
+			this.camera = Camera
+					.open ( getCameraId ( CameraInfo.CAMERA_FACING_BACK ) );
 			this.camera.setPreviewDisplay ( holder );
-			if(camera == null)
-				Toast.makeText ( context, "cam null", Toast.LENGTH_LONG ).show ();
-		}catch(IOException e)
+			if ( camera == null )
+				Toast.makeText ( context, "cam null", Toast.LENGTH_LONG )
+						.show ();
+		}
+		catch ( IOException e )
 		{
-			//TODO 
-			Log.e ( TAG,  ""+e );
+			// TODO
+			Log.e ( TAG, "" + e );
 		}
 	}
 
@@ -67,14 +73,27 @@ public class CameraPreview extends SurfaceView implements Callback
 
 		try
 		{
-			if(camera == null)
-				return;
-			
+			if ( camera == null ) return;
 
 			Camera.Parameters parameters = camera.getParameters ();
-			//List< Size > sizes = parameters.getSupportedPreviewSizes ();
-			//Size previewSize = sizes.get ( sizes.size () - 1 );
-			parameters.setPreviewSize (width, height );
+			// List< Size > sizes = parameters.getSupportedPreviewSizes ();
+			// Size previewSize = sizes.get ( sizes.size () - 1 );
+			parameters.setPreviewSize ( width, height );
+
+			List<Size> sizes = parameters.getSupportedPictureSizes ();
+			Collections.sort ( sizes, new Comparator<Size>(){
+
+				@Override
+				public int compare ( Size lhs, Size rhs )
+				{
+					return lhs.width - rhs.width;
+				}
+				
+			} );
+			Size pictureSize = sizes.get ( 0 );
+
+			parameters.setPictureSize ( pictureSize.width, pictureSize.height );
+			parameters.setJpegQuality ( JPEG_QUALITY );
 			camera.setParameters ( parameters );
 			camera.setDisplayOrientation ( 90 );
 			camera.setPreviewDisplay ( holder );
@@ -82,8 +101,8 @@ public class CameraPreview extends SurfaceView implements Callback
 		}
 		catch ( IOException e )
 		{
-			//TODO
-			Log.e ( TAG,  ""+e );
+			// TODO
+			Log.e ( TAG, "" + e );
 		}
 
 	}
@@ -91,7 +110,7 @@ public class CameraPreview extends SurfaceView implements Callback
 	@Override
 	public void surfaceDestroyed ( SurfaceHolder holder )
 	{
-		if(camera != null)
+		if ( camera != null )
 		{
 			this.camera.setPreviewCallback ( null );
 			this.camera.stopPreview ();
@@ -100,8 +119,8 @@ public class CameraPreview extends SurfaceView implements Callback
 		}
 
 	}
-	
-	public Camera getCamera()
+
+	public Camera getCamera ()
 	{
 		return this.camera;
 	}
@@ -117,10 +136,10 @@ public class CameraPreview extends SurfaceView implements Callback
 		}
 		return 0;
 	}
-	
-	public void refreshPreview()
+
+	public void refreshPreview ()
 	{
-		if(camera != null)
+		if ( camera != null )
 		{
 			camera.startPreview ();
 		}

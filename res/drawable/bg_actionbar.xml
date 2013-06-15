@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle" >
+    <!-- SOLID GREY THEME 
+    <solid
+       android:color="#dcdcdc"/> -->
+   <!-- GREY GRADIENT THEME 
+   	<gradient
+        android:startColor="#eee9e9"
+        android:endColor="#dcdcdc"
+        android:useLevel="false"
+        android:type="linear"
+        android:angle="90"
+        ></gradient>-->
+   <!-- GREEN GRADIENT THEME 
+    <gradient
+        android:startColor="#3cb371"
+        android:endColor="#2e8b57"
+        android:useLevel="false"
+        android:type="linear"
+        android:angle="90"
+        ></gradient> -->
+    <solid
+       android:color="#308014"></solid>
+</shape>

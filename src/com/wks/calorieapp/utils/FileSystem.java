@@ -4,9 +4,8 @@ import java.io.File;
 
 import android.content.Context;
 import android.os.Environment;
-import android.util.Log;
 
-public class ApplicationEnvironment
+public class FileSystem
 {
 	public static String getPicturesDirectory(Context context)
 	{

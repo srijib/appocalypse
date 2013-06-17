@@ -7,7 +7,7 @@ package com.wks.calorieapp.models;
  * @author Waqqas
  * 
  */
-public class FoodInfoItem
+public class NutritionInfo
 {
 	/*
 	 * private static final String REGEX_SPACE = "\\s"; // private static final
@@ -29,7 +29,7 @@ public class FoodInfoItem
 	private float gramCarbsPer100g = 0;
 	private float gramProteinsPer100g = 0;
 
-	public FoodInfoItem ()
+	public NutritionInfo ()
 	{
 
 	}

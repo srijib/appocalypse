@@ -1,10 +1,12 @@
 package com.wks.calorieapp.models;
 
+import java.util.List;
+
 public class Response
 {
 	private boolean successful;
 	private String message;
-	private Object data;
+	private List<?> data;
 	
 	public Response()
 	{
@@ -21,12 +23,12 @@ public class Response
 		this.successful = successful;
 	}
 	
-	public Object getData ()
+	public List<?> getData ()
 	{
 		return data;
 	}
 	
-	public void setData ( Object data )
+	public void setData ( List<?> data )
 	{
 		this.data = data;
 	}

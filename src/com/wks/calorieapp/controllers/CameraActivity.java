@@ -43,6 +43,7 @@ public class CameraActivity extends Activity
 	private CameraPreview preview;
 	
 	private String fileName = "";
+	boolean pictureBeingPreviewed = false;
 
 	private FrameLayout framelayoutCameraPreview;
 
@@ -84,6 +85,16 @@ public class CameraActivity extends Activity
 		super.onPause ();
 	}
 
+	@Override
+	protected void onResume ()
+	{
+		super.onResume ();
+		if(!pictureBeingPreviewed)
+		{
+			setControlButtonsVisible(false);
+		}
+	}
+	
 	@Override
 	public boolean onCreateOptionsMenu ( Menu menu )
 	{
@@ -137,7 +148,9 @@ public class CameraActivity extends Activity
 			
 			Intent getCaloriesIntent = new Intent(CameraActivity.this,GetCaloriesActivity.class);
 			getCaloriesIntent.putExtra ( "image", getFileName() );
+			pictureBeingPreviewed = false;
 			CameraActivity.this.startActivity ( getCaloriesIntent );
+			
 		}
 
 	}
@@ -154,6 +167,7 @@ public class CameraActivity extends Activity
 			{
 				camera.takePicture ( null, null, new OnPictureTaken () );
 				setControlButtonsVisible ( true );
+				pictureBeingPreviewed = true;
 			}
 
 		}
@@ -168,6 +182,7 @@ public class CameraActivity extends Activity
 		{
 			setControlButtonsVisible(false);
 			preview.refreshPreview ();
+			pictureBeingPreviewed = false;
 		}
 
 	}

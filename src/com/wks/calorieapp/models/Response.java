@@ -4,31 +4,38 @@ import java.util.List;
 
 public class Response
 {
-	private boolean successful;
+	private int statusCode;
 	private String message;
-	private List<?> data;
+	private Object data;
 	
 	public Response()
 	{
 		
 	}
 	
-	public boolean isSuccessful ()
+	public Response(int statusCode,String message,List<?> data)
 	{
-		return successful;
+		this.statusCode = statusCode;
+		this.message = message;
+		this.data = data;
 	}
 	
-	public void setSuccessful ( boolean successful )
+	public int getStatusCode ()
 	{
-		this.successful = successful;
+		return statusCode;
 	}
 	
-	public List<?> getData ()
+	public void setStatusCode ( int statusCode )
+	{
+		this.statusCode = statusCode;
+	}
+	
+	public Object getData ()
 	{
 		return data;
 	}
 	
-	public void setData ( List<?> data )
+	public void setData ( Object data )
 	{
 		this.data = data;
 	}
@@ -41,6 +48,11 @@ public class Response
 	public void setMessage ( String message )
 	{
 		this.message = message;
+	}
+	
+	public boolean isSuccessful()
+	{
+		return this.statusCode == StatusCode.OK.getCode ();
 	}
 	
 	

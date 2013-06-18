@@ -3,12 +3,14 @@ package com.wks.calorieapp.controllers;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.List;
+import java.util.Map.Entry;
 
 import org.json.simple.parser.ParseException;
 
 import com.wks.calorieapp.R;
+import com.wks.calorieapp.models.FoodSimilarity;
+import com.wks.calorieapp.models.NutritionInfo;
 import com.wks.calorieapp.models.Response;
 import com.wks.calorieapp.models.ResponseFactory;
 import com.wks.calorieapp.utils.FileSystem;
@@ -20,18 +22,15 @@ import com.wks.calorieapp.views.GetCaloriesView;
 import android.app.Activity;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.util.Log;
 import android.widget.Toast;
 
 public class GetCaloriesActivity extends Activity
 {
-	private static final String TAG = GetCaloriesActivity.class
-			.getCanonicalName ();
+	private static final String TAG = GetCaloriesActivity.class.getCanonicalName ();
 
 	private static final int NUM_TRIES_GET_NUTR_INFO = 3;
 
 	private GetCaloriesView view;
-	private String imageFileName;
 
 	@Override
 	protected void onCreate ( Bundle savedInstanceState )
@@ -45,8 +44,7 @@ public class GetCaloriesActivity extends Activity
 
 		if ( fileName == null )
 		{
-			Toast.makeText ( this, R.string.get_calories_error_image_not_found,
-					Toast.LENGTH_LONG ).show ();
+			Toast.makeText ( this, R.string.get_calories_error_image_not_found, Toast.LENGTH_LONG ).show ();
 			this.finish ();
 			return;
 		}
@@ -58,36 +56,39 @@ public class GetCaloriesActivity extends Activity
 	{
 
 		@Override
-		protected void onPostExecute ( Response result )
+		protected void onPostExecute ( Response response )
 		{
-			if ( result == null || !result.isSuccessful () )
+			if(response != null && response.isSuccessful () && response.getData () instanceof HashMap)
 			{
-				String log = ( result != null ) ? result.getMessage ()
-						: "fuck me";
-				Log.e ( TAG, log );
-				view.setProgressBarText ( GetCaloriesActivity.this
-						.getString ( R.string.get_calories_error_operation_failed ) );
+				HashMap<String,List<NutritionInfo>> nutritionInfoForFoods = (HashMap<String,List<NutritionInfo>>) response.getData ();
+				for(Entry<String,List<NutritionInfo>> entry : nutritionInfoForFoods.entrySet ())
+				{
+					List<NutritionInfo> ni = entry.getValue ();
+					String foodname = entry.getKey ();
+					String calories = ni.get ( 0 ).toString ();
+					view.setProgressBarText ( foodname + "="+calories );
+					break;
+				}
+				
 			}else
-			{
-
-			}
-
+				view.setProgressBarText ( "No results found" );
 		}
 
+		/**
+		 * I just want to go on record saying that I am definitely not pleased with the quality of code in this method.
+		 * but i'm really frustrated so i jsut want it to work cuz i've got a deadline and a dissertation to wrtie. 
+		 */
 		@Override
 		protected Response doInBackground ( String... params )
 		{
 
 			if ( !HttpClient.isConnectedToNetwork ( GetCaloriesActivity.this ) )
 			{
-				Toast.makeText ( GetCaloriesActivity.this,
-						R.string.get_calories_error_no_internet_connection,
-						Toast.LENGTH_LONG ).show ();
+				Toast.makeText ( GetCaloriesActivity.this, R.string.get_calories_error_no_internet_connection, Toast.LENGTH_LONG ).show ();
 				return null;
 			}
 
-			String picturesDir = FileSystem
-					.getPicturesDirectory ( GetCaloriesActivity.this );
+			String picturesDir = FileSystem.getPicturesDirectory ( GetCaloriesActivity.this );
 			String fileName = params[0];
 			File imageFile = new File ( picturesDir + fileName );
 
@@ -98,85 +99,70 @@ public class GetCaloriesActivity extends Activity
 			{
 				// upload image
 				publishProgress ( "Uploading Image..." );
-				json = Uploader.uploadFile ( imageFile,WebServiceUrlFactory.upload ());
-				response = ResponseFactory
-						.createResponseForUploadRequest ( json );
+				json = Uploader.uploadFile ( imageFile, WebServiceUrlFactory.upload () );
+				response = ResponseFactory.createResponseForUploadRequest ( json );
 
-				if ( response == null || !response.isSuccessful () )
-				{
-					if ( response == null )
-					{
-						response = new Response();
-						response.setSuccessful ( false );
-						response.setMessage ( GetCaloriesActivity.Status.IMAGE_UPLOAD_FAILURE
-								.getMessage () );
-						response.setData ( null );
-					}
-
-					return response;
-				}
+				if ( response == null || !response.isSuccessful () ) return response;
 
 				// get matches for image
 				publishProgress ( "Identifying Food..." );
-				json = HttpClient.get (WebServiceUrlFactory.identify ("35937204245399320130616225827.jpg"));
-				response = ResponseFactory
-						.createResponseForIdentifyRequest ( json );
+				json = HttpClient.get ( WebServiceUrlFactory.identify ( "35937204245399320130616225827.jpg" ) );
+				response = ResponseFactory.createResponseForIdentifyRequest ( json );
 
-				// check response for succes and put images
-				if ( response == null || !response.isSuccessful () )
+				//if response not received or matching foods not found, return 
+				if ( response == null || !response.isSuccessful () ) return response;
+
+				//if matching foods found
+				if ( response.getData () != null )
 				{
-					if ( response == null )
+					//assert that data is a list of matching foods before casting.
+					if ( response.getData () instanceof List )
 					{
-						response = new Response();
-						response.setSuccessful ( false );
-						response.setMessage ( GetCaloriesActivity.Status.FOOD_NOT_IDENTIFIED.getMessage() );
-						response.setData ( null );
+						List< FoodSimilarity > foodSimilarity = ( List< FoodSimilarity > ) response.getData ();
 
-					}
-					
-					return response;
-				}
-
-				if ( response.getData () != null
-						&& response.getData () instanceof HashMap )
-				{
-					@SuppressWarnings ( "unchecked" )
-					HashMap< Float, String > similarityFoodName = ( HashMap< Float, String > ) response
-							.getData ();
-
-					if ( similarityFoodName.size () == 0 )
-					{
-						Response failResponse = new Response ();
-						failResponse.setSuccessful ( false );
-						failResponse
-								.setMessage ( GetCaloriesActivity.Status.FOOD_NOT_IDENTIFIED
-										.getMessage () );
-						failResponse.setData ( null );
-
-						return failResponse;
-					}
-
-					publishProgress ( "Getting Nutrition Information..." );
-					Set<String> foodNames = new HashSet<String>(similarityFoodName.values ());
-					
-					for(int i=0;i < foodNames.size ();i++)
-					{
-						for(int j=0;j < NUM_TRIES_GET_NUTR_INFO;j++)
+						publishProgress ( "Getting Nutrition Information..." );
+						//create hashmap containing food name => nutrtion info
+						HashMap< String, List< NutritionInfo >> nutritionInfoForFoods = new HashMap< String, List< NutritionInfo >> ();
+						
+						//get nutrition info for each food in list.
+						for ( int i = 0 ; i < foodSimilarity.size () ; i++ )
 						{
-							
-						}
-					}
+							String foodName = foodSimilarity.get ( i ).getFoodName ();
 
-				}else
-				{
+							//nutrition info request doesn't always work, so if it fails, 
+							//make NUM_TRIES_GET_NUTR_INFO tries before giving up.
+							for ( int j = 0 ; j < NUM_TRIES_GET_NUTR_INFO ; j++ )
+							{
+								json = HttpClient.get ( WebServiceUrlFactory.getNutritionInfo ( foodName));
+								response = ResponseFactory.createResponseForNutritionInfoRequest ( json );
+								
+								//when response is received with data, move on to next step.
+								if ( response != null && response.isSuccessful () ) break;
+							}
+							
+							publishProgress ( "Proccessing Information" );
+							//double check that the response is not null and that data is received.
+							if ( response != null && response.isSuccessful () )
+							{
+								//asseert tht data is  list of nutrition info
+								if ( response.getData () instanceof List )
+								{
+									
+									List< NutritionInfo > nutritionInfoForFood = ( List< NutritionInfo > ) response.getData ();
+									
+									//put nutrition info into map with food name as key.
+									nutritionInfoForFoods.put ( foodName, nutritionInfoForFood );
+								}
+							}
+
+						}
+						//replace list of food similarity with hashmap foodname=>nutrinfo
+						response.setData ( nutritionInfoForFoods );
+					}else 
+						//you might want to throw an exception over here.
+						return null;
 
 				}
-
-				// get nutrition information for each of the three items.
-				//
-
-				// TODO check response for success. if false, try again 3 times
-				// TODO prepare response for list.
 
 			}
 			catch ( IOException e )
@@ -196,24 +182,7 @@ public class GetCaloriesActivity extends Activity
 		{
 			view.setProgressBarText ( values[0] );
 		}
+
 	}
 
-	enum Status
-	{
-		FOOD_NOT_IDENTIFIED (
-				"The food in the picture could not be identified." ), IMAGE_UPLOAD_FAILURE (
-				"This image failed to upload." );
-
-		private final String message;
-
-		private Status ( String message )
-		{
-			this.message = message;
-		}
-
-		public String getMessage ()
-		{
-			return message;
-		}
-	}
 }

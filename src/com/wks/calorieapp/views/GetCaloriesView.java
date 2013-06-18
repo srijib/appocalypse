@@ -14,7 +14,6 @@ public class GetCaloriesView
 	private View view;
 	private Context context;
 	
-	private ViewFlipper viewflipper;
 	private ProgressBar progressbarLoading;
 	private TextView textLoadingActivity;
 	
@@ -29,7 +28,7 @@ public class GetCaloriesView
 	
 	private void setupView()
 	{
-		this.viewflipper = (ViewFlipper) view.findViewById ( R.id.get_calories_viewflipper );
+		
 		this.progressbarLoading = (ProgressBar) view.findViewById ( R.id.get_calories_spinner_loading );
 		this.textLoadingActivity = (TextView) view.findViewById ( R.id.get_calories_text_loading_activity );
 	}
@@ -43,4 +42,6 @@ public class GetCaloriesView
 	{
 		this.textLoadingActivity.setText ( text );
 	}
+	
+	
 }

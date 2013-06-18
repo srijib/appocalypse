@@ -198,7 +198,7 @@ public class NutritionInfo
 	@Override
 	public String toString ()
 	{
-		return String.format ( "[id: %d,name: %s,type: %s,description: %s]",
-				id, name, type/*, description */);
+		return String.format ( "[id: %d,name: %s,calories: %f]",
+				id, name, kiloCaloriesPer100g);
 	}
 }

@@ -1,7 +1,8 @@
-package com.wks.calorieapp.models;
+package com.wks.calorieapp.pojos;
 
 import java.util.ArrayList;
 import java.util.List;
+
 
 public class ParentItem
 {
@@ -10,8 +11,13 @@ public class ParentItem
 	
 	public ParentItem()
 	{
+		this("");
+	}
+	
+	public ParentItem(String foodName)
+	{
+		this.foodName = foodName;
 		this.nutritionInfoList = new ArrayList<NutritionInfo>();
-		
 	}
 	
 	public String getFoodName ()

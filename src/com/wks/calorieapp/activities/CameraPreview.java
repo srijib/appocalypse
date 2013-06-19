@@ -1,4 +1,4 @@
-package com.wks.calorieapp.views;
+package com.wks.calorieapp.activities;
 
 import java.io.IOException;
 import java.util.Collections;

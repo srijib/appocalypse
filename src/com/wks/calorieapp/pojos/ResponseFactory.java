@@ -1,4 +1,4 @@
-package com.wks.calorieapp.models;
+package com.wks.calorieapp.pojos;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -9,6 +9,7 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
+
 
 public class ResponseFactory
 {

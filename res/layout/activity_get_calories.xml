@@ -2,7 +2,8 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/get_calories_relativelayout_loading"
     android:layout_width="fill_parent"
-    android:layout_height="fill_parent" >
+    android:layout_height="fill_parent" 
+    android:background="#F0FFF0">
 
     <ProgressBar
         android:id="@+id/get_calories_spinner_loading"
@@ -16,6 +17,6 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@+id/get_calories_spinner_loading"
-        android:layout_centerHorizontal="true" />
-
+        android:layout_centerHorizontal="true"
+        style="@style/GreenFont"></TextView>
 </RelativeLayout>

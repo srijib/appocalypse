@@ -1,23 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="horizontal" >
-    
+    android:gravity="center_vertical|center_horizontal"
+    android:orientation="horizontal"
+    android:background="#F0FFF0"
+    android:padding="12dip">
+
     <TextView
         android:id="@+id/expandable_row_child_food_name"
-        android:layout_width="wrap_content"
+        android:layout_width="0dip"
         android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
-        android:gravity="center"
-        ></TextView>
-    
+        android:layout_weight="7"
+        android:maxLines="5"
+        android:gravity="left"
+        style="@style/ChildItem.Bold">
+    </TextView>
+
     <TextView
         android:id="@+id/expandable_row_child_calories"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentRight="true"
-        android:gravity="center"
-        ></TextView>
+        android:layout_weight="3"
+        android:gravity="right"
+        style="@style/ChildItem">
+    </TextView>
 
-</RelativeLayout>
+</LinearLayout>

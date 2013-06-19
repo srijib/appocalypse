@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical" >
+
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:background="#ebebeb"
+        android:orientation="horizontal"
+        android:padding="2dip"
+        android:weightSum="10" >
+
+        <EditText
+            android:id="@+id/search_edit_search_term"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="7"
+            android:background="#ffffff"
+            android:hint="Enter search term"
+            android:inputType="text"
+            android:maxLines="1"
+            android:padding="2dip" >
+        </EditText>
+
+        <Button
+            android:id="@+id/search_button_do_search"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="3"
+            android:background="#00ebebeb"
+            android:text="Go" >
+        </Button>
+    </LinearLayout>
+
+    <ViewFlipper
+        android:id="@+id/search_viewflipper"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent" >
+
+        <RelativeLayout
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:background="#F0FFF0" >
+
+            <ProgressBar
+                android:id="@+id/search_spinner_loading"
+                style="?android:attr/progressBarStyleLarge"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true" />
+
+            <TextView
+                android:id="@+id/search_text_loading_activity"
+                style="@style/GreenFont"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/search_spinner_loading"
+                android:layout_centerHorizontal="true" >
+            </TextView>
+        </RelativeLayout>
+
+        <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:background="#F0FFF0"
+            android:orientation="vertical" >
+
+            <ExpandableListView
+                android:id="@+id/search_expandlist_nutrition_info"
+                android:layout_width="fill_parent"
+                android:layout_height="0dip" >
+            </ExpandableListView>
+        </LinearLayout>
+    </ViewFlipper>
+
+</LinearLayout>

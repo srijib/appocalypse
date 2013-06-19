@@ -1,4 +1,4 @@
-package com.wks.calorieapp.controllers;
+package com.wks.calorieapp.activities;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -9,7 +9,6 @@ import java.util.Calendar;
 
 import com.wks.calorieapp.R;
 import com.wks.calorieapp.utils.FileSystem;
-import com.wks.calorieapp.views.CameraPreview;
 
 import android.graphics.drawable.Drawable;
 import android.hardware.Camera;

@@ -1,9 +1,10 @@
-package com.wks.calorieapp.views;
+package com.wks.calorieapp.adapters;
 
 import java.util.List;
 
-import com.wks.calorieapp.models.NutritionInfo;
-import com.wks.calorieapp.models.ParentItem;
+import com.wks.calorieapp.activities.CalorieApplication;
+import com.wks.calorieapp.pojos.NutritionInfo;
+import com.wks.calorieapp.pojos.ParentItem;
 
 
 import android.content.Context;
@@ -60,6 +61,7 @@ public class NutritionInfoExpandableListAdapter extends BaseExpandableListAdapte
 		}
 		
 		ParentItem foodItem = getGroup(groupPosition);
+		holder.textFoodName.setTypeface ( CalorieApplication.getTypefaceCantarell () );
 		holder.textFoodName.setText ( foodItem.getFoodName () );
 		return resultView;
 	}
@@ -101,6 +103,10 @@ public class NutritionInfoExpandableListAdapter extends BaseExpandableListAdapte
 		}
 		
 		NutritionInfo info = getChild(groupPosition,childPosition);
+		
+		holder.textFoodName.setTypeface ( CalorieApplication.getTypefaceCantarell () );
+		holder.textCalories.setTypeface ( CalorieApplication.getTypefaceCantarell () );
+		
 		holder.textFoodName.setText ( info.getName () );
 		holder.textCalories.setText( String.valueOf(info.getCaloriesPer100g () ));
 		

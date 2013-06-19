@@ -1,4 +1,4 @@
-package com.wks.calorieapp.models;
+package com.wks.calorieapp.pojos;
 
 import java.util.List;
 

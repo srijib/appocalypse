@@ -1,4 +1,4 @@
-package com.wks.calorieapp.models;
+package com.wks.calorieapp.pojos;
 
 /**
  * TODO: I think the calculation of nutrients per 100g is incorrent. Double

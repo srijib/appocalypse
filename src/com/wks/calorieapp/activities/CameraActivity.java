@@ -59,6 +59,7 @@ public class CameraActivity extends Activity
 	{
 		Drawable d=getResources().getDrawable(R.drawable.bg_actionbar);  
 		getActionBar().setBackgroundDrawable(d);
+	
 		
 		buttonTakePicture = ( ImageButton ) findViewById ( R.id.camera_button_take_picture );
 		buttonOk = ( Button ) findViewById ( R.id.camera_button_ok );

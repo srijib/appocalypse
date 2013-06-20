@@ -19,19 +19,14 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
     <application
+        android:name=".activities.CalorieApplication"
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
-        android:theme="@style/AppTheme"
-        android:name=".activities.CalorieApplication">
+        android:theme="@style/AppTheme" >
         <activity
             android:name=".activities.CameraActivity"
             android:label="@string/title_activity_camera"
             android:screenOrientation="portrait" >
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
         </activity>
         <activity
             android:name=".activities.GetCaloriesActivity"
@@ -42,8 +37,20 @@
         <activity
             android:name=".activities.DisplayNutritionInfoActivity"
             android:label="@string/title_activity_display_nutrition_info"
-            android:screenOrientation="portrait">
-            ></activity>
+            android:screenOrientation="portrait" >
+            >
+        </activity>
+
+        <activtity
+            android:name=".activities.SearchActivity"
+            android:label="@string/title_activity_search"
+            android:screenOrientation="portrait" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activtity>
     </application>
 
 </manifest>

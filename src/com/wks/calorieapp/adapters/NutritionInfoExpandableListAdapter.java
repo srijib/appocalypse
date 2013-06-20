@@ -3,11 +3,13 @@ package com.wks.calorieapp.adapters;
 import java.util.List;
 
 import com.wks.calorieapp.activities.CalorieApplication;
+import com.wks.calorieapp.activities.CalorieApplication.Font;
 import com.wks.calorieapp.pojos.NutritionInfo;
 import com.wks.calorieapp.pojos.ParentItem;
 
 
 import android.content.Context;
+import android.graphics.Typeface;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -61,7 +63,7 @@ public class NutritionInfoExpandableListAdapter extends BaseExpandableListAdapte
 		}
 		
 		ParentItem foodItem = getGroup(groupPosition);
-		holder.textFoodName.setTypeface ( CalorieApplication.getTypefaceCantarell () );
+		holder.textFoodName.setTypeface ( CalorieApplication.getFont ( Font.CANTARELL_REGULAR ) );
 		holder.textFoodName.setText ( foodItem.getFoodName () );
 		return resultView;
 	}
@@ -104,8 +106,9 @@ public class NutritionInfoExpandableListAdapter extends BaseExpandableListAdapte
 		
 		NutritionInfo info = getChild(groupPosition,childPosition);
 		
-		holder.textFoodName.setTypeface ( CalorieApplication.getTypefaceCantarell () );
-		holder.textCalories.setTypeface ( CalorieApplication.getTypefaceCantarell () );
+		Typeface t = CalorieApplication.getFont ( Font.CANTARELL_REGULAR );
+		holder.textFoodName.setTypeface ( t );
+		holder.textCalories.setTypeface ( t );
 		
 		holder.textFoodName.setText ( info.getName () );
 		holder.textCalories.setText( String.valueOf(info.getCaloriesPer100g () ));

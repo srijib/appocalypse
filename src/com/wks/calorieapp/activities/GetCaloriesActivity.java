@@ -7,6 +7,7 @@ import java.util.List;
 import org.json.simple.parser.ParseException;
 
 import com.wks.calorieapp.R;
+import com.wks.calorieapp.activities.CalorieApplication.Font;
 import com.wks.calorieapp.pojos.FoodSimilarity;
 import com.wks.calorieapp.pojos.NutritionInfo;
 import com.wks.calorieapp.pojos.Response;
@@ -68,7 +69,7 @@ public class GetCaloriesActivity extends Activity
 		this.progressbarLoading = ( ProgressBar ) findViewById ( R.id.get_calories_spinner_loading );
 		this.textLoadingActivity = ( TextView ) findViewById ( R.id.get_calories_text_loading_activity );
 
-		this.textLoadingActivity.setTypeface ( CalorieApplication.getTypefaceCantarell () );
+		this.textLoadingActivity.setTypeface ( CalorieApplication.getFont ( Font.CANTARELL_REGULAR ) );
 	}
 
 	private void setActionBarDrawable ( int drawable )
@@ -104,7 +105,11 @@ public class GetCaloriesActivity extends Activity
 				Intent displayNutritionInfoInent = new Intent ( GetCaloriesActivity.this, DisplayNutritionInfoActivity.class );
 				startActivity ( displayNutritionInfoInent );
 
-			}else setProgressBarText ( "No results found" );
+			}else
+			{
+				Intent searchFoodIntent = new Intent( GetCaloriesActivity.this, SearchActivity.class);
+				startActivity( searchFoodIntent );
+			}
 		}
 
 		/**

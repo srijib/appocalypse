@@ -52,17 +52,25 @@ public class GetCaloriesActivity extends Activity
 			this.finish ();
 			return;
 		}
-		// Toast.makeText ( this, fileName, Toast.LENGTH_LONG ).show ();
-		new GetCaloriesTask ().execute ( fileName );
+
+		if ( !HttpClient.isConnectedToNetwork ( GetCaloriesActivity.this ) )
+		{
+			setProgressBarText ( GetCaloriesActivity.this.getString ( R.string.get_calories_error_no_internet_connection ) );
+		}else
+		{
+			// Toast.makeText ( this, fileName, Toast.LENGTH_LONG ).show ();
+			new GetCaloriesTask ().execute ( fileName );
+		}
+
 	}
 
 	@Override
 	protected void onPause ()
 	{
 		super.onPause ();
-		this.finish();
+		this.finish ();
 	}
-	
+
 	private void setupView ()
 	{
 		setActionBarDrawable ( R.drawable.bg_actionbar );
@@ -107,8 +115,8 @@ public class GetCaloriesActivity extends Activity
 
 			}else
 			{
-				Intent searchFoodIntent = new Intent( GetCaloriesActivity.this, SearchActivity.class);
-				startActivity( searchFoodIntent );
+				Intent searchFoodIntent = new Intent ( GetCaloriesActivity.this, SearchActivity.class );
+				startActivity ( searchFoodIntent );
 			}
 		}
 
@@ -121,13 +129,6 @@ public class GetCaloriesActivity extends Activity
 		@Override
 		protected Response doInBackground ( String... params )
 		{
-
-			if ( !HttpClient.isConnectedToNetwork ( GetCaloriesActivity.this ) )
-			{
-				Toast.makeText ( GetCaloriesActivity.this, R.string.get_calories_error_no_internet_connection, Toast.LENGTH_LONG ).show ();
-				return null;
-			}
-
 			String picturesDir = FileSystem.getPicturesDirectory ( GetCaloriesActivity.this );
 			String fileName = params[0];
 			File imageFile = new File ( picturesDir + fileName );

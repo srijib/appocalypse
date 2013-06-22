@@ -15,12 +15,14 @@ import android.hardware.Camera;
 import android.hardware.Camera.PictureCallback;
 import android.os.Bundle;
 import android.os.Environment;
+import android.app.ActionBar;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.FrameLayout;
@@ -51,14 +53,41 @@ public class CameraActivity extends Activity
 	{
 		super.onCreate ( savedInstanceState );
 		setContentView ( R.layout.activity_camera );
+		setupActionBar();
 		setupView ();
 		setupListeners ();
 	}
 
+	public boolean onOptionsItemSelected ( MenuItem item )
+	{
+		switch(item.getItemId ())
+		{
+		case android.R.id.home:
+			Intent intent = new Intent(CameraActivity.this, HomeActivity.class);
+			intent.addFlags ( Intent.FLAG_ACTIVITY_CLEAR_TOP );
+			this.startActivity ( intent );
+			return true;
+		
+		default:
+			return super.onOptionsItemSelected ( item );
+		
+		}
+		
+	}
+	
+	private void setupActionBar()
+	{
+		ActionBar actionBar = getActionBar ();
+		
+		Drawable d=getResources().getDrawable(R.drawable.bg_actionbar);  
+		actionBar.setBackgroundDrawable(d);
+		
+		actionBar.setHomeButtonEnabled ( true );
+	}
+	
 	private void setupView ()
 	{
-		Drawable d=getResources().getDrawable(R.drawable.bg_actionbar);  
-		getActionBar().setBackgroundDrawable(d);
+		
 	
 		
 		buttonTakePicture = ( ImageButton ) findViewById ( R.id.camera_button_take_picture );

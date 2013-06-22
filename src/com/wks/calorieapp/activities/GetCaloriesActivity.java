@@ -17,11 +17,13 @@ import com.wks.calorieapp.utils.HttpClient;
 import com.wks.calorieapp.utils.Uploader;
 import com.wks.calorieapp.utils.WebServiceUrlFactory;
 
+import android.app.ActionBar;
 import android.app.Activity;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.view.MenuItem;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -41,6 +43,7 @@ public class GetCaloriesActivity extends Activity
 		super.onCreate ( savedInstanceState );
 		this.setContentView ( R.layout.activity_get_calories );
 
+		setupActionBar();
 		setupView ();
 
 		Bundle extras = this.getIntent ().getExtras ();
@@ -70,21 +73,42 @@ public class GetCaloriesActivity extends Activity
 		super.onPause ();
 		this.finish ();
 	}
+	
+	@Override
+	public boolean onOptionsItemSelected ( MenuItem item )
+	{
+		switch(item.getItemId ())
+		{
+		case android.R.id.home:
+			//TODO cancel AsyncTask
+			Intent intent = new Intent(GetCaloriesActivity.this,CameraActivity.class);
+			intent.addFlags ( Intent.FLAG_ACTIVITY_REORDER_TO_FRONT );
+			return true;
+			
+		default:
+			return super.onOptionsItemSelected ( item );
+		}
+	}
 
+	private void setupActionBar()
+	{
+		ActionBar actionBar = this.getActionBar ();
+		
+		Drawable d = this.getResources ().getDrawable ( R.drawable.bg_actionbar );
+		actionBar.setBackgroundDrawable ( d );
+		
+		actionBar.setHomeButtonEnabled ( true );
+	}
+	
 	private void setupView ()
 	{
-		setActionBarDrawable ( R.drawable.bg_actionbar );
 		this.progressbarLoading = ( ProgressBar ) findViewById ( R.id.get_calories_spinner_loading );
 		this.textLoadingActivity = ( TextView ) findViewById ( R.id.get_calories_text_loading_activity );
 
 		this.textLoadingActivity.setTypeface ( CalorieApplication.getFont ( Font.CANTARELL_REGULAR ) );
 	}
 
-	private void setActionBarDrawable ( int drawable )
-	{
-		Drawable d = this.getResources ().getDrawable ( drawable );
-		this.getActionBar ().setBackgroundDrawable ( d );
-	}
+
 
 	public String getProgressBarText ()
 	{

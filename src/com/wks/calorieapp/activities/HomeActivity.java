@@ -1,21 +1,29 @@
 package com.wks.calorieapp.activities;
 
-import java.util.LinkedHashMap;
+import java.util.ArrayList;
+import java.util.List;
 
 import com.wks.calorieapp.R;
-import com.wks.calorieapp.adapters.HomeMenuGridAdapter;
+import com.wks.calorieapp.adapters.GridAdapter;
+import com.wks.calorieapp.adapters.GridItem;
 
+import android.app.ActionBar;
 import android.app.Activity;
 import android.content.Intent;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.GridView;
+import android.widget.Toast;
 
 public class HomeActivity extends Activity
 {
+	private static final int NUM_ROWS = 3;
+	
 	GridView gridviewActivities;
-	LinkedHashMap<String,Integer> activitiesDictionary;
+	List<GridItem> activitiesList;
 	
 	@Override
 	protected void onCreate ( Bundle savedInstanceState )
@@ -23,20 +31,30 @@ public class HomeActivity extends Activity
 		super.onCreate ( savedInstanceState );
 		this.setContentView ( R.layout.activity_home );
 		
-		this.activitiesDictionary = new LinkedHashMap<String,Integer>();
+		
+		this.activitiesList = new ArrayList<GridItem>();
 		
 		Activity[] activities = Activity.values ();
 		for(Activity activity: activities)
-			activitiesDictionary.put ( activity.getText (), activity.getResourceId () );
+			activitiesList.add ( new GridItem(activity.getText (),activity.getResourceId ()) );
 		
+		setupActionBar();
 		setupView();
 		setupListeners();
+	}
+	
+	private void setupActionBar()
+	{
+		ActionBar actionBar = this.getActionBar ();
+		
+		Drawable d = this.getResources ().getDrawable ( R.drawable.bg_actionbar );
+		actionBar.setBackgroundDrawable ( d );
 	}
 	
 	private void setupView()
 	{
 		this.gridviewActivities = (GridView) this.findViewById ( R.id.home_gridview_activities );
-		this.gridviewActivities.setAdapter ( new HomeMenuGridAdapter(this, this.activitiesDictionary) );
+		this.gridviewActivities.setAdapter ( new GridAdapter(this, this.activitiesList, NUM_ROWS));
 	}
 	
 	private void setupListeners()
@@ -46,18 +64,19 @@ public class HomeActivity extends Activity
 	
 	enum Activity
 	{
-		CAMERA("Photo for calories",R.drawable.ic_launcher,CameraActivity.class),
-		SEARCH("Search",R.drawable.ic_launcher,SearchActivity.class);
+		CAMERA("Calorie Camera",R.drawable.ic_launcher),
+		SEARCH("Search Nutrition Info",R.drawable.ic_launcher),
+		JOURNAL("Calorie Journal",R.drawable.ic_launcher),
+		GALLERY("Gallery",R.drawable.ic_launcher),
+		PREFERENCES("Preferences",R.drawable.ic_launcher);
 		
 		private final String text;
 		private final int resourceId;
-		private final Class< ? > intent;
 		
-		Activity(String text, int resourceId, Class< ? > intent)
+		Activity(String text, int resourceId)
 		{
 			this.text = text;
 			this.resourceId = resourceId;
-			this.intent = intent;
 		}
 		
 		public String getText ()
@@ -69,11 +88,7 @@ public class HomeActivity extends Activity
 		{
 			return resourceId;
 		}
-		
-		public Class< ? > getIntent ()
-		{
-			return intent;
-		}
+	
 	}
 	
 	class OnGridActivitiesClicked implements AdapterView.OnItemClickListener
@@ -81,12 +96,22 @@ public class HomeActivity extends Activity
 		@Override
 		public void onItemClick ( AdapterView< ? > parent, View view, int position, long id )
 		{
-			Activity[] activities = HomeActivity.Activity.values ();
-			Class<?> intentClass = activities[position].getClass ();
 			
-			//begin activity
-			Intent activityIntent = new Intent(HomeActivity.this,intentClass);
-			HomeActivity.this.startActivity ( activityIntent );
+			
+			switch(Activity.values ()[position])
+			{
+			case CAMERA:
+				Intent cameraIntent = new Intent(HomeActivity.this, CameraActivity.class);
+				startActivity(cameraIntent);
+				return;
+			case SEARCH:
+				Intent searchIntent = new Intent(HomeActivity.this, SearchActivity.class);
+				startActivity(searchIntent);
+				return;
+			default:
+				Toast.makeText(HomeActivity.this,"Not yet implemented.",Toast.LENGTH_LONG).show();
+				return;
+			}
 		}
 	}
 }

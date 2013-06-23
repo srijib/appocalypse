@@ -7,9 +7,8 @@
     <LinearLayout
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:background="#ebebeb"
+        android:background="@drawable/gradient_gray"
         android:orientation="horizontal"
-        android:padding="2dip"
         android:weightSum="10" >
 
         <EditText
@@ -17,11 +16,12 @@
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:layout_weight="7"
-            android:background="#ffffff"
+            android:textSize="14dip"
+            android:background="@color/white"
+            android:capitalize="words"
             android:hint="Enter search term"
             android:inputType="text"
-            android:maxLines="1"
-            android:padding="2dip" >
+            android:maxLines="1" >
         </EditText>
 
         <Button
@@ -29,8 +29,10 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="3"
-            android:background="#00ebebeb"
-            android:text="Go" >
+            android:background="@color/transparent"
+            android:text="Go"
+            android:textSize="14dip" >
+
         </Button>
     </LinearLayout>
 
@@ -38,13 +40,13 @@
         android:id="@+id/search_viewswitcher"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
-        android:inAnimation="@android:anim/slide_in_left">
+        android:inAnimation="@android:anim/slide_in_left"
+        android:background="#f0fff0">
 
         <RelativeLayout
             android:id="@+id/search_view_loading"
             android:layout_width="fill_parent"
-            android:layout_height="fill_parent"
-            android:background="#F0FFF0" >
+            android:layout_height="fill_parent" >
 
             <ProgressBar
                 android:id="@+id/search_spinner_loading"
@@ -59,7 +61,9 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/search_spinner_loading"
-                android:layout_centerHorizontal="true" >
+                android:layout_centerHorizontal="true"
+                android:textSize="14dip"
+                android:gravity="center">
             </TextView>
         </RelativeLayout>
 
@@ -67,7 +71,6 @@
             android:id="@+id/search_view_results"
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
-            android:background="#F0FFF0"
             android:orientation="vertical" >
 
             <ExpandableListView

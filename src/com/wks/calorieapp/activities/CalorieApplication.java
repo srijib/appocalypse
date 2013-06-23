@@ -13,8 +13,7 @@ public class CalorieApplication extends Application
 {
 	private static CalorieApplication instance;
 	private static Map<String,List<NutritionInfo>> nutritionInfoDictionary;
-	private static Typeface cantarellRegular;
-	private static Typeface cantarellBold;
+
 	
 	@Override
 	public void onCreate ()
@@ -22,8 +21,7 @@ public class CalorieApplication extends Application
 		super.onCreate ();
 		CalorieApplication.instance = this;
 		
-		cantarellRegular = Typeface.createFromAsset (this.getAssets (), "Cantarell-Regular.ttf" );
-		cantarellBold = Typeface.createFromAsset(this.getAssets (), "Cantarell-Bold.ttf");
+		
 	}
 	
 	public static CalorieApplication getInstance()
@@ -43,12 +41,7 @@ public class CalorieApplication extends Application
 	
 	public static Typeface getFont(Font typeface)
 	{
-		switch(typeface)
-		{
-		case CANTARELL_REGULAR: return cantarellRegular;
-		case CANTARELL_BOLD: return cantarellBold;
-		default: return cantarellRegular;
-		}
+		return Typeface.createFromAsset ( instance.getAssets (), typeface.getFont () );
 	}
 	
 	public enum Font

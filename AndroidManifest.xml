@@ -32,20 +32,18 @@
             android:name=".activities.GetCaloriesActivity"
             android:label="@string/title_activity_get_calories"
             android:screenOrientation="portrait" >
-            >
         </activity>
         <activity
             android:name=".activities.DisplayNutritionInfoActivity"
             android:label="@string/title_activity_display_nutrition_info"
             android:screenOrientation="portrait" >
-            >
         </activity>
 
-        <activtity
+        <activity
             android:name=".activities.SearchActivity"
             android:label="@string/title_activity_search"
             android:screenOrientation="portrait" >
-        </activtity>
+        </activity>
 
         <activity
             android:name=".activities.HomeActivity"
@@ -53,10 +51,8 @@
             android:screenOrientation="portrait" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-            />
         </activity>
     </application>
 

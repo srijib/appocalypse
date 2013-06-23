@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <color name="white">#ffffff</color>
+    <color name="honeydew_green">#F0FFF0</color>
+    <color name="sap_green">#308014</color>
+    <color name="sea_green">#3cb371</color>
+    <color name="black_medium">#2c2c2c</color>
+    <color name="transparent_black_medium">#662c2c2c</color>
+    <color name="transparent_black">#66000000</color>
+    <color name="transparent">#00ffffff</color>
+    <color name="gray_light">#eeeeee</color>
+    <color name="gray_medium">#cccccc</color>
+
+</resources>

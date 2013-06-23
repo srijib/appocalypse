@@ -15,6 +15,7 @@ import android.hardware.Camera;
 import android.hardware.Camera.PictureCallback;
 import android.os.Bundle;
 import android.os.Environment;
+import android.annotation.TargetApi;
 import android.app.ActionBar;
 import android.app.Activity;
 import android.content.Context;
@@ -75,6 +76,7 @@ public class CameraActivity extends Activity
 		
 	}
 	
+	@TargetApi ( 14 )
 	private void setupActionBar()
 	{
 		ActionBar actionBar = getActionBar ();

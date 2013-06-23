@@ -23,6 +23,7 @@ import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.MenuItem;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -139,6 +140,11 @@ public class GetCaloriesActivity extends Activity
 
 			}else
 			{
+				if(response.isSuccessful ())
+				{
+					Log.e ( TAG, response.getMessage () );
+				}
+				
 				Intent searchFoodIntent = new Intent ( GetCaloriesActivity.this, SearchActivity.class );
 				startActivity ( searchFoodIntent );
 			}
@@ -167,6 +173,8 @@ public class GetCaloriesActivity extends Activity
 				json = Uploader.uploadFile ( imageFile, WebServiceUrlFactory.upload () );
 				response = ResponseFactory.createResponseForUploadRequest ( json );
 
+				Log.e(TAG,json);
+				
 				if ( response == null || !response.isSuccessful () ) return response;
 
 				// get matches for image

@@ -2,29 +2,45 @@ package com.wks.calorieapp.adapters;
 
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map.Entry;
 
 import com.wks.calorieapp.R;
+import com.wks.calorieapp.activities.CalorieApplication;
+import com.wks.calorieapp.activities.CalorieApplication.Font;
 
 import android.content.Context;
+import android.graphics.Typeface;
+import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-public class HomeMenuGridAdapter extends BaseAdapter
+public class GridAdapter extends BaseAdapter
 {
-
-	private LinkedHashMap<String,Integer> items;
-	private LayoutInflater inflater;
+	private static final int DEFAULT_NUM_ROWS = 1;
 	
-	public HomeMenuGridAdapter (Context context, LinkedHashMap<String,Integer> items)
+	private List<GridItem> items;
+	private LayoutInflater inflater;
+	private int height;
+	
+	public GridAdapter (Context context, List<GridItem> items, int numRows)
 	{
 
 		this.items = items;
 		this.inflater = LayoutInflater.from ( context );
+		
+		DisplayMetrics metrics = new DisplayMetrics();
+		WindowManager manager = (WindowManager) context.getSystemService (Context.WINDOW_SERVICE);
+		manager.getDefaultDisplay ().getMetrics ( metrics );
+	
+		if(numRows <=0) numRows = DEFAULT_NUM_ROWS;
+		this.height = metrics.heightPixels/numRows;
 	}
 	
 	@Override
@@ -34,19 +50,9 @@ public class HomeMenuGridAdapter extends BaseAdapter
 	}
 
 	@Override
-	public Entry<String,Integer> getItem ( int position )
+	public GridItem getItem ( int position )
 	{
-		Iterator<Entry<String,Integer>> iterator = items.entrySet ().iterator ();
-		int count = 0;
-		while(iterator.hasNext ())
-		{
-			if(count == position)
-				return iterator.next ();
-			
-			count++;
-		}
-		
-		return null;
+		return items.get ( position );
 	}
 
 	@Override
@@ -65,6 +71,7 @@ public class HomeMenuGridAdapter extends BaseAdapter
 		{
 			resultView = inflater.inflate ( R.layout.grid_item, null );
 			
+			
 			holder = new ViewHolder();
 			holder.image = (ImageView) resultView.findViewById ( R.id.grid_item_image );
 			holder.text = (TextView) resultView.findViewById ( R.id.grid_item_text );
@@ -75,9 +82,13 @@ public class HomeMenuGridAdapter extends BaseAdapter
 			holder = (ViewHolder) resultView.getTag ();
 		}
 		
-		Entry<String,Integer> item = getItem(position);
-		holder.image.setImageResource ( item.getValue ());
-		holder.text.setText ( item.getKey () );
+		GridItem item = getItem(position);
+		
+		holder.image.setImageResource ( item.getResourceId ());
+		holder.text.setText ( item.getText () );
+		
+		resultView.setMinimumHeight ( this.height );
+		
 		return resultView;
 	}
 
@@ -86,4 +97,6 @@ public class HomeMenuGridAdapter extends BaseAdapter
 		ImageView image;
 		TextView text;
 	}
+	
+	
 }

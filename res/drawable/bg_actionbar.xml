@@ -19,15 +19,15 @@
     -->
     <gradient
         android:angle="90"
-        android:startColor="#308014"
-        android:endColor="#3cb371"
+        android:startColor="@color/sap_green"
+        android:endColor="@color/sea_green"
         android:type="linear"
         android:useLevel="false" >
     </gradient>
 
     <!--
         <solid
-       android:color="#308014"></solid>
+       android:color="@color/sap_green"></solid>
     -->
 
 </shape>

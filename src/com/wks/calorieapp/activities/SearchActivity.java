@@ -9,15 +9,19 @@ import java.util.Map.Entry;
 import org.json.simple.parser.ParseException;
 
 import com.wks.calorieapp.R;
+import com.wks.calorieapp.activities.CalorieApplication.Font;
 import com.wks.calorieapp.adapters.NutritionInfoExpandableListAdapter;
 import com.wks.calorieapp.pojos.NutritionInfo;
 import com.wks.calorieapp.pojos.ParentItem;
 import com.wks.calorieapp.pojos.Response;
 import com.wks.calorieapp.pojos.ResponseFactory;
+import com.wks.calorieapp.utils.AndroidUtils;
 import com.wks.calorieapp.utils.HttpClient;
 import com.wks.calorieapp.utils.WebServiceUrlFactory;
 
+import android.app.ActionBar;
 import android.app.Activity;
+import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
@@ -29,6 +33,7 @@ import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 import android.widget.ViewSwitcher;
 
 
@@ -53,8 +58,17 @@ public class SearchActivity extends Activity
 	{
 		super.onCreate ( savedInstanceState );
 		this.setContentView ( R.layout.activity_search );
+		setupActionBar();
 		setupView();
 		setupListeners();
+	}
+	
+	private void setupActionBar()
+	{
+		ActionBar actionBar = this.getActionBar ();
+		
+		Drawable d = this.getResources ().getDrawable ( R.drawable.bg_actionbar );
+		actionBar.setBackgroundDrawable ( d );
 	}
 	
 	private void setupView()
@@ -72,6 +86,10 @@ public class SearchActivity extends Activity
 		listNutritionInfo = (ExpandableListView) this.findViewById ( R.id.search_expandlist_nutrition_info );
 	
 		setSearchActivityView(SearchActivityView.VIEW_IDLE);
+		
+		editSearch.setTypeface ( CalorieApplication.getFont ( Font.CANTARELL_REGULAR ) );
+		textLoading.setTypeface ( CalorieApplication.getFont ( Font.CANTARELL_REGULAR ) );
+		buttonSearch.setTypeface ( CalorieApplication.getFont ( Font.CANTARELL_REGULAR ) );
 	}
 	
 	private void setupListeners()
@@ -82,7 +100,6 @@ public class SearchActivity extends Activity
 	private void setSearchActivityView(SearchActivityView view)
 	{
 		this.searchActivityView = view;
-		
 		switch(view)
 		{
 		case VIEW_IDLE:
@@ -91,18 +108,21 @@ public class SearchActivity extends Activity
 			{
 				viewSwitcher.showPrevious ();
 			}
+			return;
 		case VIEW_LOADING:
 			setLoadingProgressVisible(true);
 			if(viewSwitcher.getCurrentView () != viewLoading)
 			{
 				viewSwitcher.showPrevious ();
 			}
+			return;
 		case VIEW_RESULTS:
 			setLoadingProgressVisible(false);
 			if(viewSwitcher.getCurrentView () != viewResults)
 			{
 				viewSwitcher.showNext ();
 			}
+			return;
 		}
 	}
 	
@@ -154,6 +174,8 @@ public class SearchActivity extends Activity
 
 		public void onClick ( View v )
 		{
+			AndroidUtils.hideKeyboard ( SearchActivity.this, SearchActivity.this.editSearch );
+			
 			String foodName = editSearch.getText ().toString ();
 			if(foodName != null && !foodName.isEmpty ())
 			{
@@ -161,7 +183,8 @@ public class SearchActivity extends Activity
 					SearchActivity.this.setSearchActivityView ( SearchActivityView.VIEW_LOADING );
 					
 				new GetNutritionInfoTask().execute ( foodName );
-			}
+			}else
+				Toast.makeText ( SearchActivity.this, R.string.search_error_empty_search_field, Toast.LENGTH_LONG ).show();
 		}
 		
 	}
@@ -178,7 +201,7 @@ public class SearchActivity extends Activity
 				String foodName = params[0];
 				
 				//do REST call to get nutrition information for food.
-				publishProgress("Fetching Nutrition Information");
+				publishProgress("Fetching Nutrition Information for "+foodName);
 				String json = HttpClient.get ( WebServiceUrlFactory.getNutritionInfo ( foodName ) );
 				response = ResponseFactory.createResponseForNutritionInfoRequest ( json );
 			}
@@ -222,6 +245,7 @@ public class SearchActivity extends Activity
 					return;
 				}else
 				{
+					Log.e ( TAG, response.getMessage () );
 					SearchActivity.this.setLoadingText (SearchActivity.this.getString ( R.string.search_error_no_results_found  ));
 				}
 			}

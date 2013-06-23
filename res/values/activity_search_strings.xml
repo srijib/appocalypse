@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-	<string name="search_error_null_response">There was a problem while trying to retrieve nutrition information.</string>    
-	<string name="search_error_no_results_found">There is no nutrition information available for this item.</string>
+	<string name="search_error_null_response">There was a problem while trying to get information about this item.</string>    
+	<string name="search_error_no_results_found">There is no information available for this item.</string>
+	<string name="search_error_empty_search_field">Enter a food item in to the search field.</string>
 </resources>

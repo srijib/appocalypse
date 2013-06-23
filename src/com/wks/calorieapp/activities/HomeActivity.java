@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.wks.calorieapp.R;
-import com.wks.calorieapp.adapters.GridAdapter;
+import com.wks.calorieapp.adapters.NavigationGridAdapter;
 import com.wks.calorieapp.adapters.GridItem;
 
 import android.app.ActionBar;
@@ -54,7 +54,7 @@ public class HomeActivity extends Activity
 	private void setupView()
 	{
 		this.gridviewActivities = (GridView) this.findViewById ( R.id.home_gridview_activities );
-		this.gridviewActivities.setAdapter ( new GridAdapter(this, this.activitiesList, NUM_ROWS));
+		this.gridviewActivities.setAdapter ( new NavigationGridAdapter(this, this.activitiesList, NUM_ROWS));
 	}
 	
 	private void setupListeners()
@@ -64,8 +64,8 @@ public class HomeActivity extends Activity
 	
 	enum Activity
 	{
-		CAMERA("Calorie Camera",R.drawable.ic_launcher),
-		SEARCH("Search Nutrition Info",R.drawable.ic_launcher),
+		CAMERA("Calorie Camera",R.drawable.ic_camera),
+		SEARCH("Search Nutrition Info",R.drawable.ic_search),
 		JOURNAL("Calorie Journal",R.drawable.ic_launcher),
 		GALLERY("Gallery",R.drawable.ic_launcher),
 		PREFERENCES("Preferences",R.drawable.ic_launcher);

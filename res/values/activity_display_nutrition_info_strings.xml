@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="diplay_nutrition_info_error_display">The Nutrition Information can not be displayed.</string>
+	<string name="display_nutrition_info_menu_no_match">No match</string>
+	<string name="display_nutrition_info_menu_add_to_journal">Add to Journal</string>
 </resources>

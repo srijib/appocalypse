@@ -84,7 +84,7 @@ public class CameraActivity extends Activity
 		Drawable d=getResources().getDrawable(R.drawable.bg_actionbar);  
 		actionBar.setBackgroundDrawable(d);
 		
-		actionBar.setHomeButtonEnabled ( true );
+		actionBar.setDisplayHomeAsUpEnabled ( true );
 	}
 	
 	private void setupView ()
@@ -126,12 +126,6 @@ public class CameraActivity extends Activity
 		}
 	}
 	
-	@Override
-	public boolean onCreateOptionsMenu ( Menu menu )
-	{
-		getMenuInflater ().inflate ( R.menu.activity_camera, menu );
-		return true;
-	}
 	
 	public void setFileName ( String fileName )
 	{

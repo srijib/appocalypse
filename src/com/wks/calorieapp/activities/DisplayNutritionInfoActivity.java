@@ -6,13 +6,18 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import com.wks.calorieapp.R;
-import com.wks.calorieapp.adapters.NutritionInfoExpandableListAdapter;
+import com.wks.calorieapp.adapters.NutritionInfoListAdapter;
 import com.wks.calorieapp.pojos.NutritionInfo;
 import com.wks.calorieapp.pojos.ParentItem;
 
+import android.app.ActionBar;
 import android.app.Activity;
+import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.widget.Button;
 import android.widget.ExpandableListView;
 import android.widget.Toast;
@@ -20,7 +25,9 @@ import android.widget.Toast;
 public class DisplayNutritionInfoActivity extends Activity
 {
 	private ExpandableListView listNutritionInfo;
-	private Button buttonNext;
+	private Button buttonAddToJournal;
+	private Button buttonNoMatch;
+	private Button buttonDone;
 	private Map<String,List<NutritionInfo>> nutritionInfoDictionary;
 
 	@Override
@@ -37,16 +44,49 @@ public class DisplayNutritionInfoActivity extends Activity
 			this.finish ();
 		}
 		
+		setupActionBar();
 		setupView();
 		setupListeners();
 	}
 	
+	
+	
+	@Override
+	public boolean onOptionsItemSelected ( MenuItem item )
+	{
+		switch(item.getItemId ())
+		{
+		case android.R.id.home:
+			Intent cameraIntent = new Intent(DisplayNutritionInfoActivity.this, CameraActivity.class);
+			cameraIntent.addFlags ( Intent.FLAG_ACTIVITY_REORDER_TO_FRONT );
+			startActivity(cameraIntent);
+			return true;
+			
+		default:
+			return super.onOptionsItemSelected(item);
+		}
+		
+		
+	}
+	
+	private void setupActionBar()
+	{
+		ActionBar actionBar = this.getActionBar ();
+		
+		Drawable d = this.getResources ().getDrawable (R.drawable.bg_actionbar );
+		actionBar.setBackgroundDrawable ( d );
+		
+		actionBar.setDisplayHomeAsUpEnabled ( true );
+	}
+	
 	private void setupView()
 	{
-		setActionBarDrawable(R.drawable.bg_actionbar);
+		
 		//this.buttonNext = (Button) this.findViewById ( R.id.display_nutriton_info_button_next );
 		this.listNutritionInfo = (ExpandableListView) this.findViewById ( R.id.display_nutrition_info_expandlist_nutrition_info );
-	
+		this.buttonAddToJournal = (Button) this.findViewById ( R.id.display_nutrition_info_button_add_to_journal);
+		this.buttonNoMatch = (Button) this.findViewById ( R.id.display_nutrition_info_button_no_match );
+		this.buttonDone = (Button) this.findViewById ( R.id.display_nutrition_info_button_done );
 		setupList();
 	}
 	
@@ -54,19 +94,7 @@ public class DisplayNutritionInfoActivity extends Activity
 	{
 		if(this.nutritionInfoDictionary != null)
 		{
-			List<ParentItem> foodList = new ArrayList<ParentItem>();
-			for(Entry<String,List<NutritionInfo>> e : nutritionInfoDictionary.entrySet ())
-			{
-				ParentItem food = new ParentItem(e.getKey ());
-				List<NutritionInfo> nutrinfoList = e.getValue ();
-				
-				for(NutritionInfo info : nutrinfoList)
-					food.getNutritionInfoList ().add ( info );
-				
-				foodList.add ( food );
-			}
-			
-			NutritionInfoExpandableListAdapter adapter = new NutritionInfoExpandableListAdapter(this,foodList);
+			NutritionInfoListAdapter adapter = new NutritionInfoListAdapter(this,nutritionInfoDictionary);
 			this.listNutritionInfo.setAdapter ( adapter );
 		}
 	}
@@ -76,9 +104,5 @@ public class DisplayNutritionInfoActivity extends Activity
 		//
 	}
 	
-	private void setActionBarDrawable(int drawable)
-	{
-		Drawable d = this.getResources ().getDrawable ( drawable );
-		this.getActionBar ().setBackgroundDrawable ( d );
-	}
+	
 }

@@ -1,31 +1,48 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:background="@color/honeydew_green">
+    android:background="@color/honeydew_green" >
+
+    <LinearLayout
+        android:id="@+id/display_nutrition_info_view_controls"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_alignParentBottom="true">
+
+        <Button
+            android:id="@+id/display_nutrition_info_button_add_to_journal"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Add to journal" >
+        </Button>
+
+        <Button
+            android:id="@+id/display_nutrition_info_button_no_match"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="No Match" >
+        </Button>
+
+        <Button
+            android:id="@+id/display_nutrition_info_button_done"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Done" >
+        </Button>
+    </LinearLayout>
 
     <ExpandableListView
         android:id="@+id/display_nutrition_info_expandlist_nutrition_info"
         android:layout_width="fill_parent"
-        android:layout_height="0dip"
-        android:layout_weight="9" >
+        android:layout_height="fill_parent"
+        android:layout_above="@+id/display_nutrition_info_view_controls"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true" >
     </ExpandableListView>
 
-    <!-- <RelativeLayout
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:background="#cccccc"
-        android:orientation="horizontal" >
-
-        <Button
-            android:id="@+id/display_nutriton_info_button_next"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentRight="true"
-            android:background="#00000000"
-            android:text="next" >
-        </Button>
-    </RelativeLayout> -->
-
-</LinearLayout>
+</RelativeLayout>

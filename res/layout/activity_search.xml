@@ -9,7 +9,8 @@
         android:layout_height="wrap_content"
         android:background="@drawable/gradient_gray"
         android:orientation="horizontal"
-        android:weightSum="10" >
+        android:weightSum="10"
+        android:padding="6dip">
 
         <EditText
             android:id="@+id/search_edit_search_term"
@@ -18,22 +19,12 @@
             android:layout_weight="7"
             android:textSize="14dip"
             android:background="@color/white"
-            android:capitalize="words"
+            android:inputType="textCapWords"
             android:hint="Enter search term"
-            android:inputType="text"
+            android:padding="4dip"
             android:maxLines="1" >
         </EditText>
 
-        <Button
-            android:id="@+id/search_button_do_search"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="3"
-            android:background="@color/transparent"
-            android:text="Go"
-            android:textSize="14dip" >
-
-        </Button>
     </LinearLayout>
 
     <ViewSwitcher
@@ -67,18 +58,51 @@
             </TextView>
         </RelativeLayout>
 
-        <LinearLayout
+        <RelativeLayout
             android:id="@+id/search_view_results"
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
-            android:orientation="vertical" >
+            android:orientation="vertical"
+            android:weightSum="10">
 
+            <LinearLayout
+                android:id="@+id/search_view_controls"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_alignParentBottom="true"
+                >
+                
+                <Button 
+                    android:id="@+id/search_button_add_to_journal"
+                    android:layout_width="0dip"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Add to Journal"
+                    />
+                
+                <Button 
+                    android:id="@+id/search_button_done"
+                    android:layout_width="0dip"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Done"
+                    />
+                
+            </LinearLayout>
+            
             <ExpandableListView
                 android:id="@+id/search_expandlist_nutrition_info"
                 android:layout_width="fill_parent"
-                android:layout_height="0dip" >
+                android:layout_height="fill_parent"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentTop="true"
+                android:layout_above="@+id/search_view_controls">
             </ExpandableListView>
-        </LinearLayout>
+            
+            
+            
+        </RelativeLayout>
     </ViewSwitcher>
 
 </LinearLayout>

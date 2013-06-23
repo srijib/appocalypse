@@ -21,7 +21,7 @@ import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-public class GridAdapter extends BaseAdapter
+public class NavigationGridAdapter extends BaseAdapter
 {
 	private static final int DEFAULT_NUM_ROWS = 1;
 	
@@ -29,7 +29,7 @@ public class GridAdapter extends BaseAdapter
 	private LayoutInflater inflater;
 	private int height;
 	
-	public GridAdapter (Context context, List<GridItem> items, int numRows)
+	public NavigationGridAdapter (Context context, List<GridItem> items, int numRows)
 	{
 
 		this.items = items;

@@ -37,6 +37,7 @@ public class GetCaloriesActivity extends Activity
 
 	private ProgressBar progressbarLoading;
 	private TextView textLoadingActivity;
+	private GetCaloriesTask getCaloriesTask;
 
 	@Override
 	protected void onCreate ( Bundle savedInstanceState )
@@ -62,8 +63,8 @@ public class GetCaloriesActivity extends Activity
 			setProgressBarText ( GetCaloriesActivity.this.getString ( R.string.get_calories_error_no_internet_connection ) );
 		}else
 		{
-			// Toast.makeText ( this, fileName, Toast.LENGTH_LONG ).show ();
-			new GetCaloriesTask ().execute ( fileName );
+			getCaloriesTask = new GetCaloriesTask ();
+			getCaloriesTask.execute ( fileName );
 		}
 
 	}
@@ -72,6 +73,7 @@ public class GetCaloriesActivity extends Activity
 	protected void onPause ()
 	{
 		super.onPause ();
+		getCaloriesTask.cancel ( true );
 		this.finish ();
 	}
 	
@@ -81,9 +83,9 @@ public class GetCaloriesActivity extends Activity
 		switch(item.getItemId ())
 		{
 		case android.R.id.home:
-			//TODO cancel AsyncTask
 			Intent intent = new Intent(GetCaloriesActivity.this,CameraActivity.class);
 			intent.addFlags ( Intent.FLAG_ACTIVITY_REORDER_TO_FRONT );
+			startActivity(intent);
 			return true;
 			
 		default:
@@ -98,7 +100,7 @@ public class GetCaloriesActivity extends Activity
 		Drawable d = this.getResources ().getDrawable ( R.drawable.bg_actionbar );
 		actionBar.setBackgroundDrawable ( d );
 		
-		actionBar.setHomeButtonEnabled ( true );
+		actionBar.setDisplayHomeAsUpEnabled ( true );
 	}
 	
 	private void setupView ()
@@ -150,6 +152,7 @@ public class GetCaloriesActivity extends Activity
 			}
 		}
 
+		//TODO check the cancelling thing.
 		/**
 		 * I just want to go on record saying that I am definitely not pleased
 		 * with the quality of code in this method. but i'm really frustrated so
@@ -176,7 +179,7 @@ public class GetCaloriesActivity extends Activity
 				Log.e(TAG,json);
 				
 				if ( response == null || !response.isSuccessful () ) return response;
-
+				if (this.isCancelled ()) this.cancel ( true );
 				// get matches for image
 				publishProgress ( "Identifying Food..." );
 				json = HttpClient.get ( WebServiceUrlFactory.identify ( "35937204245399320130616225827.jpg" ) );
@@ -184,7 +187,7 @@ public class GetCaloriesActivity extends Activity
 
 				// if response not received or matching foods not found, return
 				if ( response == null || !response.isSuccessful () ) return response;
-
+				if (this.isCancelled ()) this.cancel ( true );
 				// if matching foods found
 				if ( response.getData () != null )
 				{
@@ -210,14 +213,17 @@ public class GetCaloriesActivity extends Activity
 							// up.
 							for ( int j = 0 ; j < NUM_TRIES_GET_NUTR_INFO ; j++ )
 							{
+								if (this.isCancelled ()) this.cancel ( true );
 								json = HttpClient.get ( WebServiceUrlFactory.getNutritionInfo ( foodName ) );
 								response = ResponseFactory.createResponseForNutritionInfoRequest ( json );
-
+								
 								// when response is received with data, move on
 								// to next step.
+								
 								if ( response != null && response.isSuccessful () ) break;
 							}
 
+							if (this.isCancelled ()) this.cancel ( true );
 							publishProgress ( "Proccessing Information" );
 							// double check that the response is not null and
 							// that data is received.
@@ -249,13 +255,15 @@ public class GetCaloriesActivity extends Activity
 			}
 			catch ( IOException e )
 			{
-
+				//TODO
 			}
 			catch ( ParseException e )
 			{
-				// TODO Auto-generated catch block
+				//TODO
 				e.printStackTrace ();
 			}
+			
+			if (this.isCancelled ()) this.cancel ( true );
 			return response;
 		}
 
@@ -265,6 +273,12 @@ public class GetCaloriesActivity extends Activity
 			setProgressBarText ( values[0] );
 		}
 
+		@Override
+		protected void onCancelled ()
+		{
+			GetCaloriesActivity.this.textLoadingActivity.setText ( "Cancelled" );
+		}
+		
 	}
 
 }

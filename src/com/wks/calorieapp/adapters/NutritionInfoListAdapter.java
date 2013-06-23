@@ -1,6 +1,9 @@
 package com.wks.calorieapp.adapters;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import com.wks.calorieapp.activities.CalorieApplication;
 import com.wks.calorieapp.activities.CalorieApplication.Font;
@@ -16,16 +19,31 @@ import android.view.ViewGroup;
 import android.widget.BaseExpandableListAdapter;
 import android.widget.TextView;
 
-public class NutritionInfoExpandableListAdapter extends BaseExpandableListAdapter
+public class NutritionInfoListAdapter extends BaseExpandableListAdapter
 {
+	private static final String FORMAT_CALORIE = "%.2f cal";
 	private List<ParentItem> foodNameList;
 	private LayoutInflater inflater;
 	
-	public NutritionInfoExpandableListAdapter(Context context, List<ParentItem> items)
+	public NutritionInfoListAdapter(Context context, Map<String,List<NutritionInfo>> items)
 	{
 		this.inflater = LayoutInflater.from ( context );
-		this.foodNameList = items;
+		
+		this.foodNameList = new ArrayList<ParentItem>();
+		for(Entry<String,List<NutritionInfo>> e : items.entrySet ())
+		{
+			ParentItem food = new ParentItem(e.getKey ());
+			List<NutritionInfo> nutrinfoList = e.getValue ();
+			
+			for(NutritionInfo info : nutrinfoList)
+				food.getNutritionInfoList ().add ( info );
+			
+			this.foodNameList.add ( food );
+		}
+		
 	}
+	
+	
 	
 	@Override
 	public ParentItem getGroup ( int groupPosition )
@@ -63,7 +81,7 @@ public class NutritionInfoExpandableListAdapter extends BaseExpandableListAdapte
 		}
 		
 		ParentItem foodItem = getGroup(groupPosition);
-		holder.textFoodName.setTypeface ( CalorieApplication.getFont ( Font.CANTARELL_REGULAR ) );
+		//holder.textFoodName.setTypeface ( CalorieApplication.getFont ( Font.CANTARELL_REGULAR ) );
 		holder.textFoodName.setText ( foodItem.getFoodName () );
 		return resultView;
 	}
@@ -106,12 +124,12 @@ public class NutritionInfoExpandableListAdapter extends BaseExpandableListAdapte
 		
 		NutritionInfo info = getChild(groupPosition,childPosition);
 		
-		Typeface t = CalorieApplication.getFont ( Font.CANTARELL_REGULAR );
-		holder.textFoodName.setTypeface ( t );
-		holder.textCalories.setTypeface ( t );
+		//Typeface t = CalorieApplication.getFont ( Font.CANTARELL_REGULAR );
+		//holder.textFoodName.setTypeface ( t );
+		//holder.textCalories.setTypeface ( t );
 		
 		holder.textFoodName.setText ( info.getName () );
-		holder.textCalories.setText( String.valueOf(info.getCaloriesPer100g () ));
+		holder.textCalories.setText( String.format ( FORMAT_CALORIE, info.getCaloriesPer100g () ));
 		
 		return resultView;
 	}

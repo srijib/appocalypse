@@ -1,18 +1,14 @@
 package com.wks.calorieapp.activities;
+
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
-
 import org.json.simple.parser.ParseException;
 
 import com.wks.calorieapp.R;
-import com.wks.calorieapp.activities.CalorieApplication.Font;
-import com.wks.calorieapp.adapters.NutritionInfoExpandableListAdapter;
+import com.wks.calorieapp.adapters.NutritionInfoListAdapter;
 import com.wks.calorieapp.pojos.NutritionInfo;
-import com.wks.calorieapp.pojos.ParentItem;
 import com.wks.calorieapp.pojos.Response;
 import com.wks.calorieapp.pojos.ResponseFactory;
 import com.wks.calorieapp.utils.AndroidUtils;
@@ -21,176 +17,197 @@ import com.wks.calorieapp.utils.WebServiceUrlFactory;
 
 import android.app.ActionBar;
 import android.app.Activity;
+import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.KeyEvent;
+import android.view.MenuItem;
 import android.view.View;
+import android.view.View.OnKeyListener;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ExpandableListView;
-import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ViewSwitcher;
 
-
 public class SearchActivity extends Activity
 {
 	private static final String TAG = SearchActivity.class.getCanonicalName ();
-	
+	private static final int NUM_TRIES = 3;
+
 	private EditText editSearch;
-	private Button buttonSearch;
+	private Button buttonAddToJournal;
+	private Button buttonDone;
 	private ViewSwitcher viewSwitcher;
 	private RelativeLayout viewLoading;
-	private LinearLayout viewResults;
+	private RelativeLayout viewResults;
 	private TextView textLoading;
 	private ProgressBar progressLoading;
+
 	private ExpandableListView listNutritionInfo;
-	
-	private enum SearchActivityView{VIEW_IDLE,VIEW_LOADING,VIEW_RESULTS};
+
+	private enum SearchActivityView
+	{
+		VIEW_IDLE, VIEW_LOADING, VIEW_RESULTS
+	};
+
 	private SearchActivityView searchActivityView;
-	
+
 	@Override
 	protected void onCreate ( Bundle savedInstanceState )
 	{
 		super.onCreate ( savedInstanceState );
 		this.setContentView ( R.layout.activity_search );
-		setupActionBar();
-		setupView();
-		setupListeners();
-	}
-	
-	private void setupActionBar()
-	{
-		ActionBar actionBar = this.getActionBar ();
-		
-		Drawable d = this.getResources ().getDrawable ( R.drawable.bg_actionbar );
-		actionBar.setBackgroundDrawable ( d );
-	}
-	
-	private void setupView()
-	{
-		editSearch = (EditText) this.findViewById ( R.id.search_edit_search_term );
-		buttonSearch = (Button) this.findViewById ( R.id.search_button_do_search );
-		
-		viewSwitcher = (ViewSwitcher) this.findViewById ( R.id.search_viewswitcher );
-		viewLoading = (RelativeLayout) this.findViewById ( R.id.search_view_loading );
-		viewResults = (LinearLayout) this.findViewById ( R.id.search_view_results );
-		
-		textLoading = (TextView) this.findViewById ( R.id.search_text_loading_activity );
-		progressLoading = (ProgressBar) this.findViewById ( R.id.search_spinner_loading );
-		
-		listNutritionInfo = (ExpandableListView) this.findViewById ( R.id.search_expandlist_nutrition_info );
-	
-		setSearchActivityView(SearchActivityView.VIEW_IDLE);
-		
-		editSearch.setTypeface ( CalorieApplication.getFont ( Font.CANTARELL_REGULAR ) );
-		textLoading.setTypeface ( CalorieApplication.getFont ( Font.CANTARELL_REGULAR ) );
-		buttonSearch.setTypeface ( CalorieApplication.getFont ( Font.CANTARELL_REGULAR ) );
-	}
-	
-	private void setupListeners()
-	{
-		buttonSearch.setOnClickListener ( new OnButtonSearchClicked() );
+
+		setupActionBar ();
+		setupView ();
+		setupListeners ();
+
 	}
 
-	private void setSearchActivityView(SearchActivityView view)
+
+	@Override
+	public boolean onOptionsItemSelected ( MenuItem item )
+	{
+		switch ( item.getItemId () )
+		{
+		case android.R.id.home:
+			Intent homeIntent = new Intent(SearchActivity.this,HomeActivity.class);
+			homeIntent.addFlags ( Intent.FLAG_ACTIVITY_CLEAR_TOP );
+			startActivity(homeIntent);
+			return true;
+		default:
+			return super.onOptionsItemSelected(item);
+		}
+	}
+
+	private void setupActionBar ()
+	{
+		ActionBar actionBar = this.getActionBar ();
+
+		Drawable d = this.getResources ().getDrawable ( R.drawable.bg_actionbar );
+		actionBar.setBackgroundDrawable ( d );
+
+		actionBar.setDisplayHomeAsUpEnabled ( true );
+	}
+
+	private void setupView ()
+	{
+		editSearch = ( EditText ) this.findViewById ( R.id.search_edit_search_term );
+	
+		viewSwitcher = ( ViewSwitcher ) this.findViewById ( R.id.search_viewswitcher );
+		viewLoading = ( RelativeLayout ) this.findViewById ( R.id.search_view_loading );
+		viewResults = ( RelativeLayout ) this.findViewById ( R.id.search_view_results );
+
+		textLoading = ( TextView ) this.findViewById ( R.id.search_text_loading_activity );
+		progressLoading = ( ProgressBar ) this.findViewById ( R.id.search_spinner_loading );
+
+		listNutritionInfo = ( ExpandableListView ) this.findViewById ( R.id.search_expandlist_nutrition_info );
+		buttonAddToJournal = (Button) this.findViewById ( R.id.search_button_add_to_journal );
+		buttonDone = (Button) this.findViewById ( R.id.search_button_done );
+		
+		setSearchActivityView ( SearchActivityView.VIEW_IDLE );
+
+	}
+
+	private void setupListeners ()
+	{
+		this.editSearch.setOnKeyListener ( new OnEditSearchSubmitted ());
+	}
+
+	private void setSearchActivityView ( SearchActivityView view )
 	{
 		this.searchActivityView = view;
-		switch(view)
+		switch ( view )
 		{
 		case VIEW_IDLE:
-			setLoadingProgressVisible(false);
-			if(viewSwitcher.getCurrentView () != viewLoading)
+			setLoadingProgressVisible ( false );
+			if ( viewSwitcher.getCurrentView () != viewLoading )
 			{
 				viewSwitcher.showPrevious ();
 			}
 			return;
 		case VIEW_LOADING:
-			setLoadingProgressVisible(true);
-			if(viewSwitcher.getCurrentView () != viewLoading)
+			setLoadingProgressVisible ( true );
+			if ( viewSwitcher.getCurrentView () != viewLoading )
 			{
 				viewSwitcher.showPrevious ();
 			}
 			return;
 		case VIEW_RESULTS:
-			setLoadingProgressVisible(false);
-			if(viewSwitcher.getCurrentView () != viewResults)
+			setLoadingProgressVisible ( false );
+			if ( viewSwitcher.getCurrentView () != viewResults )
 			{
 				viewSwitcher.showNext ();
+				Toast.makeText ( this, "Displaying results", Toast.LENGTH_LONG ).show ();
 			}
 			return;
 		}
 	}
-	
-	private SearchActivityView getSearchActivityView()
+
+	private SearchActivityView getSearchActivityView ()
 	{
 		return this.searchActivityView;
 	}
-	
-	private void setLoadingProgressVisible(boolean visible)
+
+	private void setLoadingProgressVisible ( boolean visible )
 	{
-		this.progressLoading.setVisibility ( visible? View.VISIBLE : View.GONE );
-		this.textLoading.setVisibility ( visible? View.VISIBLE : View.GONE );
+		this.progressLoading.setVisibility ( visible ? View.VISIBLE : View.GONE );
+		this.textLoading.setVisibility ( visible ? View.VISIBLE : View.GONE );
 	}
-	
-	private void setLoadingText(String text)
+
+	private void setLoadingText ( String text )
 	{
 		this.textLoading.setText ( text );
 	}
-	
+
 	@SuppressWarnings ( "unused" )
-	private String getLoadingText()
+	private String getLoadingText ()
 	{
 		return this.textLoading.getText ().toString ();
 	}
-	
-	private void setupList(Map<String,List<NutritionInfo>> nutritionInfoDictionary)
+
+	private void setupList ( Map< String, List< NutritionInfo >> nutritionInfoDictionary )
 	{
-		if(nutritionInfoDictionary != null)
+		if ( nutritionInfoDictionary != null )
 		{
-			List<ParentItem> foodList = new ArrayList<ParentItem>();
-			for(Entry<String,List<NutritionInfo>> e : nutritionInfoDictionary.entrySet ())
-			{
-				ParentItem food = new ParentItem(e.getKey ());
-				List<NutritionInfo> nutrinfoList = e.getValue ();
-				
-				for(NutritionInfo info : nutrinfoList)
-					food.getNutritionInfoList ().add ( info );
-				
-				foodList.add ( food );
-			}
-			
-			NutritionInfoExpandableListAdapter adapter = new NutritionInfoExpandableListAdapter(this,foodList);
+			NutritionInfoListAdapter adapter = new NutritionInfoListAdapter ( this, nutritionInfoDictionary );
 			this.listNutritionInfo.setAdapter ( adapter );
-		}	
+		}
 	}
-	
-	class OnButtonSearchClicked implements View.OnClickListener
+
+	class OnEditSearchSubmitted implements OnKeyListener
 	{
 
-		public void onClick ( View v )
+		public boolean onKey ( View view, int keyCode, KeyEvent event )
 		{
-			AndroidUtils.hideKeyboard ( SearchActivity.this, SearchActivity.this.editSearch );
-			
-			String foodName = editSearch.getText ().toString ();
-			if(foodName != null && !foodName.isEmpty ())
+			if(event.getAction () == KeyEvent.ACTION_DOWN && keyCode == KeyEvent.KEYCODE_ENTER)
 			{
-				if( SearchActivity.this.getSearchActivityView () != SearchActivityView.VIEW_LOADING)
-					SearchActivity.this.setSearchActivityView ( SearchActivityView.VIEW_LOADING );
-					
-				new GetNutritionInfoTask().execute ( foodName );
-			}else
-				Toast.makeText ( SearchActivity.this, R.string.search_error_empty_search_field, Toast.LENGTH_LONG ).show();
+				AndroidUtils.hideKeyboard ( SearchActivity.this, SearchActivity.this.editSearch );
+
+				String foodName = editSearch.getText ().toString ();
+				if ( foodName != null && !foodName.isEmpty () )
+				{
+					if ( SearchActivity.this.getSearchActivityView () != SearchActivityView.VIEW_LOADING )
+						SearchActivity.this.setSearchActivityView ( SearchActivityView.VIEW_LOADING );
+
+					new GetNutritionInfoTask ().execute ( foodName );
+				}else Toast.makeText ( SearchActivity.this, R.string.search_error_empty_search_field, Toast.LENGTH_LONG ).show ();	
+				return true;
+			}
+			return false;
 		}
 		
 	}
 	
-	class GetNutritionInfoTask extends AsyncTask<String,String,Response>
+	class GetNutritionInfoTask extends AsyncTask< String, String, Response >
 	{
+		private String foodName;
 
 		@Override
 		protected Response doInBackground ( String... params )
@@ -198,56 +215,66 @@ public class SearchActivity extends Activity
 			Response response = null;
 			try
 			{
-				String foodName = params[0];
-				
-				//do REST call to get nutrition information for food.
-				publishProgress("Fetching Nutrition Information for "+foodName);
-				String json = HttpClient.get ( WebServiceUrlFactory.getNutritionInfo ( foodName ) );
-				response = ResponseFactory.createResponseForNutritionInfoRequest ( json );
+				this.foodName = params[0];
+
+				// do REST call to get nutrition information for food.
+				publishProgress ( "Fetching Nutrition Information for " + foodName );
+
+				for ( int i = 0 ; i < SearchActivity.NUM_TRIES ; i++ )
+				{
+					String json = HttpClient.get ( WebServiceUrlFactory.getNutritionInfo ( foodName ) );
+					response = ResponseFactory.createResponseForNutritionInfoRequest ( json );
+
+					if ( response != null && response.isSuccessful () ) break;
+				}
+
 			}
 			catch ( IOException e )
 			{
-				Log.e ( TAG, "IOException occured while fetching results."+e.toString () );
+				Log.e ( TAG, "IOException occured while fetching results." + e.toString () );
 				e.printStackTrace ();
 			}
 			catch ( ParseException e )
 			{
-				Log.e (TAG, "ParseException while reading results."+e.toString ());
-				e.printStackTrace();
+				Log.e ( TAG, "ParseException while reading results." + e.toString () );
+				e.printStackTrace ();
 			}
-			
+
 			return response;
 		}
-		
+
 		@Override
 		protected void onProgressUpdate ( String... values )
 		{
 			SearchActivity.this.setLoadingText ( values[0] );
 		}
-		
+
 		@Override
 		protected void onPostExecute ( Response response )
 		{
-			if(response == null || !response.isSuccessful ())
+			if ( response != null && response.isSuccessful () )
 			{
-				if(response!= null)
-					Log.e(TAG, response.getMessage ());
-				
-				SearchActivity.this.setLoadingText ( SearchActivity.this.getString ( R.string.search_error_null_response ) );
-			}else
-			{
-				if(response.getData () != null && response.isSuccessful () && response.getData () instanceof HashMap)
+				if ( response.getData () instanceof List )
 				{
-					@SuppressWarnings ( "unchecked" )
-					Map<String,List<NutritionInfo>> nutritionInfoDictionary = (Map<String,List<NutritionInfo>>) response.getData ();
+					List< NutritionInfo > nutritionInfoList = ( List< NutritionInfo > ) response.getData ();
+					Map< String, List< NutritionInfo >> nutritionInfoDictionary = new HashMap< String, List< NutritionInfo >> ();
+					nutritionInfoDictionary.put ( this.foodName, nutritionInfoList );
+
+					//NutritionInfoListAdapter adapter = new NutritionInfoListAdapter ( SearchActivity.this, nutritionInfoDictionary );
+					//SearchActivity.this.listNutritionInfo.setAdapter ( adapter );
+					//SearchActivity.this.listNutritionInfo.invalidateViews ();
 					setupList(nutritionInfoDictionary);
 					SearchActivity.this.setSearchActivityView ( SearchActivityView.VIEW_RESULTS );
 					return;
-				}else
-				{
-					Log.e ( TAG, response.getMessage () );
-					SearchActivity.this.setLoadingText (SearchActivity.this.getString ( R.string.search_error_no_results_found  ));
 				}
+			}else
+			{
+				if ( response != null )
+				{
+					Log.e ( SearchActivity.TAG, response.getMessage () );
+				}
+
+				SearchActivity.this.setLoadingText ( SearchActivity.this.getString ( R.string.search_error_null_response ) );
 			}
 		}
 	}

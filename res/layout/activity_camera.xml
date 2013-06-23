@@ -40,7 +40,7 @@
             android:background="@color/transparent"
             android:contentDescription="Capture"
             android:padding="10dip"
-            android:src="@drawable/ic_camera"
+            android:src="@drawable/ic_take_picture"
             android:visibility="gone" >
         </ImageButton>
 

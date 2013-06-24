@@ -12,7 +12,6 @@ import android.app.Activity;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.GridView;
@@ -108,6 +107,11 @@ public class HomeActivity extends Activity
 				Intent searchIntent = new Intent(HomeActivity.this, SearchActivity.class);
 				startActivity(searchIntent);
 				return;
+			case JOURNAL:
+				Intent journalIntent = new Intent(HomeActivity.this, JournalActivity.class);
+				startActivity(journalIntent);
+				return;
+			
 			default:
 				Toast.makeText(HomeActivity.this,"Not yet implemented.",Toast.LENGTH_LONG).show();
 				return;

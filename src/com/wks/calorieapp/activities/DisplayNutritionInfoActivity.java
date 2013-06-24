@@ -1,22 +1,15 @@
 package com.wks.calorieapp.activities;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
-
 import com.wks.calorieapp.R;
 import com.wks.calorieapp.adapters.NutritionInfoListAdapter;
 import com.wks.calorieapp.pojos.NutritionInfo;
-import com.wks.calorieapp.pojos.ParentItem;
-
 import android.app.ActionBar;
 import android.app.Activity;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.widget.Button;
 import android.widget.ExpandableListView;

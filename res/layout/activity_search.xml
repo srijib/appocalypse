@@ -9,30 +9,29 @@
         android:layout_height="wrap_content"
         android:background="@drawable/gradient_gray"
         android:orientation="horizontal"
-        android:weightSum="10"
-        android:padding="6dip">
+        android:padding="6dip"
+        android:weightSum="10" >
 
         <EditText
             android:id="@+id/search_edit_search_term"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:layout_weight="7"
-            android:textSize="14dip"
             android:background="@color/white"
-            android:inputType="textCapWords"
             android:hint="Enter search term"
+            android:inputType="textCapWords"
+            android:maxLines="1"
             android:padding="4dip"
-            android:maxLines="1" >
+            android:textSize="14dip" >
         </EditText>
-
     </LinearLayout>
 
     <ViewSwitcher
         android:id="@+id/search_viewswitcher"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
-        android:inAnimation="@android:anim/slide_in_left"
-        android:background="#f0fff0">
+        android:background="#f0fff0"
+        android:inAnimation="@android:anim/slide_in_left" >
 
         <RelativeLayout
             android:id="@+id/search_view_loading"
@@ -53,8 +52,8 @@
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/search_spinner_loading"
                 android:layout_centerHorizontal="true"
-                android:textSize="14dip"
-                android:gravity="center">
+                android:gravity="center"
+                android:textSize="14dip" >
             </TextView>
         </RelativeLayout>
 
@@ -63,45 +62,43 @@
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
             android:orientation="vertical"
-            android:weightSum="10">
+            android:weightSum="10" >
 
             <LinearLayout
                 android:id="@+id/search_view_controls"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
                 android:layout_alignParentBottom="true"
-                >
-                
-                <Button 
+                android:background="@color/transparent_black"
+                android:orientation="horizontal"
+                android:padding="2dip" >
+
+                <TextView
+                    android:id="@+id/search_text_confirm"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_weight="1"
+                    android:text="@string/search_layout_default_prompt"
+                    android:textColor="@color/white" />
+
+                <Button
                     android:id="@+id/search_button_add_to_journal"
-                    android:layout_width="0dip"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="Add to Journal"
-                    />
-                
-                <Button 
-                    android:id="@+id/search_button_done"
-                    android:layout_width="0dip"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="Done"
-                    />
-                
+                    android:background="@color/transparent"
+                    android:text="Add"
+                    android:textColor="@color/white" />
             </LinearLayout>
-            
+
             <ExpandableListView
                 android:id="@+id/search_expandlist_nutrition_info"
                 android:layout_width="fill_parent"
                 android:layout_height="fill_parent"
+                android:layout_above="@+id/search_view_controls"
                 android:layout_alignParentLeft="true"
-                android:layout_alignParentTop="true"
-                android:layout_above="@+id/search_view_controls">
+                android:layout_alignParentTop="true" >
             </ExpandableListView>
-            
-            
-            
         </RelativeLayout>
     </ViewSwitcher>
 

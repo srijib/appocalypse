@@ -1,18 +1,9 @@
 package com.wks.calorieapp.adapters;
 
-import java.util.Iterator;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map.Entry;
-
 import com.wks.calorieapp.R;
-import com.wks.calorieapp.activities.CalorieApplication;
-import com.wks.calorieapp.activities.CalorieApplication.Font;
-
 import android.content.Context;
-import android.graphics.Typeface;
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;

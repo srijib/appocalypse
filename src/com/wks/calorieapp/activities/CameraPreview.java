@@ -27,7 +27,7 @@ public class CameraPreview extends SurfaceView implements Callback
 
 	private static final int JPEG_QUALITY = 90;
 
-	private static final int PICTURE_WIDTH = 300;
+	//private static final int PICTURE_WIDTH = 300;
 
 	private Context context;// useless
 	private Camera camera = null;

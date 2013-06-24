@@ -6,4 +6,6 @@
 	<string name="search_menu_search">Enter Food Name</string>
 	<string name="search_menu_no_match">No match</string>
 	<string name="search_menu_add_to_journal">Add to Journal</string>
+	<string name="search_layout_default_prompt">Select a food item to add to journal.</string>
+	<string name="search_confirm">Do you want to add \'%s\' to journal?</string>
 </resources>

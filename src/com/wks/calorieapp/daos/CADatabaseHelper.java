@@ -8,12 +8,13 @@ import android.database.sqlite.SQLiteOpenHelper;
 public class CADatabaseHelper extends SQLiteOpenHelper
 {
 	public static final String DATABASE_NAME = "calorieapp";
-	public static final int DATABASE_VERSION = 1;
+	public static final int DATABASE_VERSION = 2;
 
 	private static final String CREATE_TABLE_JOURNALS = 
 			"CREATE TABLE "+JournalsDataAccessObject.TABLE_JOURNALS+" ("+
 			""+JournalsDataAccessObject.Column.ID.getName ()+" INTEGER PRIMARY KEY AUTOINCREMENT,"+
-			""+JournalsDataAccessObject.Column.TIMESTAMP.getName ()+" TEXT, "+
+			""+JournalsDataAccessObject.Column.DATE.getName ()+" TEXT, "+
+			""+JournalsDataAccessObject.Column.TIME.getName()+" TEXT"+
 			""+JournalsDataAccessObject.Column.FOOD_ID.getName ()+" INTEGER,"+
 			""+JournalsDataAccessObject.Column.IMAGE_ID.getName ()+" INTEGER,"+
 			"FOREIGN KEY ("+JournalsDataAccessObject.Column.FOOD_ID.getName ()+") REFERENCES "+FoodsDataAccessObject.TABLE_FOODS+" ("+FoodsDataAccessObject.Column.ID.getName ()+"),"+

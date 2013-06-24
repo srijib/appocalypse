@@ -11,6 +11,7 @@ import java.net.URL;
 //http://www.coderzheaven.com/2012/03/29/uploading-audio-video-or-image-files-from-android-to-server/
 public class Uploader
 {
+	@SuppressWarnings ( "deprecation" )
 	public static String uploadFile ( File file, String _url ) throws IOException
 	{
 		String httpMethod = "POST";

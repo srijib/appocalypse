@@ -23,6 +23,8 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.KeyEvent;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnKeyListener;
@@ -41,15 +43,18 @@ public class SearchActivity extends Activity
 	private static final int NUM_TRIES = 3;
 
 	private EditText editSearch;
+	private TextView textConfirm;
 	private Button buttonAddToJournal;
-	private Button buttonDone;
 	private ViewSwitcher viewSwitcher;
 	private RelativeLayout viewLoading;
 	private RelativeLayout viewResults;
 	private TextView textLoading;
 	private ProgressBar progressLoading;
 
+	private NutritionInfoListAdapter adapter;
 	private ExpandableListView listNutritionInfo;
+	
+	private NutritionInfo selectedFood;
 
 	private enum SearchActivityView
 	{
@@ -70,7 +75,14 @@ public class SearchActivity extends Activity
 
 	}
 
-
+	@Override
+	public boolean onCreateOptionsMenu ( Menu menu )
+	{
+		MenuInflater inflater = this.getMenuInflater ();
+		inflater.inflate ( R.menu.activity_search, menu );
+		return true;
+	}
+	
 	@Override
 	public boolean onOptionsItemSelected ( MenuItem item )
 	{
@@ -80,6 +92,10 @@ public class SearchActivity extends Activity
 			Intent homeIntent = new Intent(SearchActivity.this,HomeActivity.class);
 			homeIntent.addFlags ( Intent.FLAG_ACTIVITY_CLEAR_TOP );
 			startActivity(homeIntent);
+			return true;
+			
+		case R.id.search_menu_done:
+			Toast.makeText ( this, "Goes to todays calorie", Toast.LENGTH_SHORT ).show ();
 			return true;
 		default:
 			return super.onOptionsItemSelected(item);
@@ -108,8 +124,9 @@ public class SearchActivity extends Activity
 		progressLoading = ( ProgressBar ) this.findViewById ( R.id.search_spinner_loading );
 
 		listNutritionInfo = ( ExpandableListView ) this.findViewById ( R.id.search_expandlist_nutrition_info );
+		textConfirm = (TextView) this.findViewById ( R.id.search_text_confirm );
 		buttonAddToJournal = (Button) this.findViewById ( R.id.search_button_add_to_journal );
-		buttonDone = (Button) this.findViewById ( R.id.search_button_done );
+		
 		
 		setSearchActivityView ( SearchActivityView.VIEW_IDLE );
 
@@ -118,6 +135,8 @@ public class SearchActivity extends Activity
 	private void setupListeners ()
 	{
 		this.editSearch.setOnKeyListener ( new OnEditSearchSubmitted ());
+		this.listNutritionInfo.setOnChildClickListener ( new OnListItemClicked() );
+		this.buttonAddToJournal.setOnClickListener ( new OnAddToJournalClicked() );
 	}
 
 	private void setSearchActivityView ( SearchActivityView view )
@@ -155,6 +174,7 @@ public class SearchActivity extends Activity
 		return this.searchActivityView;
 	}
 
+
 	private void setLoadingProgressVisible ( boolean visible )
 	{
 		this.progressLoading.setVisibility ( visible ? View.VISIBLE : View.GONE );
@@ -176,9 +196,33 @@ public class SearchActivity extends Activity
 	{
 		if ( nutritionInfoDictionary != null )
 		{
-			NutritionInfoListAdapter adapter = new NutritionInfoListAdapter ( this, nutritionInfoDictionary );
+			this.adapter = new NutritionInfoListAdapter ( this, nutritionInfoDictionary );
 			this.listNutritionInfo.setAdapter ( adapter );
 		}
+	}
+	
+	private void showConfirmMessage()
+	{
+		String confirmMessage = "";
+		
+		if(this.selectedFood != null)
+		{
+			String confirmTemplate = SearchActivity.this.getString ( R.string.search_confirm );
+			confirmMessage = String.format ( confirmTemplate, SearchActivity.this.selectedFood.getName ());
+			
+		}else
+		{
+			confirmMessage = this.getString ( R.string.search_layout_default_prompt );
+		}
+		
+		this.textConfirm.setText ( confirmMessage );
+	}
+	
+	private boolean addToJournal()
+	{
+		return false;
+		//TODO
+		//JournalDataTransferObject = 
 	}
 
 	class OnEditSearchSubmitted implements OnKeyListener
@@ -203,6 +247,31 @@ public class SearchActivity extends Activity
 			return false;
 		}
 		
+	}
+	
+	class OnListItemClicked implements ExpandableListView.OnChildClickListener
+	{
+
+		public boolean onChildClick ( ExpandableListView parent, View v, int groupPosition, int childPosition, long id )
+		{
+			NutritionInfo info = SearchActivity.this.adapter.getChild ( groupPosition, childPosition );
+			
+			SearchActivity.this.selectedFood = info;
+			SearchActivity.this.showConfirmMessage ();
+		
+			return true;
+		}
+		
+	}
+	
+	class OnAddToJournalClicked implements View.OnClickListener
+	{
+		@Override
+		public void onClick ( View v )
+		{
+			SearchActivity.this.addToJournal();
+			
+		}
 	}
 	
 	class GetNutritionInfoTask extends AsyncTask< String, String, Response >
@@ -249,6 +318,7 @@ public class SearchActivity extends Activity
 			SearchActivity.this.setLoadingText ( values[0] );
 		}
 
+		@SuppressWarnings ( "unchecked" )
 		@Override
 		protected void onPostExecute ( Response response )
 		{
@@ -256,15 +326,15 @@ public class SearchActivity extends Activity
 			{
 				if ( response.getData () instanceof List )
 				{
+					
 					List< NutritionInfo > nutritionInfoList = ( List< NutritionInfo > ) response.getData ();
 					Map< String, List< NutritionInfo >> nutritionInfoDictionary = new HashMap< String, List< NutritionInfo >> ();
 					nutritionInfoDictionary.put ( this.foodName, nutritionInfoList );
-
-					//NutritionInfoListAdapter adapter = new NutritionInfoListAdapter ( SearchActivity.this, nutritionInfoDictionary );
-					//SearchActivity.this.listNutritionInfo.setAdapter ( adapter );
-					//SearchActivity.this.listNutritionInfo.invalidateViews ();
+					
 					setupList(nutritionInfoDictionary);
+					
 					SearchActivity.this.setSearchActivityView ( SearchActivityView.VIEW_RESULTS );
+					
 					return;
 				}
 			}else
@@ -279,4 +349,5 @@ public class SearchActivity extends Activity
 		}
 	}
 
+	
 }

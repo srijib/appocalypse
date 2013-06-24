@@ -8,7 +8,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 public class CADatabaseHelper extends SQLiteOpenHelper
 {
 	public static final String DATABASE_NAME = "calorieapp";
-	public static final int DATABASE_VERSION = 2;
+	public static final int DATABASE_VERSION = 3;
 
 	private static final String CREATE_TABLE_JOURNALS = 
 			"CREATE TABLE "+JournalsDataAccessObject.TABLE_JOURNALS+" ("+
@@ -22,7 +22,7 @@ public class CADatabaseHelper extends SQLiteOpenHelper
 					
 	private static final String CREATE_TABLE_FOODS = 
 			"CREATE TABLE "+FoodsDataAccessObject.TABLE_FOODS+" ("+
-			""+FoodsDataAccessObject.Column.ID.getName ()+" INTEGER PRIMARY KEY AUTOINCREMENT,"+
+			""+FoodsDataAccessObject.Column.ID.getName ()+" INTEGER PRIMARY KEY,"+
 			""+FoodsDataAccessObject.Column.NAME.getName ()+" TEXT,"+
 			""+FoodsDataAccessObject.Column.CALORIES.getName ()+" DECIMAL(8,2);";
 			

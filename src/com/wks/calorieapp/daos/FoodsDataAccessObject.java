@@ -36,6 +36,7 @@ public class FoodsDataAccessObject
 	public long create(FoodDataTransferObject food)
 	{
 		ContentValues values = new ContentValues();
+		values.put ( Column.ID.getName (), food.getId());
 		values.put ( Column.NAME.getName (), food.getName () );
 		values.put ( Column.CALORIES.getName (), food.getCalories () );
 		return db.insert ( TABLE_FOODS, null, values );

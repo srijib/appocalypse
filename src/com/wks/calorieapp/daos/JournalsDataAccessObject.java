@@ -17,9 +17,11 @@ public class JournalsDataAccessObject
 
 	private SQLiteDatabase db;
 	private CADatabaseHelper helper;
+	private Context context;
 
 	public JournalsDataAccessObject ( Context context )
 	{
+		this.context = context;
 		this.helper = CADatabaseHelper.getInstance ( context );
 	}
 
@@ -41,6 +43,46 @@ public class JournalsDataAccessObject
 		values.put ( Column.FOOD_ID.getName (), journal.getFoodId () );
 		values.put ( Column.IMAGE_ID.getName (), journal.getImageId () );
 		return db.insert ( TABLE_JOURNALS, null, values );
+	}
+	
+	public long create(JournalDataTransferObject journal, FoodDataTransferObject food, ImageDataTransferObject image)
+	{
+		this.db.beginTransaction ();
+		
+		//add food item
+		FoodsDataAccessObject foodDao = new FoodsDataAccessObject(this.context);
+		FoodDataTransferObject foodDto = foodDao.read ( food.getId () );
+		long foodId = -1;
+		if(foodDto != null)
+		{
+			foodId = foodDao.create ( food );
+			if(foodId == -1)
+			{
+				db.endTransaction ();
+				return -1;
+			}
+		}
+		
+		//add image item
+		ImagesDataAccessObject imageDao = new ImagesDataAccessObject(this.context);
+		long imageId = imageDao.create ( image );
+		if(imageId == -1)
+		{
+			db.endTransaction ();
+			return -1;
+		}
+		
+		journal.setFoodId ( foodId );
+		journal.setImageId ( imageId );
+		
+		long journalId =  this.create ( journal );
+		if(journalId != -1)
+		{
+			db.setTransactionSuccessful ();
+		}
+		
+		db.endTransaction ();
+		return journalId;
 	}
 	
 	public JournalDataTransferObject read(long id) throws ParseException

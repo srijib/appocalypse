@@ -318,7 +318,6 @@ public class SearchActivity extends Activity
 			SearchActivity.this.setLoadingText ( values[0] );
 		}
 
-		@SuppressWarnings ( "unchecked" )
 		@Override
 		protected void onPostExecute ( Response response )
 		{

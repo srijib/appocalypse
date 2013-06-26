@@ -30,7 +30,7 @@
         android:id="@+id/search_viewswitcher"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
-        android:background="#f0fff0"
+        android:background="@drawable/bg_home"
         android:inAnimation="@android:anim/slide_in_left" >
 
         <RelativeLayout
@@ -83,13 +83,14 @@
                     android:text="@string/search_layout_text_default_confirm"
                     android:textColor="@color/white" />
 
-                <Button
+                <ImageButton
                     android:id="@+id/search_button_add_to_journal"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:background="@color/transparent"
-                    android:text="@string/search_layout_button_add_to_journal"
-                    android:textColor="@color/white" />
+                    android:src="@drawable/ic_add"
+                    android:contentDescription="@string/search_layout_content_description_add_to_journal"
+                    />
             </LinearLayout>
 
             <ExpandableListView

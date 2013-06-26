@@ -32,12 +32,14 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnKeyListener;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ExpandableListView;
+import android.widget.ImageButton;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -51,13 +53,12 @@ public class SearchActivity extends Activity
 
 	private EditText editSearch;
 	private TextView textConfirm;
-	private Button buttonAddToJournal;
+	private ImageButton buttonAddToJournal;
 	private ViewSwitcher viewSwitcher;
 	private RelativeLayout viewLoading;
 	private RelativeLayout viewResults;
 	private TextView textLoading;
 	private ProgressBar progressLoading;
-
 
 	private String fileName;
 	private NutritionInfo selectedFood;
@@ -88,6 +89,14 @@ public class SearchActivity extends Activity
 		setupListeners ();
 		// set up list when it is ready.
 		// setuplist will be called by onPostExecute in the GetNutritionInfoTasl
+	}
+
+	@Override
+	public boolean onCreateOptionsMenu ( Menu menu )
+	{
+		MenuInflater inflater = this.getMenuInflater ();
+		inflater.inflate ( R.menu.activity_search, menu );
+		return true;
 	}
 
 	@Override
@@ -132,7 +141,7 @@ public class SearchActivity extends Activity
 
 		listNutritionInfo = ( ExpandableListView ) this.findViewById ( R.id.search_expandlist_nutrition_info );
 		textConfirm = ( TextView ) this.findViewById ( R.id.search_text_confirm );
-		buttonAddToJournal = ( Button ) this.findViewById ( R.id.search_button_add_to_journal );
+		buttonAddToJournal = ( ImageButton ) this.findViewById ( R.id.search_button_add_to_journal );
 
 		setSearchActivityView ( SearchActivityView.VIEW_IDLE );
 
@@ -172,7 +181,7 @@ public class SearchActivity extends Activity
 			if ( viewSwitcher.getCurrentView () != viewResults )
 			{
 				viewSwitcher.showNext ();
-				Toast.makeText ( this, "Displaying results", Toast.LENGTH_LONG ).show ();
+
 			}
 			return;
 		}
@@ -226,46 +235,46 @@ public class SearchActivity extends Activity
 		this.textConfirm.setText ( confirmMessage );
 	}
 
-	private long addToJournal () 
+	private long addToJournal ()
 	{
 		try
 		{
-			if(this.selectedFood == null)
-				return -1;
-			
-			JournalDataTransferObject journal = new JournalDataTransferObject();
-			FoodDataTransferObject food = new FoodDataTransferObject();
+			if ( this.selectedFood == null ) return -1;
+
+			JournalDataTransferObject journal = new JournalDataTransferObject ();
+			FoodDataTransferObject food = new FoodDataTransferObject ();
 			ImageDataTransferObject image = null;
-			
+
 			food.setId ( this.selectedFood.getId () );
 			food.setName ( this.selectedFood.getName () );
 			food.setCalories ( this.selectedFood.getCaloriesPer100g () );
-			
-			String time = Time.getTimeAsString ( Calendar.getInstance (), JournalDataTransferObject.DATE_FORMAT+"~"+JournalDataTransferObject.TIME_FORMAT );
-			String[] timeTokens = time.split ( "~" );
-			
-			if(timeTokens.length < 2 ) return -1;
-			
+
+			String time = Time.getTimeAsString ( Calendar.getInstance (), JournalDataTransferObject.DATE_FORMAT + "~"
+					+ JournalDataTransferObject.TIME_FORMAT );
+			String [] timeTokens = time.split ( "~" );
+
+			if ( timeTokens.length < 2 ) return -1;
+
 			journal.setDate ( timeTokens[0] );
 			journal.setTime ( timeTokens[1] );
-			
-			if(this.fileName != null && !this.fileName.isEmpty ())
+
+			if ( this.fileName != null && !this.fileName.isEmpty () )
 			{
-				image = new ImageDataTransferObject();
+				image = new ImageDataTransferObject ();
 				image.setFileName ( this.fileName );
 			}
-			
+
 			CADatabaseHelper helper = CADatabaseHelper.getInstance ( this );
 			SQLiteDatabase db = helper.open ();
-			JournalsDataAccessObject journalDao = new JournalsDataAccessObject(db);
+			JournalsDataAccessObject journalDao = new JournalsDataAccessObject ( db );
 			long journalId = journalDao.create ( journal, food, image );
 			db.close ();
 			return journalId;
 		}
 		catch ( java.text.ParseException e )
 		{
-			
-			e.printStackTrace();
+
+			e.printStackTrace ();
 			return -1;
 		}
 	}
@@ -314,8 +323,8 @@ public class SearchActivity extends Activity
 		@Override
 		public void onClick ( View v )
 		{
-			long success = SearchActivity.this.addToJournal();
-			String message = "Entry ("+success+") added to journal.";
+			long success = SearchActivity.this.addToJournal ();
+			String message = "Entry (" + success + ") added to journal.";
 			Toast.makeText ( SearchActivity.this, message, Toast.LENGTH_LONG ).show ();
 		}
 	}

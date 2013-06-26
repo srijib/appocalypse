@@ -10,5 +10,5 @@
 	<string name="search_layout_text_default_confirm">Select a food item to add to journal.</string>
 	<string name="search_layout_hint_edit_search">Enter Food Name</string>
 	<string name="search_layout_button_add_to_journal">Add</string>
-	<string name="search_menu_add_to_journal">Add to Journal</string>
+	<string name="search_layout_content_description_add_to_journal">Add to Journal</string>
 </resources>

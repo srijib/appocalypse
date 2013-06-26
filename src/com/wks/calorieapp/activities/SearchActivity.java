@@ -286,6 +286,7 @@ public class SearchActivity extends Activity
 		{
 			if ( event.getAction () == KeyEvent.ACTION_DOWN && keyCode == KeyEvent.KEYCODE_ENTER )
 			{
+				SearchActivity.this.selectedFood = null;
 				AndroidUtils.hideKeyboard ( SearchActivity.this, SearchActivity.this.editSearch );
 
 				String foodName = editSearch.getText ().toString ();

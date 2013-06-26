@@ -10,6 +10,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -43,6 +44,8 @@ public class DisplayNutritionInfoActivity extends Activity
 			this.finish ();
 		}
 
+		Log.e("shit",nutritionInfoDictionary.toString ());
+		
 		Bundle extras = this.getIntent ().getExtras ();
 		if(extras != null)
 		{
@@ -102,9 +105,6 @@ public class DisplayNutritionInfoActivity extends Activity
 
 	private void setupView ()
 	{
-
-		// this.buttonNext = (Button) this.findViewById (
-		// R.id.display_nutriton_info_button_next );
 		this.listNutritionInfo = ( ExpandableListView ) this.findViewById ( R.id.display_nutrition_info_expandlist_nutrition_info );
 		this.buttonAddToJournal = ( ImageButton ) this.findViewById ( R.id.display_nutrition_info_button_add_to_journal );
 		this.textConfirm = ( TextView ) this.findViewById ( R.id.display_nutrition_info_text_confirm );

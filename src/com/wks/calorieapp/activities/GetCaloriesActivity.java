@@ -106,7 +106,7 @@ public class GetCaloriesActivity extends Activity
 	private void setupView ()
 	{
 		this.progressbarLoading = ( ProgressBar ) findViewById ( R.id.get_calories_spinner_loading );
-		this.textLoadingActivity = ( TextView ) findViewById ( R.id.get_calories_text_loading_activity );
+		this.textLoadingActivity = ( TextView ) findViewById ( R.id.get_calories_text_loading );
 
 		this.textLoadingActivity.setTypeface ( CalorieApplication.getFont ( Font.CANTARELL_REGULAR ) );
 	}
@@ -146,7 +146,7 @@ public class GetCaloriesActivity extends Activity
 
 			}else
 			{
-				if(response.isSuccessful ())
+				if(response != null)
 				{
 					Log.e ( TAG, response.getMessage () );
 				}
@@ -180,15 +180,17 @@ public class GetCaloriesActivity extends Activity
 				json = Uploader.uploadFile ( imageFile, WebServiceUrlFactory.upload () );
 				response = ResponseFactory.createResponseForUploadRequest ( json );
 
-				Log.e(TAG,json);
+				Log.e("UPLOAD",json);
 				
 				if ( response == null || !response.isSuccessful () ) return response;
 				if (this.isCancelled ()) this.cancel ( true );
 				// get matches for image
 				publishProgress ( "Identifying Food..." );
-				json = HttpClient.get ( WebServiceUrlFactory.identify ( "35937204245399320130616225827.jpg" ) );
+				json = HttpClient.get ( WebServiceUrlFactory.identify ( "lime.jpg" ) );
 				response = ResponseFactory.createResponseForIdentifyRequest ( json );
 
+				Log.e("IDENTIFY",json);
+				
 				// if response not received or matching foods not found, return
 				if ( response == null || !response.isSuccessful () ) return response;
 				if (this.isCancelled ()) this.cancel ( true );
@@ -209,7 +211,7 @@ public class GetCaloriesActivity extends Activity
 						// get nutrition info for each food in list.
 						for ( int i = 0 ; i < foodSimilarity.size () ; i++ )
 						{
-							String foodName = foodSimilarity.get ( i ).getFoodName ();
+							String foodName = "chips";//foodSimilarity.get ( i ).getFoodName ();
 
 							// nutrition info request doesn't always work, so if
 							// it fails,
@@ -221,6 +223,7 @@ public class GetCaloriesActivity extends Activity
 								json = HttpClient.get ( WebServiceUrlFactory.getNutritionInfo ( foodName ) );
 								response = ResponseFactory.createResponseForNutritionInfoRequest ( json );
 								
+								Log.e("GET INFO",json);
 								// when response is received with data, move on
 								// to next step.
 								

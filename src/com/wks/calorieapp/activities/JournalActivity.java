@@ -11,8 +11,8 @@ import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Button;
 import android.widget.CalendarView;
+import android.widget.ImageButton;
 import android.widget.Toast;
 
 public class JournalActivity extends Activity
@@ -23,12 +23,12 @@ public class JournalActivity extends Activity
 	};
 
 	private CalendarView annoyingPieceOfShit;
-	private Button buttonLastMonth;
-	private Button buttonLastYear;
-	private Button buttonToday;
-	private Button buttonNextMonth;
-	private Button buttonNextYear;
-	private Button [] buttonsDateControl;
+	private ImageButton buttonLastMonth;
+	private ImageButton buttonLastYear;
+	private ImageButton buttonToday;
+	private ImageButton buttonNextMonth;
+	private ImageButton buttonNextYear;
+	private ImageButton [] buttonsDateControl;
 
 	private boolean userIsNavigating;
 
@@ -72,13 +72,13 @@ public class JournalActivity extends Activity
 	private void setupView ()
 	{
 		annoyingPieceOfShit = ( CalendarView ) this.findViewById ( R.id.journal_calendar );
-		buttonLastYear = ( Button ) this.findViewById ( R.id.journal_button_last_year );
-		buttonLastMonth = ( Button ) this.findViewById ( R.id.journal_button_last_month );
-		buttonToday = ( Button ) this.findViewById ( R.id.journal_button_today );
-		buttonNextMonth = ( Button ) this.findViewById ( R.id.journal_button_next_month );
-		buttonNextYear = ( Button ) this.findViewById ( R.id.journal_button_next_year );
+		buttonLastYear = ( ImageButton ) this.findViewById ( R.id.journal_button_last_year );
+		buttonLastMonth = ( ImageButton ) this.findViewById ( R.id.journal_button_last_month );
+		buttonToday = ( ImageButton ) this.findViewById ( R.id.journal_button_today );
+		buttonNextMonth = ( ImageButton ) this.findViewById ( R.id.journal_button_next_month );
+		buttonNextYear = ( ImageButton ) this.findViewById ( R.id.journal_button_next_year );
 
-		buttonsDateControl = new Button [] { buttonLastYear, buttonLastMonth, buttonToday, buttonNextMonth, buttonNextYear };
+		buttonsDateControl = new ImageButton [] { buttonLastYear, buttonLastMonth, buttonToday, buttonNextMonth, buttonNextYear };
 
 		Calendar fuckingCalendar = Calendar.getInstance ();
 		annoyingPieceOfShit.setDate ( fuckingCalendar.getTimeInMillis () );
@@ -86,7 +86,7 @@ public class JournalActivity extends Activity
 
 	private void setupListeners ()
 	{
-		for ( Button button : buttonsDateControl )
+		for ( ImageButton button : buttonsDateControl )
 			button.setOnClickListener ( new OnDateControlButtonClicked () );
 
 		annoyingPieceOfShit.setOnDateChangeListener ( new OnCalendarDateClicked () );

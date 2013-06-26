@@ -1,6 +1,7 @@
 package com.wks.calorieapp.activities;
 
 import java.io.IOException;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -8,23 +9,29 @@ import org.json.simple.parser.ParseException;
 
 import com.wks.calorieapp.R;
 import com.wks.calorieapp.adapters.NutritionInfoListAdapter;
+import com.wks.calorieapp.daos.CADatabaseHelper;
+import com.wks.calorieapp.daos.FoodDataTransferObject;
+import com.wks.calorieapp.daos.ImageDataTransferObject;
+import com.wks.calorieapp.daos.JournalDataTransferObject;
+import com.wks.calorieapp.daos.JournalsDataAccessObject;
 import com.wks.calorieapp.pojos.NutritionInfo;
 import com.wks.calorieapp.pojos.Response;
 import com.wks.calorieapp.pojos.ResponseFactory;
 import com.wks.calorieapp.utils.AndroidUtils;
 import com.wks.calorieapp.utils.HttpClient;
+import com.wks.calorieapp.utils.Time;
 import com.wks.calorieapp.utils.WebServiceUrlFactory;
 
 import android.app.ActionBar;
 import android.app.Activity;
 import android.content.Intent;
+import android.database.sqlite.SQLiteDatabase;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnKeyListener;
@@ -51,10 +58,11 @@ public class SearchActivity extends Activity
 	private TextView textLoading;
 	private ProgressBar progressLoading;
 
+
+	private String fileName;
+	private NutritionInfo selectedFood;
 	private NutritionInfoListAdapter adapter;
 	private ExpandableListView listNutritionInfo;
-	
-	private NutritionInfo selectedFood;
 
 	private enum SearchActivityView
 	{
@@ -69,36 +77,35 @@ public class SearchActivity extends Activity
 		super.onCreate ( savedInstanceState );
 		this.setContentView ( R.layout.activity_search );
 
+		Bundle extras = this.getIntent ().getExtras ();
+		if ( extras != null )
+		{
+			this.fileName = extras.getString ( "image" );
+		}
+
 		setupActionBar ();
 		setupView ();
 		setupListeners ();
-
+		// set up list when it is ready.
+		// setuplist will be called by onPostExecute in the GetNutritionInfoTasl
 	}
 
-	@Override
-	public boolean onCreateOptionsMenu ( Menu menu )
-	{
-		MenuInflater inflater = this.getMenuInflater ();
-		inflater.inflate ( R.menu.activity_search, menu );
-		return true;
-	}
-	
 	@Override
 	public boolean onOptionsItemSelected ( MenuItem item )
 	{
 		switch ( item.getItemId () )
 		{
 		case android.R.id.home:
-			Intent homeIntent = new Intent(SearchActivity.this,HomeActivity.class);
+			Intent homeIntent = new Intent ( SearchActivity.this, HomeActivity.class );
 			homeIntent.addFlags ( Intent.FLAG_ACTIVITY_CLEAR_TOP );
-			startActivity(homeIntent);
+			startActivity ( homeIntent );
 			return true;
-			
+
 		case R.id.search_menu_done:
 			Toast.makeText ( this, "Goes to todays calorie", Toast.LENGTH_SHORT ).show ();
 			return true;
 		default:
-			return super.onOptionsItemSelected(item);
+			return super.onOptionsItemSelected ( item );
 		}
 	}
 
@@ -114,8 +121,8 @@ public class SearchActivity extends Activity
 
 	private void setupView ()
 	{
-		editSearch = ( EditText ) this.findViewById ( R.id.search_edit_search_term );
-	
+		editSearch = ( EditText ) this.findViewById ( R.id.search_edit_search );
+
 		viewSwitcher = ( ViewSwitcher ) this.findViewById ( R.id.search_viewswitcher );
 		viewLoading = ( RelativeLayout ) this.findViewById ( R.id.search_view_loading );
 		viewResults = ( RelativeLayout ) this.findViewById ( R.id.search_view_results );
@@ -124,19 +131,18 @@ public class SearchActivity extends Activity
 		progressLoading = ( ProgressBar ) this.findViewById ( R.id.search_spinner_loading );
 
 		listNutritionInfo = ( ExpandableListView ) this.findViewById ( R.id.search_expandlist_nutrition_info );
-		textConfirm = (TextView) this.findViewById ( R.id.search_text_confirm );
-		buttonAddToJournal = (Button) this.findViewById ( R.id.search_button_add_to_journal );
-		
-		
+		textConfirm = ( TextView ) this.findViewById ( R.id.search_text_confirm );
+		buttonAddToJournal = ( Button ) this.findViewById ( R.id.search_button_add_to_journal );
+
 		setSearchActivityView ( SearchActivityView.VIEW_IDLE );
 
 	}
 
 	private void setupListeners ()
 	{
-		this.editSearch.setOnKeyListener ( new OnEditSearchSubmitted ());
-		this.listNutritionInfo.setOnChildClickListener ( new OnListItemClicked() );
-		this.buttonAddToJournal.setOnClickListener ( new OnAddToJournalClicked() );
+		this.editSearch.setOnKeyListener ( new OnEditSearchSubmitted () );
+		this.listNutritionInfo.setOnChildClickListener ( new OnListItemClicked () );
+		this.buttonAddToJournal.setOnClickListener ( new OnAddToJournalClicked () );
 	}
 
 	private void setSearchActivityView ( SearchActivityView view )
@@ -145,13 +151,15 @@ public class SearchActivity extends Activity
 		switch ( view )
 		{
 		case VIEW_IDLE:
-			setLoadingProgressVisible ( false );
+
+			this.setLoadingProgressVisible ( false );
 			if ( viewSwitcher.getCurrentView () != viewLoading )
 			{
 				viewSwitcher.showPrevious ();
 			}
 			return;
 		case VIEW_LOADING:
+
 			setLoadingProgressVisible ( true );
 			if ( viewSwitcher.getCurrentView () != viewLoading )
 			{
@@ -159,6 +167,7 @@ public class SearchActivity extends Activity
 			}
 			return;
 		case VIEW_RESULTS:
+
 			setLoadingProgressVisible ( false );
 			if ( viewSwitcher.getCurrentView () != viewResults )
 			{
@@ -173,7 +182,6 @@ public class SearchActivity extends Activity
 	{
 		return this.searchActivityView;
 	}
-
 
 	private void setLoadingProgressVisible ( boolean visible )
 	{
@@ -200,29 +208,66 @@ public class SearchActivity extends Activity
 			this.listNutritionInfo.setAdapter ( adapter );
 		}
 	}
-	
-	private void showConfirmMessage()
+
+	private void showConfirmMessage ()
 	{
 		String confirmMessage = "";
-		
-		if(this.selectedFood != null)
+
+		if ( this.selectedFood != null )
 		{
-			String confirmTemplate = SearchActivity.this.getString ( R.string.search_confirm );
-			confirmMessage = String.format ( confirmTemplate, SearchActivity.this.selectedFood.getName ());
-			
+			String confirmTemplate = this.getString ( R.string.search_confirm );
+			confirmMessage = String.format ( confirmTemplate, SearchActivity.this.selectedFood.getName () );
+
 		}else
 		{
-			confirmMessage = this.getString ( R.string.search_layout_default_prompt );
+			confirmMessage = this.getString ( R.string.search_layout_text_default_confirm );
 		}
-		
+
 		this.textConfirm.setText ( confirmMessage );
 	}
-	
-	private boolean addToJournal()
+
+	private long addToJournal () 
 	{
-		return false;
-		//TODO
-		//JournalDataTransferObject = 
+		try
+		{
+			if(this.selectedFood == null)
+				return -1;
+			
+			JournalDataTransferObject journal = new JournalDataTransferObject();
+			FoodDataTransferObject food = new FoodDataTransferObject();
+			ImageDataTransferObject image = null;
+			
+			food.setId ( this.selectedFood.getId () );
+			food.setName ( this.selectedFood.getName () );
+			food.setCalories ( this.selectedFood.getCaloriesPer100g () );
+			
+			String time = Time.getTimeAsString ( Calendar.getInstance (), JournalDataTransferObject.DATE_FORMAT+"~"+JournalDataTransferObject.TIME_FORMAT );
+			String[] timeTokens = time.split ( "~" );
+			
+			if(timeTokens.length < 2 ) return -1;
+			
+			journal.setDate ( timeTokens[0] );
+			journal.setTime ( timeTokens[1] );
+			
+			if(this.fileName != null && !this.fileName.isEmpty ())
+			{
+				image = new ImageDataTransferObject();
+				image.setFileName ( this.fileName );
+			}
+			
+			CADatabaseHelper helper = CADatabaseHelper.getInstance ( this );
+			SQLiteDatabase db = helper.open ();
+			JournalsDataAccessObject journalDao = new JournalsDataAccessObject(db);
+			long journalId = journalDao.create ( journal, food, image );
+			db.close ();
+			return journalId;
+		}
+		catch ( java.text.ParseException e )
+		{
+			
+			e.printStackTrace();
+			return -1;
+		}
 	}
 
 	class OnEditSearchSubmitted implements OnKeyListener
@@ -230,7 +275,7 @@ public class SearchActivity extends Activity
 
 		public boolean onKey ( View view, int keyCode, KeyEvent event )
 		{
-			if(event.getAction () == KeyEvent.ACTION_DOWN && keyCode == KeyEvent.KEYCODE_ENTER)
+			if ( event.getAction () == KeyEvent.ACTION_DOWN && keyCode == KeyEvent.KEYCODE_ENTER )
 			{
 				AndroidUtils.hideKeyboard ( SearchActivity.this, SearchActivity.this.editSearch );
 
@@ -241,39 +286,40 @@ public class SearchActivity extends Activity
 						SearchActivity.this.setSearchActivityView ( SearchActivityView.VIEW_LOADING );
 
 					new GetNutritionInfoTask ().execute ( foodName );
-				}else Toast.makeText ( SearchActivity.this, R.string.search_error_empty_search_field, Toast.LENGTH_LONG ).show ();	
+				}else Toast.makeText ( SearchActivity.this, R.string.search_error_empty_search_field, Toast.LENGTH_LONG ).show ();
 				return true;
 			}
 			return false;
 		}
-		
+
 	}
-	
+
 	class OnListItemClicked implements ExpandableListView.OnChildClickListener
 	{
 
 		public boolean onChildClick ( ExpandableListView parent, View v, int groupPosition, int childPosition, long id )
 		{
 			NutritionInfo info = SearchActivity.this.adapter.getChild ( groupPosition, childPosition );
-			
+
 			SearchActivity.this.selectedFood = info;
 			SearchActivity.this.showConfirmMessage ();
-		
+
 			return true;
 		}
-		
+
 	}
-	
+
 	class OnAddToJournalClicked implements View.OnClickListener
 	{
 		@Override
 		public void onClick ( View v )
 		{
-			SearchActivity.this.addToJournal();
-			
+			long success = SearchActivity.this.addToJournal();
+			String message = "Entry ("+success+") added to journal.";
+			Toast.makeText ( SearchActivity.this, message, Toast.LENGTH_LONG ).show ();
 		}
 	}
-	
+
 	class GetNutritionInfoTask extends AsyncTask< String, String, Response >
 	{
 		private String foodName;
@@ -325,15 +371,15 @@ public class SearchActivity extends Activity
 			{
 				if ( response.getData () instanceof List )
 				{
-					
+
 					List< NutritionInfo > nutritionInfoList = ( List< NutritionInfo > ) response.getData ();
 					Map< String, List< NutritionInfo >> nutritionInfoDictionary = new HashMap< String, List< NutritionInfo >> ();
 					nutritionInfoDictionary.put ( this.foodName, nutritionInfoList );
-					
-					setupList(nutritionInfoDictionary);
-					
+
+					setupList ( nutritionInfoDictionary );
+
 					SearchActivity.this.setSearchActivityView ( SearchActivityView.VIEW_RESULTS );
-					
+
 					return;
 				}
 			}else
@@ -348,5 +394,4 @@ public class SearchActivity extends Activity
 		}
 	}
 
-	
 }

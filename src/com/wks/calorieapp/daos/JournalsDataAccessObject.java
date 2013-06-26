@@ -19,39 +19,39 @@ public class JournalsDataAccessObject
 	private CADatabaseHelper helper;
 	private Context context;
 
-	public JournalsDataAccessObject ( Context context )
+	public JournalsDataAccessObject ( SQLiteDatabase db)
 	{
-		this.context = context;
-		this.helper = CADatabaseHelper.getInstance ( context );
+		this.db = db;
 	}
 
-	public void open ()
-	{
-		this.db = this.helper.getWritableDatabase ();
-	}
-
-	public void close ()
-	{
-		this.helper.close ();
-	}
-
+	
 	public long create ( JournalDataTransferObject journal )
 	{
 		ContentValues values = new ContentValues();
 		values.put ( Column.DATE.getName (), journal.getDateAsString () );
 		values.put ( Column.TIME.getName (), journal.getTimeAsString ());
 		values.put ( Column.FOOD_ID.getName (), journal.getFoodId () );
+		
+		if(journal.getImageId () < 0)
+		{
+			return db.insert ( TABLE_JOURNALS, Column.IMAGE_ID.getName (), values );
+		}
+		
 		values.put ( Column.IMAGE_ID.getName (), journal.getImageId () );
 		return db.insert ( TABLE_JOURNALS, null, values );
 	}
 	
 	public long create(JournalDataTransferObject journal, FoodDataTransferObject food, ImageDataTransferObject image)
 	{
+		if(journal == null || food == null)
+			throw new IllegalStateException("A Journal entry requires a journalDTO and a foodDTO.");
+		
 		this.db.beginTransaction ();
 		
 		//add food item
-		FoodsDataAccessObject foodDao = new FoodsDataAccessObject(this.context);
+		FoodsDataAccessObject foodDao = new FoodsDataAccessObject( this.db/*this.context*/);
 		FoodDataTransferObject foodDto = foodDao.read ( food.getId () );
+
 		long foodId = -1;
 		if(foodDto != null)
 		{
@@ -63,17 +63,27 @@ public class JournalsDataAccessObject
 			}
 		}
 		
-		//add image item
-		ImagesDataAccessObject imageDao = new ImagesDataAccessObject(this.context);
-		long imageId = imageDao.create ( image );
-		if(imageId == -1)
+		//image may be null.
+		if(image == null)
 		{
-			db.endTransaction ();
-			return -1;
-		}
+			journal.setFoodId ( foodId );
+			journal.setImageId ( -1 );
+			
+		}else
+		{
+			//add image item
+			ImagesDataAccessObject imageDao = new ImagesDataAccessObject( this.db/*this.context*/);
 		
-		journal.setFoodId ( foodId );
-		journal.setImageId ( imageId );
+			long imageId = imageDao.create ( image );
+			if(imageId == -1)
+			{
+				db.endTransaction ();
+				return -1;
+			}
+			
+			journal.setFoodId ( foodId );
+			journal.setImageId ( imageId );
+		}
 		
 		long journalId =  this.create ( journal );
 		if(journalId != -1)
@@ -91,9 +101,8 @@ public class JournalsDataAccessObject
 		
 		Cursor c = db.query ( TABLE_JOURNALS, COLUMNS, Column.ID.getName ()+" = "+id, null, null, null, null );
 		
-		if(c != null)
-		{
-			c.moveToFirst ();
+		if(c != null && c.moveToFirst ())
+		{	
 			journal = cursorToJournalDataTransferObject(c);
 		}
 		
@@ -107,9 +116,8 @@ public class JournalsDataAccessObject
 		
 		Cursor c = db.query ( TABLE_JOURNALS, COLUMNS, null, null, null, null, null );
 		
-		if(c != null)
+		if(c != null && c.moveToFirst ())
 		{
-			c.moveToFirst ();
 			while(!c.isAfterLast ())
 			{
 				journals.add ( cursorToJournalDataTransferObject(c) );

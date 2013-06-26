@@ -13,12 +13,12 @@
         android:weightSum="10" >
 
         <EditText
-            android:id="@+id/search_edit_search_term"
+            android:id="@+id/search_edit_search"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:layout_weight="7"
             android:background="@color/white"
-            android:hint="Enter search term"
+            android:hint="@string/search_layout_hint_edit_search"
             android:inputType="textCapWords"
             android:maxLines="1"
             android:padding="4dip"
@@ -75,11 +75,12 @@
 
                 <TextView
                     android:id="@+id/search_text_confirm"
-                    android:layout_width="wrap_content"
+                    android:layout_width="0dip"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
+                    android:maxLines="3"
                     android:layout_weight="1"
-                    android:text="@string/search_layout_default_prompt"
+                    android:text="@string/search_layout_text_default_confirm"
                     android:textColor="@color/white" />
 
                 <Button
@@ -87,7 +88,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:background="@color/transparent"
-                    android:text="Add"
+                    android:text="@string/search_layout_button_add_to_journal"
                     android:textColor="@color/white" />
             </LinearLayout>
 

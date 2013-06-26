@@ -11,9 +11,9 @@ public class JournalDataTransferObject
 	
 	private long id;
 	private long date;
-	private long time;
-	private long foodId;
-	private long imageId;
+	private long time = 0;
+	private long foodId = -1;
+	private long imageId = -1;
 	
 	public JournalDataTransferObject()
 	{

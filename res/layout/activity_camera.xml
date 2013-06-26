@@ -27,7 +27,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="50"
             android:background="@color/transparent_black"
-            android:text="Get Calories!"
+            android:text="@string/camera_layout_continue"
             android:textSize="14dp"
             android:textColor="#ffffff"
             android:visibility="visible" >
@@ -38,7 +38,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:background="@color/transparent"
-            android:contentDescription="Capture"
+            android:contentDescription="@string/camera_layout_content_description_take_picture"
             android:padding="10dip"
             android:src="@drawable/ic_take_picture"
             android:visibility="gone" >
@@ -50,7 +50,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="50"
             android:background="@color/transparent_black"
-            android:text="Try Again"
+            android:text="@string/camera_layout_retake_photo"
             android:textColor="#ffffff"
             android:textSize="14dp"
             android:visibility="visible" >

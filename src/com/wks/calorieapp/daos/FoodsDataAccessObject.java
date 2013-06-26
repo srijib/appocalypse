@@ -18,11 +18,12 @@ public class FoodsDataAccessObject
 	private SQLiteDatabase db;
 	private CADatabaseHelper helper;
 	
-	public FoodsDataAccessObject(Context context)
+	public FoodsDataAccessObject(SQLiteDatabase db/*Context context*/)
 	{
-		helper = CADatabaseHelper.getInstance ( context );
+		this.db = db;
+		//helper = CADatabaseHelper.getInstance ( context );
 	}
-	
+	/*
 	public void open()
 	{
 		this.db = this.helper.getWritableDatabase ();
@@ -31,7 +32,7 @@ public class FoodsDataAccessObject
 	public void close()
 	{
 		this.helper.close ();
-	}
+	}*/
 	
 	public long create(FoodDataTransferObject food)
 	{
@@ -48,9 +49,8 @@ public class FoodsDataAccessObject
 		
 		Cursor c = db.query ( TABLE_FOODS, COLUMNS, Column.ID.getName ()+" = "+id, null, null, null, null );
 		
-		if(c != null)
+		if(c != null && c.moveToFirst())
 		{
-			c.moveToFirst ();
 			food = cursorToFoodDataTransferObject(c);
 		}
 		
@@ -64,9 +64,8 @@ public class FoodsDataAccessObject
 		
 		Cursor c = db.query ( TABLE_FOODS, COLUMNS, null, null, null, null, null );
 		
-		if(c != null)
+		if(c != null && c.moveToFirst())
 		{
-			c.moveToFirst ();
 			while(!c.isAfterLast ())
 			{
 				foods.add ( cursorToFoodDataTransferObject(c) );

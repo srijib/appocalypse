@@ -125,7 +125,8 @@ public class GetCaloriesActivity extends Activity
 
 	class GetCaloriesTask extends AsyncTask< String, String, Response >
 	{
-
+		private String fileName;
+		
 		@Override
 		protected void onPostExecute ( Response response )
 		{
@@ -136,9 +137,12 @@ public class GetCaloriesActivity extends Activity
 				HashMap< String, List< NutritionInfo >> nutritionInfoForFoods = ( HashMap< String, List< NutritionInfo >> ) response.getData ();
 				// pass data to Application object
 				CalorieApplication.setNutritionInfoDictionary ( nutritionInfoForFoods );
+				
 				// move to diplay nutrition info activity.
-				Intent displayNutritionInfoInent = new Intent ( GetCaloriesActivity.this, DisplayNutritionInfoActivity.class );
-				startActivity ( displayNutritionInfoInent );
+				Intent displayNutritionInfoIntent = new Intent ( GetCaloriesActivity.this, DisplayNutritionInfoActivity.class );
+				displayNutritionInfoIntent.putExtra ( "image", this.fileName );
+				
+				startActivity ( displayNutritionInfoIntent );
 
 			}else
 			{
@@ -163,8 +167,8 @@ public class GetCaloriesActivity extends Activity
 		protected Response doInBackground ( String... params )
 		{
 			String picturesDir = FileSystem.getPicturesDirectory ( GetCaloriesActivity.this );
-			String fileName = params[0];
-			File imageFile = new File ( picturesDir + fileName );
+			this.fileName = params[0];
+			File imageFile = new File ( picturesDir + this.fileName );
 
 			String json = "";
 			Response response = null;

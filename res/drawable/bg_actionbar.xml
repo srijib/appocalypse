@@ -1,6 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<shape xmlns:android="http://schemas.android.com/apk/res/android"
-    android:shape="rectangle" >
+
+<bitmap xmlns:android="http://schemas.android.com/apk/res/android"
+    android:src="@drawable/pattern_leather"
+    android:tileMode="repeat"
+    ></bitmap>
+
+<!--<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle" >-->
 
     <!--
     SOLID GREY THEME 
@@ -17,17 +23,18 @@
         android:angle="90"
         ></gradient>
     -->
-    <gradient
+   <!-- <gradient
         android:angle="90"
         android:startColor="@color/sap_green"
         android:endColor="@color/sea_green"
         android:type="linear"
         android:useLevel="false" >
-    </gradient>
+    </gradient> --> 
 
+    
     <!--
         <solid
        android:color="@color/sap_green"></solid>
     -->
 
-</shape>
+<!--</shape>-->

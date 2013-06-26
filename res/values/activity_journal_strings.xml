@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="journal_layout_content_description_last_year">Previous Year</string>
+    <string name="journal_layout_content_description_last_month">Previous Month</string>
+    <string name="journal_layout_content_description_today">Today</string>
+    <string name="journal_layout_content_description_next_month">Next Month</string>
+    <string name="journal_layout_content_description_next_year">Next Year</string>
+</resources>

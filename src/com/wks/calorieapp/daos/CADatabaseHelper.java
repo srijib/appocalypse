@@ -11,23 +11,23 @@ public class CADatabaseHelper extends SQLiteOpenHelper
 	public static final int DATABASE_VERSION = 3;
 
 	private static final String CREATE_TABLE_JOURNALS = 
-			"CREATE TABLE "+JournalsDataAccessObject.TABLE_JOURNALS+" ("+
+			"CREATE TABLE IF NOT EXISTS "+JournalsDataAccessObject.TABLE_JOURNALS+" ("+
 			""+JournalsDataAccessObject.Column.ID.getName ()+" INTEGER PRIMARY KEY AUTOINCREMENT,"+
 			""+JournalsDataAccessObject.Column.DATE.getName ()+" TEXT, "+
-			""+JournalsDataAccessObject.Column.TIME.getName()+" TEXT"+
+			""+JournalsDataAccessObject.Column.TIME.getName()+" TEXT,"+
 			""+JournalsDataAccessObject.Column.FOOD_ID.getName ()+" INTEGER,"+
 			""+JournalsDataAccessObject.Column.IMAGE_ID.getName ()+" INTEGER,"+
 			"FOREIGN KEY ("+JournalsDataAccessObject.Column.FOOD_ID.getName ()+") REFERENCES "+FoodsDataAccessObject.TABLE_FOODS+" ("+FoodsDataAccessObject.Column.ID.getName ()+"),"+
-			"FOREIGN KEY ("+JournalsDataAccessObject.Column.IMAGE_ID.getName ()+") REFERENCES "+ImagesDataAccessObject.TABLE_IMAGES+" ("+ImagesDataAccessObject.Column.ID.getName ()+");";
+			"FOREIGN KEY ("+JournalsDataAccessObject.Column.IMAGE_ID.getName ()+") REFERENCES "+ImagesDataAccessObject.TABLE_IMAGES+" ("+ImagesDataAccessObject.Column.ID.getName ()+"));";
 					
 	private static final String CREATE_TABLE_FOODS = 
-			"CREATE TABLE "+FoodsDataAccessObject.TABLE_FOODS+" ("+
+			"CREATE TABLE IF NOT EXISTS "+FoodsDataAccessObject.TABLE_FOODS+" ("+
 			""+FoodsDataAccessObject.Column.ID.getName ()+" INTEGER PRIMARY KEY,"+
 			""+FoodsDataAccessObject.Column.NAME.getName ()+" TEXT,"+
-			""+FoodsDataAccessObject.Column.CALORIES.getName ()+" DECIMAL(8,2);";
+			""+FoodsDataAccessObject.Column.CALORIES.getName ()+" DECIMAL(8,2));";
 			
 	private static final String CREATE_TABLE_IMAGES = 
-			"CREATE TABLE "+ImagesDataAccessObject.TABLE_IMAGES+" ("+
+			"CREATE TABLE IF NOT EXISTS "+ImagesDataAccessObject.TABLE_IMAGES+" ("+
 			""+ImagesDataAccessObject.Column.ID.getName ()+" INTEGER PRIMARY KEY AUTOINCREMENT,"+
 			""+ImagesDataAccessObject.Column.FILE_NAME.getName ()+" TEXT);";
 	
@@ -36,6 +36,7 @@ public class CADatabaseHelper extends SQLiteOpenHelper
 	private static final String DROP_TABLE_IMAGES = "DROP TABLE IF EXISTS " + ImagesDataAccessObject.TABLE_IMAGES + ";";
 
 	private static CADatabaseHelper instance = null;
+	private static SQLiteDatabase db = null;
 	
 	private CADatabaseHelper(Context context)
 	{
@@ -51,6 +52,15 @@ public class CADatabaseHelper extends SQLiteOpenHelper
 		return instance;
 	}
 	
+	public SQLiteDatabase open()
+	{
+		return this.getWritableDatabase ();
+	}
+	
+	public void close()
+	{
+		this.close ();
+	}
 
 	@Override
 	public void onCreate ( SQLiteDatabase db )

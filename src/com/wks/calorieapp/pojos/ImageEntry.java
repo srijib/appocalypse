@@ -1,16 +1,16 @@
-package com.wks.calorieapp.daos;
+package com.wks.calorieapp.pojos;
 
-public class ImageDataTransferObject
+public class ImageEntry
 {
 	private long id;
 	private String fileName;
 	
-	public ImageDataTransferObject()
+	public ImageEntry()
 	{
 		this(0,"null");
 	}
 	
-	public ImageDataTransferObject(long id, String fileName)
+	public ImageEntry(long id, String fileName)
 	{
 		setId(id);
 		setFileName(fileName);

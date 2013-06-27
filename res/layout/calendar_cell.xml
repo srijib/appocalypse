@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+Copyright 2013 : Waqqas Sheikh
+
+This code is license under GNU Public License. 
+
+This file defines the layout of each cell in the calendar item. 
+If you make any changes to this file, you will need to change: 
+- CalendarApadter.getView() 
+- CalendarView.ViewHolder.
+
+You'll have to inflate your own layout, 
+initialise the UI elements,
+set the text/backgrounds etc of the elements.
+-->
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/calendar_cell_layout"
+    android:layout_width="match_parent"
+    android:layout_height="fill_parent"
+    android:orientation="vertical"
+    android:weightSum="10">
+
+    <!--
+         This textview shows the date in the month
+    	e.g. 1st, 2nd, 3rd.
+    -->
+
+    <TextView
+        android:id="@+id/calendar_cell_date"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="right"
+        android:layout_weight="1"
+        android:gravity="center"
+        android:textColor="#cccccc" >
+    </TextView>
+
+    <!--
+         The imageview shows an icon/image for the day's event
+         e.g. a cake icon for a birthday.
+         	  a briefcase for an important meeting
+    -->
+
+    <ImageView
+        android:id="@+id/calendar_cell_image"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_weight="8"
+        android:layout_gravity="center"
+        android:gravity="center" />
+
+    <!--
+         This textview shows details of the day's event
+    	e.g. "Pick up dude from airport."
+    -->
+
+    <TextView
+        android:id="@+id/calendar_cell_description"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:maxLines="3"
+        android:padding="1dip"
+        android:layout_weight="1" />
+
+</LinearLayout>

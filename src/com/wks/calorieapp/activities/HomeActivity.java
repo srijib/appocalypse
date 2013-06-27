@@ -64,9 +64,9 @@ public class HomeActivity extends Activity
 	enum Activity
 	{
 		CAMERA("Calorie Camera",R.drawable.ic_launcher),
-		SEARCH("Search Nutrition Info",R.drawable.ic_launcher),
+		SEARCH("Food Search",R.drawable.search),
 		JOURNAL("Calorie Journal",R.drawable.ic_launcher),
-		GALLERY("Gallery",R.drawable.ic_launcher),
+		GALLERY("Gallery",R.drawable.gallery),
 		PREFERENCES("Preferences",R.drawable.ic_launcher);
 		
 		private final String text;

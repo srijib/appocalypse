@@ -1,13 +1,22 @@
 package com.wks.calorieapp.activities;
 
+import java.util.Calendar;
 import java.util.List;
 import java.util.Map;
 import com.wks.calorieapp.R;
 import com.wks.calorieapp.adapters.NutritionInfoListAdapter;
+import com.wks.calorieapp.daos.DatabaseManager;
+import com.wks.calorieapp.daos.JournalDAO;
+import com.wks.calorieapp.pojos.FoodEntry;
+import com.wks.calorieapp.pojos.ImageEntry;
+import com.wks.calorieapp.pojos.JournalEntry;
 import com.wks.calorieapp.pojos.NutritionInfo;
+import com.wks.calorieapp.utils.Time;
+
 import android.app.ActionBar;
 import android.app.Activity;
 import android.content.Intent;
+import android.database.sqlite.SQLiteDatabase;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.util.Log;
@@ -44,10 +53,10 @@ public class DisplayNutritionInfoActivity extends Activity
 			this.finish ();
 		}
 
-		Log.e("shit",nutritionInfoDictionary.toString ());
-		
+		Log.e ( "shit", nutritionInfoDictionary.toString () );
+
 		Bundle extras = this.getIntent ().getExtras ();
-		if(extras != null)
+		if ( extras != null )
 		{
 			this.fileName = extras.getString ( "image" );
 		}
@@ -57,7 +66,7 @@ public class DisplayNutritionInfoActivity extends Activity
 		setupListeners ();
 		setupList ();
 	}
-	
+
 	@Override
 	public boolean onCreateOptionsMenu ( Menu menu )
 	{
@@ -78,15 +87,15 @@ public class DisplayNutritionInfoActivity extends Activity
 			return true;
 
 		case R.id.display_nutrition_info_menu_done:
-			Toast.makeText ( this, "goes to days calories", Toast.LENGTH_SHORT ).show();
+			Toast.makeText ( this, "goes to days calories", Toast.LENGTH_SHORT ).show ();
 			return true;
-			
+
 		case R.id.display_nutrition_info_menu_no_match:
-			Intent searchIntent = new Intent(this,SearchActivity.class);
+			Intent searchIntent = new Intent ( this, SearchActivity.class );
 			searchIntent.putExtra ( "image", this.fileName );
-			startActivity(searchIntent);
+			startActivity ( searchIntent );
 			return true;
-		
+
 		default:
 			return super.onOptionsItemSelected ( item );
 		}
@@ -142,12 +151,50 @@ public class DisplayNutritionInfoActivity extends Activity
 		this.textConfirm.setText ( confirmMessage );
 	}
 
-	private boolean addToJournal()
+	private long addToJournal ()
 	{
-		Toast.makeText(this,"to be implemented",Toast.LENGTH_SHORT).show();
-		return false;
+		try
+		{
+			if ( this.selectedFood == null ) return -1;
+
+			JournalEntry journal = new JournalEntry ();
+			FoodEntry food = new FoodEntry ();
+			ImageEntry image = null;
+
+			food.setId ( this.selectedFood.getId () );
+			food.setName ( this.selectedFood.getName () );
+			food.setCalories ( this.selectedFood.getCaloriesPer100g () );
+
+			String time = Time.getTimeAsString ( Calendar.getInstance (), JournalEntry.DATE_FORMAT + "~"
+					+ JournalEntry.TIME_FORMAT );
+			String [] timeTokens = time.split ( "~" );
+
+			if ( timeTokens.length < 2 ) return -1;
+
+			journal.setDate ( timeTokens[0] );
+			journal.setTime ( timeTokens[1] );
+
+			if ( this.fileName != null && !this.fileName.isEmpty () )
+			{
+				image = new ImageEntry ();
+				image.setFileName ( this.fileName );
+			}
+
+			DatabaseManager helper = DatabaseManager.getInstance ( this );
+			SQLiteDatabase db = helper.open ();
+			JournalDAO journalDao = new JournalDAO ( db );
+			long journalId = journalDao.create ( journal, food, image );
+			db.close ();
+			return journalId;
+		}
+		catch ( java.text.ParseException e )
+		{
+
+			e.printStackTrace ();
+			return -1;
+		}
 	}
-	
+
 	class OnListItemClicked implements ExpandableListView.OnChildClickListener
 	{
 
@@ -170,8 +217,15 @@ public class DisplayNutritionInfoActivity extends Activity
 		@Override
 		public void onClick ( View v )
 		{
-			DisplayNutritionInfoActivity.this.addToJournal();
-		}
+			boolean success = ( DisplayNutritionInfoActivity.this.addToJournal () > 0 );
+			String message = String.format (
+					DisplayNutritionInfoActivity.this.getString ( 
+							success ? 
+									R.string.display_nutrition_info_toast_entry_added
+									: R.string.display_nutrition_info_toast_entry_not_added ), 
+							DisplayNutritionInfoActivity.this.selectedFood.getName () );
 
+			Toast.makeText ( DisplayNutritionInfoActivity.this, message, Toast.LENGTH_LONG ).show ();
+		}
 	}
 }

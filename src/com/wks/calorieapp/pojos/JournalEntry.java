@@ -1,10 +1,10 @@
-package com.wks.calorieapp.daos;
+package com.wks.calorieapp.pojos;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-public class JournalDataTransferObject
+public class JournalEntry
 {
 	public static final String DATE_FORMAT = "yyyy-MM-dd";
 	public static final String TIME_FORMAT = "HH:mm:ss";
@@ -15,12 +15,12 @@ public class JournalDataTransferObject
 	private long foodId = -1;
 	private long imageId = -1;
 	
-	public JournalDataTransferObject()
+	public JournalEntry()
 	{
 		this(0,0,0,0,0);
 	}
 	
-	public JournalDataTransferObject(long id, long date,long time, long foodId, long imageId)
+	public JournalEntry(long id, long date,long time, long foodId, long imageId)
 	{
 		this.setId(id);
 		this.setDate(date);
@@ -29,7 +29,7 @@ public class JournalDataTransferObject
 		this.setImageId(imageId);
 	}
 	
-	public JournalDataTransferObject(long id, String date,String time, long foodId, long imageId) throws ParseException
+	public JournalEntry(long id, String date,String time, long foodId, long imageId) throws ParseException
 	{
 		this.setId ( id );
 		this.setDate(date);

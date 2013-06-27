@@ -3,16 +3,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical" >
+    
 
-        <TextView
-            android:id="@+id/journal_text_date_header"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center"
-            android:layout_alignParentTop="true"
-            style="@android:style/TextAppearance.Large"
-            ></TextView>
-        
     <LinearLayout 
         android:id="@+id/journal_view_date_controls"
        	android:layout_width="fill_parent"
@@ -80,27 +72,13 @@
         
     </LinearLayout>
     
-    <GridView
-        android:id="@+id/journal_grid_days_of_week"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:layout_below="@+id/journal_text_date_header"
-        android:numColumns="7" >
-    </GridView>
-
-    <GridView
-        android:id="@+id/journal_grid_calendar"
+    <CalendarView
+        android:id="@+id/journal_calendar"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
-        android:layout_below="@+id/journal_grid_days_of_week"
-        android:layout_above="@+id/journal_view_date_controls"
-        android:layout_weight="1"
-        android:horizontalSpacing="0dip"
-        android:numColumns="7"
-        android:verticalSpacing="1dip" >
-    </GridView>
+    	android:layout_alignParentTop="true"
+    	android:layout_alignParentLeft="true"  
+    	android:layout_above="@+id/journal_view_date_controls"  
+        ></CalendarView>
     
-   
-
 </RelativeLayout>

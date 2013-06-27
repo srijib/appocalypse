@@ -3,21 +3,23 @@ package com.wks.calorieapp.daos;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.wks.calorieapp.pojos.ImageEntry;
+
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
-public class ImagesDataAccessObject
+public class ImageDAO
 {
 
 	public static final String TABLE_IMAGES = "images";
 	public static final String [] COLUMNS = { Column.ID.name, Column.FILE_NAME.name };
 
 	private SQLiteDatabase db;
-	private CADatabaseHelper helper;
+	private DatabaseManager helper;
 
-	public ImagesDataAccessObject ( SQLiteDatabase db )
+	public ImageDAO ( SQLiteDatabase db )
 	{
 		this.db = db;
 		//this.helper = CADatabaseHelper.getInstance ( context );
@@ -29,16 +31,16 @@ public class ImagesDataAccessObject
 	 * public void close() { this.db.close (); }
 	 */
 
-	public long create ( ImageDataTransferObject image )
+	public long create ( ImageEntry image )
 	{
 		ContentValues values = new ContentValues ();
 		values.put ( Column.FILE_NAME.getName (), image.getFileName () );
 		return db.insert ( TABLE_IMAGES, null, values );
 	}
 
-	public ImageDataTransferObject read ( long id )
+	public ImageEntry read ( long id )
 	{
-		ImageDataTransferObject image = null;
+		ImageEntry image = null;
 
 		Cursor c = db.query ( TABLE_IMAGES, COLUMNS, Column.ID.getName () + " = " + id, null, null, null, null );
 
@@ -51,9 +53,9 @@ public class ImagesDataAccessObject
 		return image;
 	}
 
-	public List< ImageDataTransferObject > read ()
+	public List< ImageEntry > read ()
 	{
-		List< ImageDataTransferObject > images = new ArrayList< ImageDataTransferObject > ();
+		List< ImageEntry > images = new ArrayList< ImageEntry > ();
 
 		Cursor c = db.query ( TABLE_IMAGES, COLUMNS, null, null, null, null, null );
 
@@ -70,7 +72,7 @@ public class ImagesDataAccessObject
 		return images;
 	}
 
-	public int update ( ImageDataTransferObject image )
+	public int update ( ImageEntry image )
 	{
 		ContentValues values = new ContentValues ();
 		values.put ( Column.ID.getName (), image.getId () );
@@ -84,12 +86,12 @@ public class ImagesDataAccessObject
 		return db.delete ( TABLE_IMAGES, Column.ID.getName () + " = " + id, null );
 	}
 
-	private ImageDataTransferObject cursorToImageDataTransferObject ( Cursor c )
+	private ImageEntry cursorToImageDataTransferObject ( Cursor c )
 	{
 		long id = c.getLong ( Column.ID.ordinal () );
 		String fileName = c.getString ( Column.FILE_NAME.ordinal () );
 
-		return new ImageDataTransferObject ( id, fileName );
+		return new ImageEntry ( id, fileName );
 	}
 
 	public static enum Column
@@ -106,6 +108,11 @@ public class ImagesDataAccessObject
 		public String getName ()
 		{
 			return name;
+		}
+		
+		public String getFullName()
+		{
+			return ImageDAO.TABLE_IMAGES+"."+name;
 		}
 	}
 }

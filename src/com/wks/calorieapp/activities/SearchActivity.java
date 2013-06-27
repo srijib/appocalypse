@@ -9,11 +9,11 @@ import org.json.simple.parser.ParseException;
 
 import com.wks.calorieapp.R;
 import com.wks.calorieapp.adapters.NutritionInfoListAdapter;
-import com.wks.calorieapp.daos.CADatabaseHelper;
-import com.wks.calorieapp.daos.FoodDataTransferObject;
-import com.wks.calorieapp.daos.ImageDataTransferObject;
-import com.wks.calorieapp.daos.JournalDataTransferObject;
-import com.wks.calorieapp.daos.JournalsDataAccessObject;
+import com.wks.calorieapp.daos.DatabaseManager;
+import com.wks.calorieapp.daos.JournalDAO;
+import com.wks.calorieapp.pojos.FoodEntry;
+import com.wks.calorieapp.pojos.ImageEntry;
+import com.wks.calorieapp.pojos.JournalEntry;
 import com.wks.calorieapp.pojos.NutritionInfo;
 import com.wks.calorieapp.pojos.Response;
 import com.wks.calorieapp.pojos.ResponseFactory;
@@ -241,16 +241,16 @@ public class SearchActivity extends Activity
 		{
 			if ( this.selectedFood == null ) return -1;
 
-			JournalDataTransferObject journal = new JournalDataTransferObject ();
-			FoodDataTransferObject food = new FoodDataTransferObject ();
-			ImageDataTransferObject image = null;
+			JournalEntry journal = new JournalEntry ();
+			FoodEntry food = new FoodEntry ();
+			ImageEntry image = null;
 
 			food.setId ( this.selectedFood.getId () );
 			food.setName ( this.selectedFood.getName () );
 			food.setCalories ( this.selectedFood.getCaloriesPer100g () );
 
-			String time = Time.getTimeAsString ( Calendar.getInstance (), JournalDataTransferObject.DATE_FORMAT + "~"
-					+ JournalDataTransferObject.TIME_FORMAT );
+			String time = Time.getTimeAsString ( Calendar.getInstance (), JournalEntry.DATE_FORMAT + "~"
+					+ JournalEntry.TIME_FORMAT );
 			String [] timeTokens = time.split ( "~" );
 
 			if ( timeTokens.length < 2 ) return -1;
@@ -260,13 +260,13 @@ public class SearchActivity extends Activity
 
 			if ( this.fileName != null && !this.fileName.isEmpty () )
 			{
-				image = new ImageDataTransferObject ();
+				image = new ImageEntry ();
 				image.setFileName ( this.fileName );
 			}
 
-			CADatabaseHelper helper = CADatabaseHelper.getInstance ( this );
+			DatabaseManager helper = DatabaseManager.getInstance ( this );
 			SQLiteDatabase db = helper.open ();
-			JournalsDataAccessObject journalDao = new JournalsDataAccessObject ( db );
+			JournalDAO journalDao = new JournalDAO ( db );
 			long journalId = journalDao.create ( journal, food, image );
 			db.close ();
 			return journalId;
@@ -324,8 +324,14 @@ public class SearchActivity extends Activity
 		@Override
 		public void onClick ( View v )
 		{
-			long success = SearchActivity.this.addToJournal ();
-			String message = "Entry (" + success + ") added to journal.";
+			boolean success = ( SearchActivity.this.addToJournal () > 0 );
+			String message = String.format (
+					SearchActivity.this.getString ( 
+							success ? 
+									R.string.search_toast_entry_added
+									: R.string.search_toast_entry_not_added ), 
+							SearchActivity.this.selectedFood.getName () );
+
 			Toast.makeText ( SearchActivity.this, message, Toast.LENGTH_LONG ).show ();
 		}
 	}

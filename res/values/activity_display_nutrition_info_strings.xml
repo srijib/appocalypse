@@ -1,10 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+
     <string name="diplay_nutrition_info_error_display">The Nutrition Information can not be displayed.</string>
-	<string name="display_nutrition_info_menu_no_match">No match</string>
-	<string name="display_nutrition_info_menu_done">Done</string>
-	<string name="display_nutrition_info_layout_text_default_confirm">Select a food item to add to journal.</string>
-	<string name="display_nutrition_info_layout_button_add_to_journal">Add</string>
-	<string name="display_nutrition_info_layout_content_description_add_to_journal">Add to Journal</string>
-	<string name="display_nutrition_info_confirm">Do you want to add \'%s\' to journal?</string>
+    <string name="display_nutrition_info_menu_no_match">No match</string>
+    <string name="display_nutrition_info_menu_done">Done</string>
+    <string name="display_nutrition_info_layout_text_default_confirm">Select a food item to add to journal.</string>
+    <string name="display_nutrition_info_layout_button_add_to_journal">Add</string>
+    <string name="display_nutrition_info_layout_content_description_add_to_journal">Add to Journal</string>
+    <string name="display_nutrition_info_confirm">Do you want to add \'%s\' to journal?</string>
+    <string name="display_nutrition_info_toast_entry_added">%s added to Calorie Journal</string>
+    <string name="display_nutrition_info_toast_entry_not_added">There was a problem adding %s to your Calorie Journal.</string>
+
 </resources>

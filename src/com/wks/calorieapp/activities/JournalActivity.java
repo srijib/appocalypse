@@ -1,8 +1,11 @@
 package com.wks.calorieapp.activities;
 
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
 import com.wks.calorieapp.R;
+import com.wks.calorieapp.adapters.CalendarAdapter;
+import com.wks.calorieapp.adapters.DaysOfWeekAdapter;
 
 import android.app.ActionBar;
 import android.app.Activity;
@@ -12,23 +15,30 @@ import android.os.Bundle;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.CalendarView;
+import android.widget.GridView;
 import android.widget.ImageButton;
+import android.widget.TextView;
 import android.widget.Toast;
 
 public class JournalActivity extends Activity
 {
+	public static final String FORMAT_DATE_HEADER = "MMMM yyyy";
 	public enum CalendarPeriod
 	{
 		TODAY, NEXT_WEEK, NEXT_MONTH, NEXT_YEAR, LAST_WEEK, LAST_MONTH, LAST_YEAR
 	};
 
-	private CalendarView annoyingPieceOfShit;
+	private TextView textDateHeader;
+	private GridView gridDaysOfWeek;
+	private GridView gridCalendar;
 	private ImageButton buttonLastMonth;
 	private ImageButton buttonLastYear;
 	private ImageButton buttonToday;
 	private ImageButton buttonNextMonth;
 	private ImageButton buttonNextYear;
 	private ImageButton [] buttonsDateControl;
+	
+	private CalendarAdapter adapter;
 
 	private boolean userIsNavigating;
 
@@ -41,6 +51,7 @@ public class JournalActivity extends Activity
 		this.setupActionBar ();
 		this.setupView ();
 		this.setupListeners ();
+		
 	}
 
 	@Override
@@ -71,7 +82,9 @@ public class JournalActivity extends Activity
 
 	private void setupView ()
 	{
-		annoyingPieceOfShit = ( CalendarView ) this.findViewById ( R.id.journal_calendar );
+		textDateHeader = (TextView) this.findViewById ( R.id.journal_text_date_header );
+		gridDaysOfWeek = (GridView) this.findViewById ( R.id.journal_grid_days_of_week );
+		gridCalendar = (GridView) this.findViewById ( R.id.journal_grid_calendar );
 		buttonLastYear = ( ImageButton ) this.findViewById ( R.id.journal_button_last_year );
 		buttonLastMonth = ( ImageButton ) this.findViewById ( R.id.journal_button_last_month );
 		buttonToday = ( ImageButton ) this.findViewById ( R.id.journal_button_today );
@@ -79,33 +92,46 @@ public class JournalActivity extends Activity
 		buttonNextYear = ( ImageButton ) this.findViewById ( R.id.journal_button_next_year );
 
 		buttonsDateControl = new ImageButton [] { buttonLastYear, buttonLastMonth, buttonToday, buttonNextMonth, buttonNextYear };
-
-		Calendar fuckingCalendar = Calendar.getInstance ();
-		annoyingPieceOfShit.setDate ( fuckingCalendar.getTimeInMillis () );
+	
+		this.setupCalendar();
 	}
 
+	private void setupCalendar()
+	{
+		this.gridDaysOfWeek.setAdapter ( new DaysOfWeekAdapter(this) );
+		this.adapter = new CalendarAdapter(this);
+		this.gridCalendar.setAdapter ( adapter );
+		this.updateDateHeader ( this.adapter.getDate () );
+	}
+	
 	private void setupListeners ()
 	{
 		for ( ImageButton button : buttonsDateControl )
 			button.setOnClickListener ( new OnDateControlButtonClicked () );
 
-		annoyingPieceOfShit.setOnDateChangeListener ( new OnCalendarDateClicked () );
+	}
+		
+	private void updateDateHeader(long newDate)
+	{
+		SimpleDateFormat formatter = new SimpleDateFormat(FORMAT_DATE_HEADER);
+		String dateText = formatter.format ( newDate );
+		this.textDateHeader.setText ( dateText );
 	}
 
-	private void setCalendarDate ( int day, int month, int year )
+	private Calendar getCalendarForDate ( int day, int month, int year )
 	{
 		Calendar calendar = Calendar.getInstance ();
 		calendar.set ( Calendar.DAY_OF_MONTH, day );
 		calendar.set ( Calendar.MONTH, month );
 		calendar.set ( Calendar.YEAR, year );
 
-		this.annoyingPieceOfShit.setDate ( calendar.getTimeInMillis () );
+		return calendar;
 	}
 
-	private void setCalendarPeriod ( CalendarPeriod period )
+	private Calendar getCalendarForPeriod ( CalendarPeriod period )
 	{
 		Calendar cal = Calendar.getInstance ();
-		cal.setTimeInMillis ( this.annoyingPieceOfShit.getDate () );
+		cal.setTimeInMillis ( this.adapter.getDate () );
 		int day = cal.get ( Calendar.DAY_OF_MONTH );
 		int month = cal.get ( Calendar.MONTH );
 		int year = cal.get ( Calendar.YEAR );
@@ -113,22 +139,19 @@ public class JournalActivity extends Activity
 		switch ( period )
 		{
 		case LAST_YEAR:
-			this.setCalendarDate ( day, month, ( year - 1 ) );
-			return;
+			return getCalendarForDate ( day, month, ( year - 1 ) );
 		case LAST_MONTH:
-			this.setCalendarDate ( day, ( month - 1 ), year );
-			return;
+			return getCalendarForDate ( day, ( month - 1 ), year );
+			
 		case NEXT_MONTH:
-			this.setCalendarDate ( day, ( month + 1 ), year );
-			return;
+			return getCalendarForDate ( day, ( month + 1 ), year );
+			
 		case NEXT_YEAR:
-			this.setCalendarDate ( day, month, ( year + 1 ) );
-			return;
+			return getCalendarForDate ( day, month, ( year + 1 ) );
 		case TODAY:
 		default:
 			Calendar calendar = Calendar.getInstance ();
-			annoyingPieceOfShit.setDate ( calendar.getTimeInMillis () );
-			return;
+			return calendar;
 
 		}
 	}
@@ -141,45 +164,33 @@ public class JournalActivity extends Activity
 			// to avoid date change events when user is navigating through
 			// calendar.
 			JournalActivity.this.userIsNavigating = true;
-
+			Calendar calendar = Calendar.getInstance ();
+			
 			switch ( v.getId () )
 			{
 			case R.id.journal_button_last_year:
-				JournalActivity.this.setCalendarPeriod ( CalendarPeriod.LAST_YEAR );
+				calendar = (Calendar) JournalActivity.this.getCalendarForPeriod ( CalendarPeriod.LAST_YEAR ).clone ();
 				break;
 			case R.id.journal_button_last_month:
-				JournalActivity.this.setCalendarPeriod ( CalendarPeriod.LAST_MONTH );
+				calendar = (Calendar) JournalActivity.this.getCalendarForPeriod ( CalendarPeriod.LAST_MONTH ).clone();
 				break;
 			case R.id.journal_button_today:
-				JournalActivity.this.setCalendarPeriod ( CalendarPeriod.TODAY );
+				calendar = (Calendar) JournalActivity.this.getCalendarForPeriod ( CalendarPeriod.TODAY ).clone();
 				break;
 			case R.id.journal_button_next_month:
-				JournalActivity.this.setCalendarPeriod ( CalendarPeriod.NEXT_MONTH );
+				calendar = (Calendar) JournalActivity.this.getCalendarForPeriod ( CalendarPeriod.NEXT_MONTH ).clone();
 				break;
 			case R.id.journal_button_next_year:
-				JournalActivity.this.setCalendarPeriod ( CalendarPeriod.NEXT_YEAR );
+				calendar = (Calendar) JournalActivity.this.getCalendarForPeriod ( CalendarPeriod.NEXT_YEAR ).clone();
 				break;
 			default:
-				JournalActivity.this.setCalendarPeriod ( CalendarPeriod.TODAY );
+				calendar = (Calendar) JournalActivity.this.getCalendarForPeriod ( CalendarPeriod.TODAY ).clone();
 				break;
 			}
+			JournalActivity.this.adapter.setDate ( calendar );
+			JournalActivity.this.updateDateHeader ( calendar.getTimeInMillis () );
 			JournalActivity.this.userIsNavigating = false;
-		}
-
-	}
-
-	class OnCalendarDateClicked implements CalendarView.OnDateChangeListener
-	{
-
-		@Override
-		public void onSelectedDayChange ( CalendarView view, int year, int month, int dayOfMonth )
-		{
-			if ( !JournalActivity.this.userIsNavigating )
-			{
-				Toast.makeText ( JournalActivity.this, "" + dayOfMonth + "/" + month + "/" + year, Toast.LENGTH_SHORT ).show ();
-
-			}
-			JournalActivity.this.userIsNavigating = false;
+			
 		}
 
 	}

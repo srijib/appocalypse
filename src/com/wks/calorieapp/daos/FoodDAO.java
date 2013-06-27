@@ -3,12 +3,14 @@ package com.wks.calorieapp.daos;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.wks.calorieapp.pojos.FoodEntry;
+
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
-public class FoodsDataAccessObject
+public class FoodDAO
 {
 
 	public static final String TABLE_FOODS = "foods";
@@ -16,9 +18,9 @@ public class FoodsDataAccessObject
 
 	
 	private SQLiteDatabase db;
-	private CADatabaseHelper helper;
+	private DatabaseManager helper;
 	
-	public FoodsDataAccessObject(SQLiteDatabase db/*Context context*/)
+	public FoodDAO(SQLiteDatabase db/*Context context*/)
 	{
 		this.db = db;
 		//helper = CADatabaseHelper.getInstance ( context );
@@ -34,7 +36,7 @@ public class FoodsDataAccessObject
 		this.helper.close ();
 	}*/
 	
-	public long create(FoodDataTransferObject food)
+	public long create(FoodEntry food)
 	{
 		ContentValues values = new ContentValues();
 		values.put ( Column.ID.getName (), food.getId());
@@ -43,9 +45,9 @@ public class FoodsDataAccessObject
 		return db.insert ( TABLE_FOODS, null, values );
 	}
 	
-	public FoodDataTransferObject read(long id)
+	public FoodEntry read(long id)
 	{
-		FoodDataTransferObject food = null;
+		FoodEntry food = null;
 		
 		Cursor c = db.query ( TABLE_FOODS, COLUMNS, Column.ID.getName ()+" = "+id, null, null, null, null );
 		
@@ -58,9 +60,9 @@ public class FoodsDataAccessObject
 		return food;
 	}
 	
-	public List<FoodDataTransferObject> read()
+	public List<FoodEntry> read()
 	{
-		List<FoodDataTransferObject> foods = new ArrayList<FoodDataTransferObject>();
+		List<FoodEntry> foods = new ArrayList<FoodEntry>();
 		
 		Cursor c = db.query ( TABLE_FOODS, COLUMNS, null, null, null, null, null );
 		
@@ -77,7 +79,7 @@ public class FoodsDataAccessObject
 		return foods;
 	}
 	
-	public int update(FoodDataTransferObject food)
+	public int update(FoodEntry food)
 	{
 		ContentValues values = new ContentValues();
 		values.put ( Column.ID.getName (), food.getId () );
@@ -92,13 +94,13 @@ public class FoodsDataAccessObject
 		return db.delete ( TABLE_FOODS, Column.ID.getName ()+" = "+id, null );
 	}
 	
-	private FoodDataTransferObject cursorToFoodDataTransferObject(Cursor c)
+	private FoodEntry cursorToFoodDataTransferObject(Cursor c)
 	{
 		long id = c.getLong ( Column.ID.ordinal () );
 		String name = c.getString ( Column.NAME.ordinal () );
 		float calories = c.getFloat ( Column.CALORIES.ordinal () );
 		
-		return new FoodDataTransferObject(id,name,calories);
+		return new FoodEntry(id,name,calories);
 	}
 	
 	public static enum Column
@@ -108,6 +110,7 @@ public class FoodsDataAccessObject
 		CALORIES("calories");
 		
 		private final String name;
+		private final static String alias = "f";
 		
 		Column(String name)
 		{
@@ -117,6 +120,11 @@ public class FoodsDataAccessObject
 		public String getName ()
 		{
 			return name;
+		}
+		
+		public String getFullName()
+		{
+			return FoodDAO.TABLE_FOODS+"."+name;
 		}
 	}
 }

@@ -1,17 +1,17 @@
-package com.wks.calorieapp.daos;
+package com.wks.calorieapp.pojos;
 
-public class FoodDataTransferObject
+public class FoodEntry
 {
 	private long id;
 	private String name;
 	private float calories;
 	
-	public FoodDataTransferObject()
+	public FoodEntry()
 	{
 		this(0,"null",0.0F);
 	}
 	
-	public FoodDataTransferObject(long id, String name, float calories)
+	public FoodEntry(long id, String name, float calories)
 	{
 		this.setId(id);
 		this.setName(name);

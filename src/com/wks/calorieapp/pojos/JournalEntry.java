@@ -120,4 +120,9 @@ public class JournalEntry
 		return foodId;
 	}
 	
+	@Override
+	public String toString ()
+	{
+		return String.format ( "id: %d,date: %s,time: %s,foodId: %d", id,this.getDateAsString (),this.getTimeAsString (),foodId );
+	}
 }

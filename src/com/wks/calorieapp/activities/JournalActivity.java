@@ -2,23 +2,26 @@ package com.wks.calorieapp.activities;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
-
+import java.util.List;
 import com.wks.calorieapp.R;
 import com.wks.calorieapp.adapters.CalendarAdapter;
 import com.wks.calorieapp.adapters.DaysOfWeekAdapter;
-
+import com.wks.calorieapp.daos.DatabaseManager;
+import com.wks.calorieapp.daos.FoodDAO;
+import com.wks.calorieapp.daos.JournalDAO;
+import com.wks.calorieapp.pojos.FoodEntry;
 import android.app.ActionBar;
 import android.app.Activity;
 import android.content.Intent;
+import android.database.sqlite.SQLiteDatabase;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.CalendarView;
 import android.widget.GridView;
 import android.widget.ImageButton;
 import android.widget.TextView;
-import android.widget.Toast;
 
 public class JournalActivity extends Activity
 {
@@ -40,7 +43,6 @@ public class JournalActivity extends Activity
 	
 	private CalendarAdapter adapter;
 
-	private boolean userIsNavigating;
 
 	@Override
 	protected void onCreate ( Bundle savedInstanceState )
@@ -51,6 +53,7 @@ public class JournalActivity extends Activity
 		this.setupActionBar ();
 		this.setupView ();
 		this.setupListeners ();
+		this.initCalendar();
 		
 	}
 
@@ -110,6 +113,21 @@ public class JournalActivity extends Activity
 			button.setOnClickListener ( new OnDateControlButtonClicked () );
 
 	}
+	
+	@SuppressWarnings ( "unused" )
+	private void initCalendar()
+	{
+		
+		DatabaseManager manager = DatabaseManager.getInstance ( this );
+		SQLiteDatabase db = manager.open ();
+		JournalDAO journalDAO = new JournalDAO(db);
+		//Map< String, Float > cow = journalDAO.getCaloriesForEachDay ( Calendar.getInstance () );
+		//Log.e ( "shit", ""+cow.size () );
+		//journalDAO.test ();
+		FoodDAO foodDao = new FoodDAO(db);
+		List<FoodEntry> list = foodDao.read ();
+		Log.e ( "r", ""+list.toString () );
+	}
 		
 	private void updateDateHeader(long newDate)
 	{
@@ -163,7 +181,7 @@ public class JournalActivity extends Activity
 		{
 			// to avoid date change events when user is navigating through
 			// calendar.
-			JournalActivity.this.userIsNavigating = true;
+			
 			Calendar calendar = Calendar.getInstance ();
 			
 			switch ( v.getId () )
@@ -189,7 +207,7 @@ public class JournalActivity extends Activity
 			}
 			JournalActivity.this.adapter.setDate ( calendar );
 			JournalActivity.this.updateDateHeader ( calendar.getTimeInMillis () );
-			JournalActivity.this.userIsNavigating = false;
+			
 			
 		}
 

@@ -6,7 +6,6 @@ import java.util.List;
 import com.wks.calorieapp.pojos.FoodEntry;
 
 import android.content.ContentValues;
-import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
@@ -18,23 +17,11 @@ public class FoodDAO
 
 	
 	private SQLiteDatabase db;
-	private DatabaseManager helper;
 	
-	public FoodDAO(SQLiteDatabase db/*Context context*/)
+	public FoodDAO(SQLiteDatabase db)
 	{
 		this.db = db;
-		//helper = CADatabaseHelper.getInstance ( context );
 	}
-	/*
-	public void open()
-	{
-		this.db = this.helper.getWritableDatabase ();
-	}
-	
-	public void close()
-	{
-		this.helper.close ();
-	}*/
 	
 	public long create(FoodEntry food)
 	{
@@ -110,7 +97,6 @@ public class FoodDAO
 		CALORIES("calories");
 		
 		private final String name;
-		private final static String alias = "f";
 		
 		Column(String name)
 		{

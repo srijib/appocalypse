@@ -183,13 +183,12 @@ public class DisplayNutritionInfoActivity extends Activity
 			DatabaseManager helper = DatabaseManager.getInstance ( this );
 			SQLiteDatabase db = helper.open ();
 			JournalDAO journalDao = new JournalDAO ( db );
-			long journalId = journalDao.create ( journal, food, image );
+			long journalId = journalDao.addToJournal ( journal, food, image );
 			db.close ();
 			return journalId;
 		}
 		catch ( java.text.ParseException e )
 		{
-
 			e.printStackTrace ();
 			return -1;
 		}

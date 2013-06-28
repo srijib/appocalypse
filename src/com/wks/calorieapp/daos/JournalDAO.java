@@ -14,6 +14,7 @@ import com.wks.calorieapp.pojos.JournalEntry;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.util.Log;
 
 public class JournalDAO
 {
@@ -22,9 +23,15 @@ public class JournalDAO
 	{
 			Column.ID.getName (), Column.DATE.getName (), Column.TIME.getName (), Column.FOOD_ID.getName (), Column.IMAGE_ID.getName ()
 	};
+	
 
 	public static final String TOTAL_CALORIES = "total_calories";
-
+	public static final String queryCaloriesEachDayOfParameterMonth = "SELECT "+JournalDAO.Column.DATE.getFullName ()+", SUM("+FoodDAO.Column.CALORIES.getFullName ()+") FROM "+JournalDAO.TABLE_JOURNALS+", "+FoodDAO.TABLE_FOODS+"  WHERE ("+JournalDAO.Column.ID.getFullName ()+" = "+FoodDAO.Column.ID.getFullName ()+")"
+			+ " AND ("+JournalDAO.Column.DATE.getFullName ()+" LIKE %s) GROUP BY "+JournalDAO.Column.DATE.getFullName ()+";";
+	
+	public static final String queryFoodEntriesForParameterDate = "SELECT "+FoodDAO.Column.ID.getFullName ()+", "+FoodDAO.Column.NAME.getFullName ()+", "+FoodDAO.Column.CALORIES.getFullName ()+"  FROM "+FoodDAO.TABLE_FOODS+", "+JournalDAO.TABLE_JOURNALS+" WHERE ("+JournalDAO.Column.FOOD_ID.getFullName ()+" = "+FoodDAO.Column.ID.getFullName ()+") AND ("+JournalDAO.Column.DATE.getFullName ()+" LIKE %s)";
+	
+	
 	private SQLiteDatabase db;
 
 	public JournalDAO ( SQLiteDatabase db )
@@ -45,7 +52,7 @@ public class JournalDAO
 		return db.insert ( TABLE_JOURNALS, null, values );
 	}
 
-	public long create ( JournalEntry journal, FoodEntry food, ImageEntry image )
+	public long addToJournal ( JournalEntry journal, FoodEntry food, ImageEntry image )
 	{
 		if ( journal == null || food == null ) throw new IllegalStateException ( "A Journal entry requires a journalDTO and a foodDTO." );
 
@@ -165,21 +172,10 @@ public class JournalDAO
 		
 		Map< String, Float > dayCaloriesMap = new HashMap< String, Float > ();
 
-		String queryCaloriesEachDayOfParameterMonth = "SELECT ?, SUM(?) AS " + TOTAL_CALORIES + "FROM ?, ?  WHERE (? = ?)"
-				+ " AND (? LIKE ?) GROUP BY ?";
-
-		Cursor c = this.db.rawQuery ( queryCaloriesEachDayOfParameterMonth, new String []
-		{
-				JournalDAO.Column.DATE.getFullName (),
-				FoodDAO.Column.CALORIES.getFullName (),
-				JournalDAO.TABLE_JOURNALS,
-				FoodDAO.TABLE_FOODS,
-				JournalDAO.Column.ID.getFullName (),
-				FoodDAO.Column.ID.getFullName (),
-				JournalDAO.Column.DATE.getFullName (),
-				monthRegex,
-				JournalDAO.Column.DATE.getFullName ()
-		} );
+		//This works. DO NOT TOUCH!!!!!!!!!!
+		String unparameterQuery = "SELECT journals.date,SUM(foods.calories) FROM journals, foods WHERE (journals.food_id = foods._id) AND (journals.date LIKE %s) GROUP BY journals.date;";
+		String query = String.format ( unparameterQuery, "'"+monthRegex+"'");
+		Cursor c = this.db.rawQuery ( query, null);
 
 		if ( c != null && c.moveToFirst () )
 		{
@@ -189,6 +185,7 @@ public class JournalDAO
 				String date = c.getString ( 0 );
 				float calories = c.getFloat ( 1 );
 				dayCaloriesMap.put ( date, calories );
+				c.moveToNext ();
 			}
 		}
 
@@ -202,20 +199,9 @@ public class JournalDAO
 		
 		List<FoodEntry> foodEntries = new ArrayList<FoodEntry>();
 		
-		String queryFoodEntriesForParameterDate = "SELECT ?, ?, ?  FROM ?, ? WHERE (? = ?) AND (? LIKE ?)";
-		Cursor c = this.db.rawQuery ( queryFoodEntriesForParameterDate,
-				new String[]
-		{
-				FoodDAO.Column.ID.getFullName (),
-				FoodDAO.Column.NAME.getFullName (),
-				FoodDAO.Column.CALORIES.getFullName (),
-				FoodDAO.TABLE_FOODS,
-				JournalDAO.TABLE_JOURNALS,
-				JournalDAO.Column.FOOD_ID.getFullName (),
-				FoodDAO.Column.ID.getFullName (),
-				JournalDAO.Column.DATE.getFullName (),
-				monthRegex
-		});
+		String query = String.format ( queryFoodEntriesForParameterDate, monthRegex );
+		
+		Cursor c = this.db.rawQuery ( query,null);
 		
 		if(c != null && c.moveToFirst ())
 		{
@@ -230,6 +216,29 @@ public class JournalDAO
 		}
 		
 		return foodEntries;
+	}
+	
+	public void test()
+	{
+		String s = "Now:\n";
+		String query = "SELECT journals.date,SUM(foods.calories) FROM journals, foods WHERE (journals.food_id = foods._id) AND (journals.date LIKE %s) GROUP BY journals.date;";
+		Cursor c = db.rawQuery ( query, null );
+		if(c!=null && c.moveToFirst ())
+		{
+			while(!c.isAfterLast ())
+			{
+				
+				String date = c.getString ( 0 );
+				float calories = c.getFloat ( 1 );
+				s += "date: "+date+", calories: "+calories+"\n";
+				c.moveToNext ();
+			}
+		}else
+		{
+			s+="no stuff";
+		}
+		Log.e("stuff",s);
+		
 	}
 
 	private JournalEntry cursorToJournalDataTransferObject ( Cursor c ) throws ParseException

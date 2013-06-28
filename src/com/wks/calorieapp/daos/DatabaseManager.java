@@ -36,7 +36,6 @@ public class DatabaseManager extends SQLiteOpenHelper
 	private static final String DROP_TABLE_IMAGES = "DROP TABLE IF EXISTS " + ImageDAO.TABLE_IMAGES + ";";
 
 	private static DatabaseManager instance = null;
-	private static SQLiteDatabase db = null;
 	
 	private DatabaseManager(Context context)
 	{

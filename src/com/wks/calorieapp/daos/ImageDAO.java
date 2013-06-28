@@ -6,7 +6,6 @@ import java.util.List;
 import com.wks.calorieapp.pojos.ImageEntry;
 
 import android.content.ContentValues;
-import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
@@ -17,19 +16,12 @@ public class ImageDAO
 	public static final String [] COLUMNS = { Column.ID.name, Column.FILE_NAME.name };
 
 	private SQLiteDatabase db;
-	private DatabaseManager helper;
 
 	public ImageDAO ( SQLiteDatabase db )
 	{
 		this.db = db;
-		//this.helper = CADatabaseHelper.getInstance ( context );
 	}
 
-	/*
-	 * public void open() { this.db = this.helper.getWritableDatabase (); }
-	 * 
-	 * public void close() { this.db.close (); }
-	 */
 
 	public long create ( ImageEntry image )
 	{

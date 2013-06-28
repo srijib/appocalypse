@@ -36,7 +36,6 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnKeyListener;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ExpandableListView;
 import android.widget.ImageButton;
@@ -258,6 +257,8 @@ public class SearchActivity extends Activity
 			journal.setDate ( timeTokens[0] );
 			journal.setTime ( timeTokens[1] );
 
+			Log.e ( TAG, "Adding to db, food:["+food+"], journal:["+journal+"]");
+			
 			if ( this.fileName != null && !this.fileName.isEmpty () )
 			{
 				image = new ImageEntry ();
@@ -267,7 +268,7 @@ public class SearchActivity extends Activity
 			DatabaseManager helper = DatabaseManager.getInstance ( this );
 			SQLiteDatabase db = helper.open ();
 			JournalDAO journalDao = new JournalDAO ( db );
-			long journalId = journalDao.create ( journal, food, image );
+			long journalId = journalDao.addToJournal ( journal, food, image );
 			db.close ();
 			return journalId;
 		}
@@ -380,6 +381,7 @@ public class SearchActivity extends Activity
 			SearchActivity.this.setLoadingText ( values[0] );
 		}
 
+		@SuppressWarnings ( "unchecked" )
 		@Override
 		protected void onPostExecute ( Response response )
 		{

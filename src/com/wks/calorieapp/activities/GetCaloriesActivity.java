@@ -35,6 +35,7 @@ public class GetCaloriesActivity extends Activity
 
 	private static final int NUM_TRIES_GET_NUTR_INFO = 3;
 
+	@SuppressWarnings ( "unused" )
 	private ProgressBar progressbarLoading;
 	private TextView textLoadingActivity;
 	private GetCaloriesTask getCaloriesTask;

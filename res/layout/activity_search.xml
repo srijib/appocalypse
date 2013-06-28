@@ -9,14 +9,13 @@
         android:layout_height="wrap_content"
         android:background="@drawable/gradient_gray"
         android:orientation="horizontal"
-        android:padding="6dip"
-        android:weightSum="10" >
+        android:padding="6dip" >
 
         <EditText
             android:id="@+id/search_edit_search"
-            android:layout_width="fill_parent"
+            android:layout_width="0dip"
             android:layout_height="wrap_content"
-            android:layout_weight="7"
+            android:layout_weight="1"
             android:background="@color/white"
             android:hint="@string/search_layout_hint_edit_search"
             android:inputType="textCapWords"

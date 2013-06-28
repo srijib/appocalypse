@@ -22,7 +22,7 @@ public class DaysOfWeekAdapter extends BaseAdapter
 	@Override
 	public int getCount ()
 	{
-		return this.daysOfWeek.length;
+		return daysOfWeek.length;
 	}
 
 	@Override

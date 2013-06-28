@@ -3,7 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="#00C78C"
+    android:background="#63B8FF"
     android:paddingLeft="?android:attr/expandableListPreferredItemPaddingLeft">
 <TextView
     android:id="@+id/expandable_row_parent_text_food_name"

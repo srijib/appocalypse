@@ -13,5 +13,6 @@
     <color name="transparent">#00ffffff</color>
     <color name="gray_light">#eeeeee</color>
     <color name="gray_medium">#cccccc</color>
-
+	<color name="cornflower_blue">#6495ED</color>
+	<color name="turquoise_blue">#00C78C</color>
 </resources>

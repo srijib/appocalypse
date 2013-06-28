@@ -7,16 +7,6 @@
     android:padding="10dip"
     >
     
-    <ImageView
-        android:id="@+id/grid_item_image"
-        android:src="@drawable/ic_launcher"
-        android:contentDescription="@string/home_layout_content_description_navigation"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="10dip"
-        android:layout_gravity="center"
-       
-        />
 
     <TextView
         android:id="@+id/grid_item_text"
@@ -24,7 +14,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         style="@style/GridItem"
-        
-        ></TextView>
+        android:drawableTop="@drawable/ic_launcher"
+        />
     
 </LinearLayout>

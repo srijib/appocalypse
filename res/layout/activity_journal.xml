@@ -95,7 +95,6 @@
         android:layout_height="fill_parent"
         android:layout_below="@+id/journal_grid_days_of_week"
         android:layout_above="@+id/journal_view_date_controls"
-        android:layout_weight="1"
         android:horizontalSpacing="0dip"
         android:numColumns="7"
         android:verticalSpacing="1dip" >

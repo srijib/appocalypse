@@ -51,5 +51,10 @@ public class FoodEntry
 		this.calories = calories;
 	}
 	
+	@Override
+	public String toString ()
+	{
+		return String.format ( "id: %d,name: %s,calories: %g", id,name,calories );
+	}
 
 }

@@ -45,9 +45,7 @@ public class JournalActivity extends Activity
 	private ImageButton buttonNextMonth;
 	private ImageButton buttonNextYear;
 	private ImageButton [] buttonsDateControl;
-	
-	private DatabaseManager manager;
-	private SQLiteDatabase db;
+
 	
 	private CalendarAdapter adapter;
 	private Calendar calendar;
@@ -58,9 +56,6 @@ public class JournalActivity extends Activity
 	{
 		super.onCreate ( savedInstanceState );
 		this.setContentView ( R.layout.activity_journal );
-
-		this.manager = DatabaseManager.getInstance ( this );
-		this.db = this.manager.open();
 		
 		this.setupActionBar ();
 		this.setupView ();
@@ -132,8 +127,12 @@ public class JournalActivity extends Activity
 	{
 		this.updateDateHeader ( this.adapter.getDate () );
 		
-		Map<Calendar,CalendarEvent> caloriesEachDay = JournalActivity.this.getCalorieCalendar ( this.calendar );
-		JournalActivity.this.adapter.setItems ( caloriesEachDay );
+		Map<Calendar,CalendarEvent> caloriesForMonth = JournalActivity.this.getCalorieCalendar ( this.calendar );
+		if(caloriesForMonth != null)
+		{
+			JournalActivity.this.adapter.setItems ( caloriesForMonth );
+		}
+		
 		
 		//update adapter date
 		JournalActivity.this.adapter.setDate ( this.calendar );
@@ -148,16 +147,19 @@ public class JournalActivity extends Activity
 	
 	private Map<Calendar,CalendarEvent> getCalorieCalendar(Calendar cal)
 	{
+		DatabaseManager manager = DatabaseManager.getInstance ( this );
+		SQLiteDatabase db = manager.open ();
+		
 		Map<Calendar,CalendarEvent> calorieCalendar = new HashMap<Calendar,CalendarEvent>();
 		//retrieve calories consumed for each day of selected month
-		if(JournalActivity.this.db == null)
+		if(db == null)
 		{
 			Log.e(TAG,"Can not load calorie data - null connection to db.");
 			
 		}else
 		{
-			JournalDAO journalDao = new JournalDAO(JournalActivity.this.db);
-			Map<Calendar,Float> caloriesEachDay = journalDao.getCaloriesForEachDay ( cal );
+			JournalDAO journalDao = new JournalDAO(db);
+			Map<Calendar,Float> caloriesEachDay = journalDao.getCaloriesForMonth ( cal );
 			
 			//create calendar events for that period. 
 			
@@ -171,6 +173,7 @@ public class JournalActivity extends Activity
 			}
 		}
 		
+		db.close ();
 		return calorieCalendar;
 	}
 
@@ -257,7 +260,13 @@ public class JournalActivity extends Activity
 			CalendarEvent event = JournalActivity.this.adapter.getItem ( position );
 			if(event != null)
 			{
-				//TODO open day calories activity.
+				int date = JournalActivity.this.adapter.getDateAtPosition ( position );
+				Calendar cal = (Calendar) JournalActivity.this.calendar.clone ();
+				cal.set ( Calendar.DAY_OF_MONTH, date );
+				
+				Intent dateCaloriesIntent = new Intent(JournalActivity.this,DateCaloriesActivity.class);
+				dateCaloriesIntent.putExtra ( "date", cal.getTimeInMillis () );
+				startActivity(dateCaloriesIntent);
 			}
 		}
 	}

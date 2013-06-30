@@ -61,6 +61,12 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        
+        <activity
+            android:name=".activities.DateCaloriesActivity"
+            android:label="@string/title_activity_date_calories"
+            android:screenOrientation="portrait"
+            ></activity>
     </application>
 
 </manifest>

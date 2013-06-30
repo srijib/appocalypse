@@ -12,30 +12,30 @@ public class JournalEntry
 	private long id;
 	private long date;
 	private long time = 0;
-	private long foodId = -1;
-	private long imageId = -1;
+	private FoodEntry foodEntry;
+	private ImageEntry imageEntry;
 	
 	public JournalEntry()
 	{
-		this(0,0,0,0,0);
+		this(0,0,0,null,null);
 	}
 	
-	public JournalEntry(long id, long date,long time, long foodId, long imageId)
+	public JournalEntry(long id, long date,long time, FoodEntry foodEntry, ImageEntry imageEntry)
 	{
 		this.setId(id);
 		this.setDate(date);
 		this.setTime(time);
-		this.setFoodId(foodId);
-		this.setImageId(imageId);
+		this.setFoodEntry(foodEntry);
+		this.setImageEntry(imageEntry);
 	}
 	
-	public JournalEntry(long id, String date,String time, long foodId, long imageId) throws ParseException
+	public JournalEntry(long id, String date,String time, FoodEntry foodEntry, ImageEntry imageEntry) throws ParseException
 	{
 		this.setId ( id );
 		this.setDate(date);
 		this.setTime(time);
-		this.setFoodId ( foodId );
-		this.setImageId ( imageId );
+		this.setFoodEntry(foodEntry);
+		this.setImageEntry(imageEntry);
 	}
 	
 	public void setId ( long id )
@@ -98,31 +98,31 @@ public class JournalEntry
 	}
 	
 	
-	public void setImageId ( long imageId )
+	public void setFoodEntry ( FoodEntry foodEntry )
 	{
-		if(id < 0 ) throw new IllegalStateException("food id must be a positive integer.");
-		this.imageId = imageId;
+		this.foodEntry = foodEntry;
 	}
 	
-	public long getImageId ()
+	public FoodEntry getFoodEntry ()
 	{
-		return imageId;
+		return foodEntry;
 	}
 	
-	public void setFoodId ( long foodId )
+	public void setImageEntry ( ImageEntry imageEntry )
 	{
-		if(id < 0 ) throw new IllegalStateException("image id must be a positive integer.");
-		this.foodId = foodId;
+		this.imageEntry = imageEntry;
 	}
 	
-	public long getFoodId ()
+	public ImageEntry getImageEntry ()
 	{
-		return foodId;
+		return imageEntry;
 	}
 	
 	@Override
 	public String toString ()
 	{
-		return String.format ( "id: %d,date: %s,time: %s,foodId: %d", id,this.getDateAsString (),this.getTimeAsString (),foodId );
+		long foodId = this.foodEntry == null? -1:this.foodEntry.getId ();
+		long imageId = this.imageEntry == null? -1: this.imageEntry.getId ();
+		return String.format ( "id: %d,date: %s,time: %s,foodId: %d,imageId: %d", id,this.getDateAsString (),this.getTimeAsString (),foodId,imageId );
 	}
 }

@@ -1,6 +1,7 @@
 package com.wks.calorieapp.activities;
 
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
@@ -19,7 +20,6 @@ import com.wks.calorieapp.pojos.Response;
 import com.wks.calorieapp.pojos.ResponseFactory;
 import com.wks.calorieapp.utils.AndroidUtils;
 import com.wks.calorieapp.utils.HttpClient;
-import com.wks.calorieapp.utils.Time;
 import com.wks.calorieapp.utils.WebServiceUrlFactory;
 
 import android.app.ActionBar;
@@ -240,35 +240,39 @@ public class SearchActivity extends Activity
 		{
 			if ( this.selectedFood == null ) return -1;
 
-			JournalEntry journal = new JournalEntry ();
 			FoodEntry food = new FoodEntry ();
-			ImageEntry image = null;
-
 			food.setId ( this.selectedFood.getId () );
 			food.setName ( this.selectedFood.getName () );
 			food.setCalories ( this.selectedFood.getCaloriesPer100g () );
 
-			String time = Time.getTimeAsString ( Calendar.getInstance (), JournalEntry.DATE_FORMAT + "~"
-					+ JournalEntry.TIME_FORMAT );
-			String [] timeTokens = time.split ( "~" );
-
-			if ( timeTokens.length < 2 ) return -1;
-
-			journal.setDate ( timeTokens[0] );
-			journal.setTime ( timeTokens[1] );
-
-			Log.e ( TAG, "Adding to db, food:["+food+"], journal:["+journal+"]");
-			
+			ImageEntry image = null;
 			if ( this.fileName != null && !this.fileName.isEmpty () )
 			{
 				image = new ImageEntry ();
 				image.setFileName ( this.fileName );
 			}
+			
+			Calendar cal = Calendar.getInstance ();
+			SimpleDateFormat formatter = new SimpleDateFormat();
+			
+			formatter.applyPattern ( JournalEntry.DATE_FORMAT );
+			String date = formatter.format ( cal.getTimeInMillis () );
+			
+			formatter.applyPattern ( JournalEntry.TIME_FORMAT );
+			String time = formatter.format ( cal.getTimeInMillis ());
 
-			DatabaseManager helper = DatabaseManager.getInstance ( this );
-			SQLiteDatabase db = helper.open ();
+			JournalEntry journal = new JournalEntry ();
+			journal.setDate ( date );
+			journal.setTime ( time );
+			journal.setFoodEntry ( food );
+			journal.setImageEntry ( image );
+
+			DatabaseManager manager = DatabaseManager.getInstance ( this );
+			SQLiteDatabase db = manager.open ();
+			
 			JournalDAO journalDao = new JournalDAO ( db );
-			long journalId = journalDao.addToJournal ( journal, food, image );
+			long journalId = journalDao.addToJournal ( journal);
+			
 			db.close ();
 			return journalId;
 		}

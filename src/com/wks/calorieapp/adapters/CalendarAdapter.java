@@ -86,6 +86,7 @@ public class CalendarAdapter extends BaseAdapter
 	public void clearItems ()
 	{
 		this.events.clear ();
+		this.notifyDataSetChanged ();
 	}
 
 	/**

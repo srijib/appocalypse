@@ -31,7 +31,7 @@ public class JournalDAO
 	public static final String queryCaloriesEachDayOfParameterMonth = "SELECT "+JournalDAO.Column.DATE.getFullName ()+", SUM("+FoodDAO.Column.CALORIES.getFullName ()+") FROM "+JournalDAO.TABLE_JOURNALS+", "+FoodDAO.TABLE_FOODS+"  WHERE ("+JournalDAO.Column.ID.getFullName ()+" = "+FoodDAO.Column.ID.getFullName ()+")"
 			+ " AND ("+JournalDAO.Column.DATE.getFullName ()+" LIKE %s) GROUP BY "+JournalDAO.Column.DATE.getFullName ()+";";
 	
-	public static final String queryFoodEntriesForParameterDate = "SELECT "+FoodDAO.Column.ID.getFullName ()+", "+FoodDAO.Column.NAME.getFullName ()+", "+FoodDAO.Column.CALORIES.getFullName ()+"  FROM "+FoodDAO.TABLE_FOODS+", "+JournalDAO.TABLE_JOURNALS+" WHERE ("+JournalDAO.Column.FOOD_ID.getFullName ()+" = "+FoodDAO.Column.ID.getFullName ()+") AND ("+JournalDAO.Column.DATE.getFullName ()+" LIKE %s)";
+	public static final String queryFoodEntriesForParameterDate = "SELECT "+FoodDAO.Column.ID.getFullName ()+", "+FoodDAO.Column.NAME.getFullName ()+", "+FoodDAO.Column.CALORIES.getFullName ()+", "+ ImageDAO.Column.ID.getFullName ()+", "+ImageDAO.Column.FILE_NAME.getFullName ()+", "+JournalDAO.Column.ID.getFullName()+","+JournalDAO.Column.TIME.getFullName()+"  FROM "+FoodDAO.TABLE_FOODS+", "+JournalDAO.TABLE_JOURNALS+", "+ImageDAO.TABLE_IMAGES+" WHERE ("+JournalDAO.Column.FOOD_ID.getFullName ()+" = "+FoodDAO.Column.ID.getFullName ()+") AND ("+JournalDAO.Column.DATE.getFullName ()+" LIKE %s)";
 	
 	
 	private SQLiteDatabase db;
@@ -41,33 +41,24 @@ public class JournalDAO
 		this.db = db;
 	}
 
-	public long create ( JournalEntry journal )
+
+	public long addToJournal ( JournalEntry journal)
 	{
-		ContentValues values = new ContentValues ();
-		values.put ( Column.DATE.getName (), journal.getDateAsString () );
-		values.put ( Column.TIME.getName (), journal.getTimeAsString () );
-		values.put ( Column.FOOD_ID.getName (), journal.getFoodId () );
+		//if journal entry or food entry are null, throw exception
+		if ( journal == null || journal.getFoodEntry () == null) throw new IllegalStateException ( "A Journal entry can not be null or have a null food entry" );
 
-		if ( journal.getImageId () < 0 ) { return db.insert ( TABLE_JOURNALS, Column.IMAGE_ID.getName (), values ); }
-
-		values.put ( Column.IMAGE_ID.getName (), journal.getImageId () );
-		return db.insert ( TABLE_JOURNALS, null, values );
-	}
-
-	public long addToJournal ( JournalEntry journal, FoodEntry food, ImageEntry image )
-	{
-		if ( journal == null || food == null ) throw new IllegalStateException ( "A Journal entry requires a journalDTO and a foodDTO." );
-
+		//begin transaction
 		this.db.beginTransaction ();
+		
+		//check if food item exists in database
+		long foodId = journal.getFoodEntry ().getId ();
+		FoodDAO foodDao = new FoodDAO ( this.db);
+		FoodEntry foodDto = foodDao.read ( journal.getFoodEntry ().getId () );
 
-		// add food item
-		FoodDAO foodDao = new FoodDAO ( this.db/* this.context */);
-		FoodEntry foodDto = foodDao.read ( food.getId () );
-
-		long foodId = -1;
+		//if food item does not exist in db, add to db.
 		if ( foodDto == null )
 		{
-			foodId = foodDao.create ( food );
+			foodId = foodDao.create ( journal.getFoodEntry () );
 			if ( foodId == -1 )
 			{
 				db.endTransaction ();
@@ -75,29 +66,37 @@ public class JournalDAO
 			}
 		}
 
-		// image may be null.
-		if ( image == null )
+		//if journal entry contains an image entry, add image entry
+		long imageId = -1;
+		if ( journal.getImageEntry () != null )
 		{
-			journal.setFoodId ( foodId );
-			journal.setImageId ( -1 );
 
-		}else
-		{
-			// add image item
-			ImageDAO imageDao = new ImageDAO ( this.db/* this.context */);
+			ImageDAO imageDao = new ImageDAO ( this.db);
 
-			long imageId = imageDao.create ( image );
+			imageId = imageDao.create ( journal.getImageEntry () );
 			if ( imageId == -1 )
 			{
 				db.endTransaction ();
 				return -1;
 			}
 
-			journal.setFoodId ( foodId );
-			journal.setImageId ( imageId );
 		}
-
-		long journalId = this.create ( journal );
+		
+		long journalId = -1;
+		ContentValues values = new ContentValues ();
+		values.put ( Column.DATE.getName (), journal.getDateAsString () );
+		values.put ( Column.TIME.getName (), journal.getTimeAsString () );
+		values.put ( Column.FOOD_ID.getName (), foodId );
+		
+		if ( imageId == -1 ) 
+		{
+			journalId = db.insert ( TABLE_JOURNALS, Column.IMAGE_ID.getName (), values ); 
+		}else
+		{
+			values.put ( Column.IMAGE_ID.getName (), journal.getImageEntry ().getId ());
+			journalId = db.insert ( TABLE_JOURNALS, null, values );
+		}
+		
 		if ( journalId != -1 )
 		{
 			db.setTransactionSuccessful ();
@@ -147,8 +146,8 @@ public class JournalDAO
 		values.put ( Column.ID.getName (), journal.getId () );
 		values.put ( Column.DATE.getName (), journal.getDateAsString () );
 		values.put ( Column.TIME.getName (), journal.getTimeAsString () );
-		values.put ( Column.FOOD_ID.getName (), journal.getFoodId () );
-		values.put ( Column.IMAGE_ID.getName (), journal.getImageId () );
+		values.put ( Column.FOOD_ID.getName (), journal.getFoodEntry ().getId () );
+		values.put ( Column.IMAGE_ID.getName (), journal.getImageEntry ().getId () );
 
 		return db.update ( TABLE_JOURNALS, values, Column.ID.getName () + " = " + journal.getId (), null );
 	}
@@ -163,11 +162,10 @@ public class JournalDAO
 	{
 		Calendar calendar = Calendar.getInstance ();
 		calendar.setTimeInMillis ( timeInMillis );
-		return getCaloriesForEachDay(calendar);
+		return getCaloriesForMonth(calendar);
 	}
 
-	//Java is so annoying!! Calendar.DAY are 1-7 but Calendar.MONTH 0-11 WTF
-	public Map< Calendar, Float > getCaloriesForEachDay ( Calendar cal )
+	public Map< Calendar, Float > getCaloriesForMonth ( Calendar cal )
 	{
 		SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM");
 		String monthRegex = formatter.format ( cal.getTimeInMillis () ) + "-__";
@@ -213,12 +211,13 @@ public class JournalDAO
 		return dayCaloriesMap;
 	}
 
-	public List< FoodEntry > getFoodEntriesForDay ( Calendar cal )
+	public List< JournalEntry > getEntriesForDay ( Calendar cal ) throws ParseException
 	{
-		SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+		//TODO sort this out.
+		SimpleDateFormat formatter = new SimpleDateFormat(JournalEntry.DATE_FORMAT);
 		String monthRegex = formatter.format ( cal.getTimeInMillis () );
 		
-		List<FoodEntry> foodEntries = new ArrayList<FoodEntry>();
+		List<JournalEntry> entries = new ArrayList<JournalEntry>();
 		
 		String query = String.format ( queryFoodEntriesForParameterDate, monthRegex );
 		
@@ -232,11 +231,22 @@ public class JournalDAO
 				foodEntry.setId ( c.getLong ( 0 ) );
 				foodEntry.setName ( c.getString ( 1 ) );
 				foodEntry.setCalories ( c.getFloat ( 2 ) );
-				foodEntries.add ( foodEntry );
+				
+				ImageEntry imageEntry = new ImageEntry();
+				imageEntry.setId ( c.getLong ( 3 ) );
+				imageEntry.setFileName ( c.getString ( 4 ) );
+				
+				JournalEntry journalEntry = new JournalEntry();
+				journalEntry.setId ( c.getLong ( 5 ) );
+				journalEntry.setTime ( c.getString ( 6 ) );
+				journalEntry.setDate ( monthRegex );
+				journalEntry.setFoodEntry ( foodEntry );
+				journalEntry.setImageEntry ( imageEntry );
+				entries.add ( journalEntry );
 			}
 		}
 		
-		return foodEntries;
+		return entries;
 	}
 	
 	public void test()
@@ -270,7 +280,13 @@ public class JournalDAO
 		long foodId = c.getLong ( Column.FOOD_ID.ordinal () );
 		long imageId = c.getLong ( Column.IMAGE_ID.ordinal () );
 
-		return new JournalEntry ( id, date, time, foodId, imageId );
+		FoodDAO foodDAO = new FoodDAO(this.db);
+		FoodEntry foodEntry = foodDAO.read ( foodId );
+		
+		ImageDAO imageDAO = new ImageDAO(this.db);
+		ImageEntry imageEntry = imageDAO.read ( imageId );
+		
+		return new JournalEntry ( id, date, time, foodEntry, imageEntry );
 	}
 
 	public static enum Column

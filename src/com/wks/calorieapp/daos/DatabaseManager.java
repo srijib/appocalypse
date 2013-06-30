@@ -58,7 +58,7 @@ public class DatabaseManager extends SQLiteOpenHelper
 	
 	public void close()
 	{
-		this.close ();
+		super.close ();
 	}
 
 	@Override

@@ -4,38 +4,38 @@ import android.graphics.drawable.Drawable;
 
 public class CalendarEvent
 {
-	private String eventDescription = "";
-	private Drawable eventImage = null;
-	private int eventBackgroundColor = 0;
+	private String description = "";
+	private Drawable drawable = null;
+	private int backgroundColor = 0;
 	
-	public String getEventDescription ()
+	public String getDescription ()
 	{
-		return eventDescription;
+		return description;
 	}
 	
-	public void setEventDescription ( String eventDescription )
+	public void setDescription ( String description )
 	{
-		this.eventDescription = eventDescription;
+		this.description = description;
 	}
 	
-	public int getEventBackgroundColor ()
+	public int getBackgroundColor ()
 	{
-		return eventBackgroundColor;
+		return backgroundColor;
 	}
 	
-	public void setEventBackgroundColor ( int eventBackgroundColor )
+	public void setBackgroundColor ( int backgroundColor )
 	{
-		this.eventBackgroundColor = eventBackgroundColor;
+		this.backgroundColor = backgroundColor;
 	}
 	
-	public Drawable getEventImage ()
+	public Drawable getDrawable ()
 	{
-		return eventImage;
+		return drawable;
 	}
 	
-	public void setEventImage ( Drawable eventImage )
+	public void setDrawable ( Drawable drawable )
 	{
-		this.eventImage = eventImage;
+		this.drawable = drawable;
 	}
 	
 	

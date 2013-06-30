@@ -61,7 +61,7 @@ public class NavigationGridAdapter extends BaseAdapter
 		
 		if(resultView == null)
 		{
-			resultView = inflater.inflate ( R.layout.grid_item, null );
+			resultView = inflater.inflate ( R.layout.activity_home_grid_item, null );
 			
 			
 			holder = new ViewHolder();

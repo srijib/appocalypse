@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical" >    
+
+    <TextView
+        android:id="@+id/date_calories_text_total_calories"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:padding="2dip"
+        android:background="@color/transparent_black"
+        android:textColor="@color/white"
+        android:layout_alignParentBottom="true"
+        
+        >
+    </TextView>
+    
+    <ListView
+        android:id="@+id/date_calories_list_meals"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"
+        android:layout_above="@+id/date_calories_text_total_calories" >
+    </ListView>
+
+</RelativeLayout>

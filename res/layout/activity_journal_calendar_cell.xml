@@ -33,6 +33,7 @@ set the text/backgrounds etc of the elements.
         android:layout_gravity="right"
         android:layout_weight="1"
         android:gravity="center"
+        android:textStyle="bold"
         android:textColor="#cccccc" >
     </TextView>
 

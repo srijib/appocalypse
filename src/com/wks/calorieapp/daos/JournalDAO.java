@@ -18,6 +18,8 @@ import android.util.Log;
 
 public class JournalDAO
 {
+	public static final String TAG = JournalDAO.class.getCanonicalName ();
+	
 	public static final String TABLE_JOURNALS = "journals";
 	public static final String [] COLUMNS =
 	{
@@ -63,7 +65,7 @@ public class JournalDAO
 		FoodEntry foodDto = foodDao.read ( food.getId () );
 
 		long foodId = -1;
-		if ( foodDto != null )
+		if ( foodDto == null )
 		{
 			foodId = foodDao.create ( food );
 			if ( foodId == -1 )
@@ -157,7 +159,7 @@ public class JournalDAO
 	}
 
 	
-	public Map< String, Float > getCaloriesForEachDay ( long timeInMillis )
+	public Map< Calendar, Float > getCaloriesForEachDay ( long timeInMillis )
 	{
 		Calendar calendar = Calendar.getInstance ();
 		calendar.setTimeInMillis ( timeInMillis );
@@ -165,12 +167,12 @@ public class JournalDAO
 	}
 
 	//Java is so annoying!! Calendar.DAY are 1-7 but Calendar.MONTH 0-11 WTF
-	public Map< String, Float > getCaloriesForEachDay ( Calendar cal )
+	public Map< Calendar, Float > getCaloriesForEachDay ( Calendar cal )
 	{
 		SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM");
 		String monthRegex = formatter.format ( cal.getTimeInMillis () ) + "-__";
 		
-		Map< String, Float > dayCaloriesMap = new HashMap< String, Float > ();
+		Map< Calendar, Float > dayCaloriesMap = new HashMap< Calendar, Float > ();
 
 		//This works. DO NOT TOUCH!!!!!!!!!!
 		String unparameterQuery = "SELECT journals.date,SUM(foods.calories) FROM journals, foods WHERE (journals.food_id = foods._id) AND (journals.date LIKE %s) GROUP BY journals.date;";
@@ -182,9 +184,28 @@ public class JournalDAO
 
 			while ( !c.isAfterLast () )
 			{
-				String date = c.getString ( 0 );
+				String _date = c.getString ( 0 );
+				formatter.applyPattern ( JournalEntry.DATE_FORMAT );
+				long date = 0;
+				
+				try
+				{
+					
+					date = formatter.parse ( _date ).getTime ();
+					
+				}
+				catch ( ParseException e )
+				{
+					Log.e(TAG,"Could not parse date: "+_date+"Exception: "+e.toString ());
+					continue;
+				}
+				
+
+				Calendar calendar = Calendar.getInstance ();
+				calendar.setTimeInMillis ( date );
+				
 				float calories = c.getFloat ( 1 );
-				dayCaloriesMap.put ( date, calories );
+				dayCaloriesMap.put ( calendar, calories );
 				c.moveToNext ();
 			}
 		}

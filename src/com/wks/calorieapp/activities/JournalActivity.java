@@ -2,14 +2,16 @@ package com.wks.calorieapp.activities;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
+
 import com.wks.calorieapp.R;
 import com.wks.calorieapp.adapters.CalendarAdapter;
+import com.wks.calorieapp.adapters.CalendarEvent;
 import com.wks.calorieapp.adapters.DaysOfWeekAdapter;
 import com.wks.calorieapp.daos.DatabaseManager;
-import com.wks.calorieapp.daos.FoodDAO;
 import com.wks.calorieapp.daos.JournalDAO;
-import com.wks.calorieapp.pojos.FoodEntry;
 import android.app.ActionBar;
 import android.app.Activity;
 import android.content.Intent;
@@ -19,12 +21,15 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.GridView;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
 public class JournalActivity extends Activity
 {
+	public static final String TAG = JournalActivity.class.getCanonicalName ();
+	
 	public static final String FORMAT_DATE_HEADER = "MMMM yyyy";
 	public enum CalendarPeriod
 	{
@@ -41,7 +46,11 @@ public class JournalActivity extends Activity
 	private ImageButton buttonNextYear;
 	private ImageButton [] buttonsDateControl;
 	
+	private DatabaseManager manager;
+	private SQLiteDatabase db;
+	
 	private CalendarAdapter adapter;
+	private Calendar calendar;
 
 
 	@Override
@@ -50,12 +59,15 @@ public class JournalActivity extends Activity
 		super.onCreate ( savedInstanceState );
 		this.setContentView ( R.layout.activity_journal );
 
+		this.manager = DatabaseManager.getInstance ( this );
+		this.db = this.manager.open();
+		
 		this.setupActionBar ();
 		this.setupView ();
 		this.setupListeners ();
 		this.initCalendar();
-		
 	}
+	
 
 	@Override
 	public boolean onOptionsItemSelected ( MenuItem item )
@@ -96,37 +108,35 @@ public class JournalActivity extends Activity
 
 		buttonsDateControl = new ImageButton [] { buttonLastYear, buttonLastMonth, buttonToday, buttonNextMonth, buttonNextYear };
 	
-		this.setupCalendar();
-	}
-
-	private void setupCalendar()
-	{
 		this.gridDaysOfWeek.setAdapter ( new DaysOfWeekAdapter(this) );
 		this.adapter = new CalendarAdapter(this);
 		this.gridCalendar.setAdapter ( adapter );
-		this.updateDateHeader ( this.adapter.getDate () );
 	}
+
 	
 	private void setupListeners ()
 	{
 		for ( ImageButton button : buttonsDateControl )
 			button.setOnClickListener ( new OnDateControlButtonClicked () );
 
+		this.gridCalendar.setOnItemClickListener ( new OnCalendarDateClicked() );
 	}
 	
-	@SuppressWarnings ( "unused" )
 	private void initCalendar()
 	{
+		this.calendar = Calendar.getInstance ();
+		this.updateCalendar ( );
+	}
+
+	private void updateCalendar()
+	{
+		this.updateDateHeader ( this.adapter.getDate () );
 		
-		DatabaseManager manager = DatabaseManager.getInstance ( this );
-		SQLiteDatabase db = manager.open ();
-		JournalDAO journalDAO = new JournalDAO(db);
-		//Map< String, Float > cow = journalDAO.getCaloriesForEachDay ( Calendar.getInstance () );
-		//Log.e ( "shit", ""+cow.size () );
-		//journalDAO.test ();
-		FoodDAO foodDao = new FoodDAO(db);
-		List<FoodEntry> list = foodDao.read ();
-		Log.e ( "r", ""+list.toString () );
+		Map<Calendar,CalendarEvent> caloriesEachDay = JournalActivity.this.getCalorieCalendar ( this.calendar );
+		JournalActivity.this.adapter.setItems ( caloriesEachDay );
+		
+		//update adapter date
+		JournalActivity.this.adapter.setDate ( this.calendar );
 	}
 		
 	private void updateDateHeader(long newDate)
@@ -134,6 +144,34 @@ public class JournalActivity extends Activity
 		SimpleDateFormat formatter = new SimpleDateFormat(FORMAT_DATE_HEADER);
 		String dateText = formatter.format ( newDate );
 		this.textDateHeader.setText ( dateText );
+	}
+	
+	private Map<Calendar,CalendarEvent> getCalorieCalendar(Calendar cal)
+	{
+		Map<Calendar,CalendarEvent> calorieCalendar = new HashMap<Calendar,CalendarEvent>();
+		//retrieve calories consumed for each day of selected month
+		if(JournalActivity.this.db == null)
+		{
+			Log.e(TAG,"Can not load calorie data - null connection to db.");
+			
+		}else
+		{
+			JournalDAO journalDao = new JournalDAO(JournalActivity.this.db);
+			Map<Calendar,Float> caloriesEachDay = journalDao.getCaloriesForEachDay ( cal );
+			
+			//create calendar events for that period. 
+			
+			for(Entry<Calendar,Float> calorieEntry : caloriesEachDay.entrySet ())
+			{
+				CalendarEvent event = new CalendarEvent();
+				event.setDescription ( String.format ( "%.1f cal", calorieEntry.getValue () ) );
+				//TODO set colour.
+				calorieCalendar.put ( calorieEntry.getKey (), event );
+				
+			}
+		}
+		
+		return calorieCalendar;
 	}
 
 	private Calendar getCalendarForDate ( int day, int month, int year )
@@ -179,9 +217,7 @@ public class JournalActivity extends Activity
 
 		public void onClick ( View v )
 		{
-			// to avoid date change events when user is navigating through
-			// calendar.
-			
+			//get time period selected by user
 			Calendar calendar = Calendar.getInstance ();
 			
 			switch ( v.getId () )
@@ -205,12 +241,25 @@ public class JournalActivity extends Activity
 				calendar = (Calendar) JournalActivity.this.getCalendarForPeriod ( CalendarPeriod.TODAY ).clone();
 				break;
 			}
-			JournalActivity.this.adapter.setDate ( calendar );
-			JournalActivity.this.updateDateHeader ( calendar.getTimeInMillis () );
-			
-			
+					
+			//update view.
+			JournalActivity.this.calendar = calendar;
+			JournalActivity.this.updateCalendar ();
 		}
 
+	}
+	
+	class OnCalendarDateClicked implements AdapterView.OnItemClickListener
+	{
+		@Override
+		public void onItemClick ( AdapterView< ? > parent, View view, int position, long id )
+		{
+			CalendarEvent event = JournalActivity.this.adapter.getItem ( position );
+			if(event != null)
+			{
+				//TODO open day calories activity.
+			}
+		}
 	}
 
 }

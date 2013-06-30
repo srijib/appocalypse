@@ -1,6 +1,5 @@
 package com.wks.calorieapp.adapters;
 
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.HashMap;
@@ -8,10 +7,10 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import com.wks.calorieapp.R;
-
 import android.content.Context;
 import android.graphics.Color;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -36,26 +35,28 @@ public class CalendarAdapter extends BaseAdapter
 	private Context context;
 	private Calendar calendar;
 	private int height;
-	private Map< Long, CalendarEvent > events;
+	private Map< String, CalendarEvent > events;
+	private SimpleDateFormat formatter;
 
-	public CalendarAdapter(Context context)
+	public CalendarAdapter ( Context context )
 	{
-		this(context,null,null);
+		this ( context, null, null );
 	}
-	
-	public CalendarAdapter (Context context, Calendar calendar)
+
+	public CalendarAdapter ( Context context, Calendar calendar )
 	{
-		this(context, calendar, null);
+		this ( context, calendar, null );
 	}
-	
-	public CalendarAdapter ( Context context, Calendar calendar, Map< String, CalendarEvent > events )
+
+	public CalendarAdapter ( Context context, Calendar calendar, Map< Calendar, CalendarEvent > events )
 	{
 		if ( context == null ) throw new IllegalStateException ( "Application context must not be null" );
 
 		this.context = context;
 
 		this.calendar = calendar == null ? Calendar.getInstance () : ( Calendar ) calendar.clone ();
-
+		this.formatter = new SimpleDateFormat(DATE_FORMAT);
+		
 		DisplayMetrics metrics = new DisplayMetrics ();
 		WindowManager manager = ( WindowManager ) context.getSystemService ( Context.WINDOW_SERVICE );
 		manager.getDefaultDisplay ().getMetrics ( metrics );
@@ -63,31 +64,26 @@ public class CalendarAdapter extends BaseAdapter
 
 		this.setItems ( events );
 	}
-	
-	public void setItems(Map<String,CalendarEvent> events)
+
+	public void setItems ( Map< Calendar, CalendarEvent > events )
 	{
-		if ( events == null ) return;
-
-		this.events = new HashMap< Long, CalendarEvent > ();
-		try
+		if ( events != null )
 		{
-			SimpleDateFormat formatter = new SimpleDateFormat ( DATE_FORMAT );
-			for ( Entry< String, CalendarEvent > entry : events.entrySet () )
+			this.events = new HashMap< String, CalendarEvent > ();
+			
+			for ( Entry< Calendar, CalendarEvent > entry : events.entrySet () )
 			{
-				String _date = entry.getKey ();
-				CalendarEvent event = entry.getValue ();
-
-				long date = formatter.parse ( _date ).getTime ();
-				this.events.put ( date, event );
+				String date = formatter.format ( entry.getKey ().getTimeInMillis () );
+				this.events.put ( date, entry.getValue () );
 			}
+
+			this.notifyDataSetChanged ();
+
 		}
-		catch ( ParseException e )
-		{
-			throw new IllegalArgumentException ( "Date String must match format: " + DATE_FORMAT );
-		}
+
 	}
-	
-	public void clearItems()
+
+	public void clearItems ()
 	{
 		this.events.clear ();
 	}
@@ -114,7 +110,9 @@ public class CalendarAdapter extends BaseAdapter
 		{
 			Calendar cal = ( Calendar ) this.calendar.clone ();
 			cal.set ( Calendar.DAY_OF_MONTH, date );
-			return this.events.get ( cal.getTimeInMillis () );
+			String currentDate = formatter.format ( cal.getTimeInMillis () );
+			
+			return this.events.get ( currentDate );
 
 		}
 		return null;
@@ -137,7 +135,7 @@ public class CalendarAdapter extends BaseAdapter
 		if ( resultView == null )
 		{
 			inflater = LayoutInflater.from ( context );
-			resultView = inflater.inflate ( R.layout.calendar_cell, null );
+			resultView = inflater.inflate ( R.layout.activity_journal_calendar_cell, null );
 
 			holder = new ViewHolder ();
 			holder.cellCalendar = ( LinearLayout ) resultView.findViewById ( R.id.calendar_cell_layout );
@@ -163,19 +161,21 @@ public class CalendarAdapter extends BaseAdapter
 		{
 			// show the date in the calendar.
 			holder.textDate.setText ( "" + date );
-
 			if ( this.events != null )
 			{
-				// if there is an event on this day in the calendar, display
-				// details.
-				CalendarEvent event = events.get ( this.getDateAsLong ( date ) );
+				Calendar currentDay = ( Calendar ) this.calendar.clone ();
+				currentDay.set ( Calendar.DAY_OF_MONTH, date );
+				String eventDay = formatter.format ( currentDay.getTimeInMillis () );
+				
+				CalendarEvent event = events.get ( eventDay );
 				if ( event != null )
 				{
-					holder.image.setImageDrawable ( event.getEventImage () );
-					holder.textDescription.setText ( event.getEventDescription () );
-					holder.cellCalendar.setBackgroundColor ( event.getEventBackgroundColor () );
+					holder.image.setImageDrawable ( event.getDrawable () );
+					holder.textDescription.setText ( event.getDescription () );
+					holder.cellCalendar.setBackgroundColor ( event.getBackgroundColor() );
 				}
 			}
+
 		}else
 		{
 
@@ -224,13 +224,6 @@ public class CalendarAdapter extends BaseAdapter
 		return i;
 	}
 
-	private long getDateAsLong ( int date )
-	{
-		Calendar cal = ( Calendar ) this.calendar.clone ();
-		cal.set ( Calendar.DAY_OF_MONTH, date );
-		return cal.getTimeInMillis ();
-	}
-
 	private static class ViewHolder
 	{
 		private LinearLayout cellCalendar;
@@ -244,13 +237,11 @@ public class CalendarAdapter extends BaseAdapter
 		this.calendar = ( Calendar ) calendar.clone ();
 		this.notifyDataSetChanged ();
 	}
-	
-	
-	public long getDate()
+
+	public long getDate ()
 	{
 		return this.calendar.getTimeInMillis ();
 	}
-
 
 	public int getTextSizeDate ()
 	{

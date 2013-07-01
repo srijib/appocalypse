@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="profile_menu_done"></string>
+    <string name="profile_layout_text_instructions">Enter your age, height, weight and activity lifestyle to calculate your recommended calorie intake.</string>
+    <string name="profile_layout_text_sex">Sex</string>
+	<string name="profile_layout_radio_male">Male</string> 
+	<string name="profile_layout_radio_female">Female</string> 
+	<string name="profile_layout_text_activity_lifestyle">Activity</string>
+	<string name="profile_layout_text_height">Height(cm)</string>
+	<string name="profile_layout_text_weight">Weight(kg)</string>
+	<string name="profile_layout_text_age">Age</string>
+	<string name="profile_layout_text_weight_loss_goal">Weight Loss Goal (kg)</string>
+	<string name="profile_layout_text_recommended_calories">Daily Recommended Calories: %.1f cal</string>
+	<string name="profile_layout_content_description_human">Human Outline</string>
+	
+</resources>

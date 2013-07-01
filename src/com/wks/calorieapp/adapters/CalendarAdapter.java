@@ -27,10 +27,6 @@ public class CalendarAdapter extends BaseAdapter
 	private static final int WEEKS_PER_MONTH = 6;// do not change
 	private static final String DATE_FORMAT = "yyyy-MM-dd";
 
-	private int textSizeDate = 12;
-	private int textSizeDescription = 12;
-	private int textColorDate = Color.BLACK;
-	private int textColorDescription = Color.BLACK;
 
 	private Context context;
 	private Calendar calendar;
@@ -143,13 +139,7 @@ public class CalendarAdapter extends BaseAdapter
 			holder.textDate = ( TextView ) resultView.findViewById ( R.id.calendar_cell_date );
 			holder.image = ( ImageView ) resultView.findViewById ( R.id.calendar_cell_image );
 			holder.textDescription = ( TextView ) resultView.findViewById ( R.id.calendar_cell_description );
-
-			holder.textDate.setTextSize ( this.textSizeDate );
-			holder.textDate.setTextColor ( this.textColorDate );
-
-			holder.textDescription.setTextSize ( this.textSizeDate );
-			holder.textDescription.setTextColor ( this.textColorDescription );
-
+			
 			resultView.setMinimumHeight ( this.height );
 			resultView.setTag ( holder );
 		}else
@@ -242,46 +232,6 @@ public class CalendarAdapter extends BaseAdapter
 	public long getDate ()
 	{
 		return this.calendar.getTimeInMillis ();
-	}
-
-	public int getTextSizeDate ()
-	{
-		return textSizeDate;
-	}
-
-	public void setTextSizeDate ( int textSizeDate )
-	{
-		this.textSizeDate = textSizeDate;
-	}
-
-	public int getTextSizeDescription ()
-	{
-		return textSizeDescription;
-	}
-
-	public void setTextSizeDescription ( int textSizeDescription )
-	{
-		this.textSizeDescription = textSizeDescription;
-	}
-
-	public int getTextColorDate ()
-	{
-		return textColorDate;
-	}
-
-	public void setTextColorDate ( int textColorDate )
-	{
-		this.textColorDate = textColorDate;
-	}
-
-	public int getTextColorDescription ()
-	{
-		return textColorDescription;
-	}
-
-	public void setTextColorDescription ( int textColorDescription )
-	{
-		this.textColorDescription = textColorDescription;
 	}
 
 }

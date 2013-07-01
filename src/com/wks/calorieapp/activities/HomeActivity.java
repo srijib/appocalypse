@@ -67,7 +67,7 @@ public class HomeActivity extends Activity
 		SEARCH("Food Search",R.drawable.search),
 		JOURNAL("Calorie Journal",R.drawable.ic_launcher),
 		GALLERY("Gallery",R.drawable.gallery),
-		PREFERENCES("Preferences",R.drawable.ic_launcher);
+		PROFILE("Profile",R.drawable.ic_launcher);
 		
 		private final String text;
 		private final int resourceId;
@@ -110,6 +110,10 @@ public class HomeActivity extends Activity
 			case JOURNAL:
 				Intent journalIntent = new Intent(HomeActivity.this, JournalActivity.class);
 				startActivity(journalIntent);
+				return;
+			case PROFILE:
+				Intent profileIntent = new Intent(HomeActivity.this,ProfileActivity.class);
+				startActivity(profileIntent);
 				return;
 			
 			default:

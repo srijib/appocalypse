@@ -9,4 +9,5 @@
 	<string name="title_activity_search">Search</string>
 	<string name="title_activity_journal">Calorie Journal</string>
 	<string name="title_activity_date_calories">Calorie Journal</string>
+	<string name="title_activity_profile">Profile</string>
 </resources>

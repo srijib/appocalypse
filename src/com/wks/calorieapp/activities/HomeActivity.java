@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.wks.calorieapp.R;
-import com.wks.calorieapp.adapters.NavigationGridAdapter;
+import com.wks.calorieapp.adapters.NavigationListAdapter;
 import com.wks.calorieapp.adapters.GridItem;
 
 import android.app.ActionBar;
@@ -14,14 +14,14 @@ import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.GridView;
+import android.widget.ListView;
 import android.widget.Toast;
 
 public class HomeActivity extends Activity
 {
 	private static final int NUM_ROWS = 3;
 	
-	GridView gridviewActivities;
+	ListView listviewActivities;
 	List<GridItem> activitiesList;
 	
 	@Override
@@ -52,13 +52,13 @@ public class HomeActivity extends Activity
 	
 	private void setupView()
 	{
-		this.gridviewActivities = (GridView) this.findViewById ( R.id.home_gridview_activities );
-		this.gridviewActivities.setAdapter ( new NavigationGridAdapter(this, this.activitiesList, NUM_ROWS));
+		this.listviewActivities = (ListView) this.findViewById ( R.id.home_listview_activities );
+		this.listviewActivities.setAdapter ( new NavigationListAdapter(this, this.activitiesList, NUM_ROWS));
 	}
 	
 	private void setupListeners()
 	{
-		this.gridviewActivities.setOnItemClickListener ( new OnGridActivitiesClicked() );
+		this.listviewActivities.setOnItemClickListener ( new OnGridActivitiesClicked() );
 	}
 	
 	enum Activity

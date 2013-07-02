@@ -1,7 +1,6 @@
 package com.wks.calorieapp.activities;
 
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
@@ -10,8 +9,6 @@ import com.wks.calorieapp.R;
 import com.wks.calorieapp.adapters.DateCaloriesListAdapter;
 import com.wks.calorieapp.daos.DatabaseManager;
 import com.wks.calorieapp.daos.JournalDAO;
-import com.wks.calorieapp.pojos.FoodEntry;
-import com.wks.calorieapp.pojos.ImageEntry;
 import com.wks.calorieapp.pojos.JournalEntry;
 
 import android.app.ActionBar;
@@ -22,7 +19,6 @@ import android.os.Bundle;
 import android.util.Log;
 import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 public class DateCaloriesActivity extends Activity
 {

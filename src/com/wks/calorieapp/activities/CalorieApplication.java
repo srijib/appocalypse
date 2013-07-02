@@ -5,12 +5,15 @@ import java.util.List;
 import java.util.Map;
 
 import com.wks.calorieapp.pojos.NutritionInfo;
+import com.wks.calorieapp.pojos.Profile;
 
 import android.app.Application;
-import android.graphics.Typeface;
 
 public class CalorieApplication extends Application
 {
+	public static final String FILENAME_PROFILE_JSON = "profile.json";
+	
+	private Profile profile;
 	private static CalorieApplication instance;
 	private static Map<String,List<NutritionInfo>> nutritionInfoDictionary;
 
@@ -39,26 +42,17 @@ public class CalorieApplication extends Application
 		return CalorieApplication.nutritionInfoDictionary;
 	}
 	
-	public static Typeface getFont(Font typeface)
+	public Profile getProfile()
 	{
-		return Typeface.createFromAsset ( instance.getAssets (), typeface.getFont () );
+		return this.profile;
 	}
 	
-	public enum Font
+	public void setProfile(Profile profile)
 	{
-		CANTARELL_REGULAR("Cantarell-Regular.ttf"),
-		CANTARELL_BOLD("Cantarell-Bold.ttf");
-		
-		private final String font;
-		
-		private Font(String font)
-		{
-			this.font = font;
-		}
-		
-		public String getFont ()
-		{
-			return font;
-		}
+		if(profile == null)
+			throw new IllegalStateException("Profile can not be null");
+		this.profile = profile;
 	}
+	
+	
 }

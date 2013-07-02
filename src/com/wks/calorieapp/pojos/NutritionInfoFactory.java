@@ -14,7 +14,7 @@ public class NutritionInfoFactory
 	private static final String KEY_TYPE = "type";
 	private static final String KEY_PROTEINS = "proteins";
 	
-	public static NutritionInfo createNutritionInfoFromJsonString(String json) throws ParseException
+	public static NutritionInfo createNutritionInfoFromJson(String json) throws ParseException
 	{
 		JSONParser parser = new JSONParser();
 		Object object = parser.parse ( json );

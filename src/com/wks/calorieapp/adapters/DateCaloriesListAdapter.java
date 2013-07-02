@@ -80,8 +80,8 @@ public class DateCaloriesListAdapter extends BaseAdapter
 		
 		JournalEntry entry = this.items.get ( position );
 		try{
-			holder.textMealName.setText ( entry.getFoodEntry ().getName () );
-			holder.textMealCalories.setText ( String.format ( "%.1f cal", entry.getFoodEntry ().getCalories () ));
+			holder.textMealName.setText ( entry.getNutritionInfo ().getName () );
+			holder.textMealCalories.setText ( String.format ( "%.1f cal", entry.getNutritionInfo ().getCaloriesPer100g () ));
 		}catch(NullPointerException npe)
 		{
 			String s = entry == null? "unknown date" : entry.getDateAsString ();

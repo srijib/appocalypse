@@ -7,7 +7,6 @@ import java.util.List;
 import org.json.simple.parser.ParseException;
 
 import com.wks.calorieapp.R;
-import com.wks.calorieapp.activities.CalorieApplication.Font;
 import com.wks.calorieapp.pojos.FoodSimilarity;
 import com.wks.calorieapp.pojos.NutritionInfo;
 import com.wks.calorieapp.pojos.Response;
@@ -108,8 +107,6 @@ public class GetCaloriesActivity extends Activity
 	{
 		this.progressbarLoading = ( ProgressBar ) findViewById ( R.id.get_calories_spinner_loading );
 		this.textLoadingActivity = ( TextView ) findViewById ( R.id.get_calories_text_loading );
-
-		this.textLoadingActivity.setTypeface ( CalorieApplication.getFont ( Font.CANTARELL_REGULAR ) );
 	}
 
 

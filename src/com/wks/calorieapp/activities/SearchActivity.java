@@ -12,7 +12,6 @@ import com.wks.calorieapp.R;
 import com.wks.calorieapp.adapters.NutritionInfoListAdapter;
 import com.wks.calorieapp.daos.DatabaseManager;
 import com.wks.calorieapp.daos.JournalDAO;
-import com.wks.calorieapp.pojos.FoodEntry;
 import com.wks.calorieapp.pojos.ImageEntry;
 import com.wks.calorieapp.pojos.JournalEntry;
 import com.wks.calorieapp.pojos.NutritionInfo;
@@ -240,11 +239,6 @@ public class SearchActivity extends Activity
 		{
 			if ( this.selectedFood == null ) return -1;
 
-			FoodEntry food = new FoodEntry ();
-			food.setId ( this.selectedFood.getId () );
-			food.setName ( this.selectedFood.getName () );
-			food.setCalories ( this.selectedFood.getCaloriesPer100g () );
-
 			ImageEntry image = null;
 			if ( this.fileName != null && !this.fileName.isEmpty () )
 			{
@@ -264,7 +258,7 @@ public class SearchActivity extends Activity
 			JournalEntry journal = new JournalEntry ();
 			journal.setDate ( date );
 			journal.setTime ( time );
-			journal.setFoodEntry ( food );
+			journal.setNutritionInfo ( this.selectedFood );
 			journal.setImageEntry ( image );
 
 			DatabaseManager manager = DatabaseManager.getInstance ( this );

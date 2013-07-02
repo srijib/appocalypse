@@ -12,7 +12,7 @@ public class JournalEntry
 	private long id;
 	private long date;
 	private long time = 0;
-	private FoodEntry foodEntry;
+	private NutritionInfo nutritionInfo;
 	private ImageEntry imageEntry;
 	
 	public JournalEntry()
@@ -20,23 +20,24 @@ public class JournalEntry
 		this(0,0,0,null,null);
 	}
 	
-	public JournalEntry(long id, long date,long time, FoodEntry foodEntry, ImageEntry imageEntry)
-	{
-		this.setId(id);
-		this.setDate(date);
-		this.setTime(time);
-		this.setFoodEntry(foodEntry);
-		this.setImageEntry(imageEntry);
-	}
-	
-	public JournalEntry(long id, String date,String time, FoodEntry foodEntry, ImageEntry imageEntry) throws ParseException
+	public JournalEntry(long id, String date,String time, NutritionInfo nutritionInfo, ImageEntry imageEntry) throws ParseException
 	{
 		this.setId ( id );
 		this.setDate(date);
 		this.setTime(time);
-		this.setFoodEntry(foodEntry);
+		this.setNutritionInfo ( nutritionInfo );
 		this.setImageEntry(imageEntry);
 	}
+	
+	public JournalEntry(long id, long date,long time, NutritionInfo nutritionInfo, ImageEntry imageEntry)
+	{
+		this.setId(id);
+		this.setDate(date);
+		this.setTime(time);
+		this.setNutritionInfo ( nutritionInfo );
+		this.setImageEntry(imageEntry);
+	}
+
 	
 	public void setId ( long id )
 	{
@@ -97,16 +98,16 @@ public class JournalEntry
 		return formatter.format ( this.time );
 	}
 	
-	
-	public void setFoodEntry ( FoodEntry foodEntry )
+	public void setNutritionInfo ( NutritionInfo nutritionInfo )
 	{
-		this.foodEntry = foodEntry;
+		this.nutritionInfo = nutritionInfo;
 	}
 	
-	public FoodEntry getFoodEntry ()
+	public NutritionInfo getNutritionInfo ()
 	{
-		return foodEntry;
+		return nutritionInfo;
 	}
+	
 	
 	public void setImageEntry ( ImageEntry imageEntry )
 	{
@@ -121,7 +122,7 @@ public class JournalEntry
 	@Override
 	public String toString ()
 	{
-		long foodId = this.foodEntry == null? -1:this.foodEntry.getId ();
+		long foodId = this.nutritionInfo == null? -1:this.nutritionInfo.getId ();
 		long imageId = this.imageEntry == null? -1: this.imageEntry.getId ();
 		return String.format ( "id: %d,date: %s,time: %s,foodId: %d,imageId: %d", id,this.getDateAsString (),this.getTimeAsString (),foodId,imageId );
 	}

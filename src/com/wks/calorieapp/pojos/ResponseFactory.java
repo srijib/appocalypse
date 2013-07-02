@@ -94,7 +94,7 @@ public class ResponseFactory
 			{
 
 				String nutritionInfoJson = ( String ) array.get ( i );
-				NutritionInfo nutrInfo = NutritionInfoFactory.createNutritionInfoFromJsonString ( nutritionInfoJson );
+				NutritionInfo nutrInfo = NutritionInfoFactory.createNutritionInfoFromJson ( nutritionInfoJson );
 
 				nutrInfoList.add ( nutrInfo );
 

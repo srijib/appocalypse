@@ -8,7 +8,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 public class DatabaseManager extends SQLiteOpenHelper
 {
 	public static final String DATABASE_NAME = "calorieapp";
-	public static final int DATABASE_VERSION = 3;
+	public static final int DATABASE_VERSION = 4;
 
 	private static final String CREATE_TABLE_JOURNALS =
 			"CREATE TABLE IF NOT EXISTS "+JournalDAO.TABLE_JOURNALS+" ("+
@@ -17,14 +17,19 @@ public class DatabaseManager extends SQLiteOpenHelper
 			""+JournalDAO.Column.TIME.getName()+" TEXT,"+
 			""+JournalDAO.Column.FOOD_ID.getName ()+" INTEGER,"+
 			""+JournalDAO.Column.IMAGE_ID.getName ()+" INTEGER,"+
-			"FOREIGN KEY ("+JournalDAO.Column.FOOD_ID.getName ()+") REFERENCES "+FoodDAO.TABLE_FOODS+" ("+FoodDAO.Column.ID.getName ()+"),"+
+			"FOREIGN KEY ("+JournalDAO.Column.FOOD_ID.getName ()+") REFERENCES "+NutritionInfoDAO.TABLE_FOODS+" ("+NutritionInfoDAO.Column.ID.getName ()+"),"+
 			"FOREIGN KEY ("+JournalDAO.Column.IMAGE_ID.getName ()+") REFERENCES "+ImageDAO.TABLE_IMAGES+" ("+ImageDAO.Column.ID.getName ()+"));";
 					
 	private static final String CREATE_TABLE_FOODS = 
-			"CREATE TABLE IF NOT EXISTS "+FoodDAO.TABLE_FOODS+" ("+
-			""+FoodDAO.Column.ID.getName ()+" INTEGER PRIMARY KEY,"+
-			""+FoodDAO.Column.NAME.getName ()+" TEXT,"+
-			""+FoodDAO.Column.CALORIES.getName ()+" DECIMAL(8,2));";
+			"CREATE TABLE IF NOT EXISTS "+NutritionInfoDAO.TABLE_FOODS+" ("+
+			""+NutritionInfoDAO.Column.ID.getName ()+" INTEGER PRIMARY KEY,"+
+			""+NutritionInfoDAO.Column.NAME.getName ()+" TEXT,"+
+			""+NutritionInfoDAO.Column.TYPE.getName ()+" TEXT,"+
+			""+NutritionInfoDAO.Column.URL.getName ()+" TEXT,"+
+			""+NutritionInfoDAO.Column.CALORIES.getName ()+" DECIMAL(8,2),"+
+			""+NutritionInfoDAO.Column.FAT.getName ()+" DECIMAL(8,2)," +
+			""+NutritionInfoDAO.Column.CARBS.getName ()+" DECIMAL(8,2),"+
+			""+NutritionInfoDAO.Column.PROTEINS.getName ()+" DECIMAL(8,2));";
 			
 	private static final String CREATE_TABLE_IMAGES = 
 			"CREATE TABLE IF NOT EXISTS "+ImageDAO.TABLE_IMAGES+" ("+
@@ -32,7 +37,7 @@ public class DatabaseManager extends SQLiteOpenHelper
 			""+ImageDAO.Column.FILE_NAME.getName ()+" TEXT);";
 	
 	private static final String DROP_TABLE_JOURNAL = "DROP TABLE IF EXISTS " + JournalDAO.TABLE_JOURNALS + ";";
-	private static final String DROP_TABLE_FOODS = "DROP TABLE IF EXISTS " + FoodDAO.TABLE_FOODS + ";";
+	private static final String DROP_TABLE_FOODS = "DROP TABLE IF EXISTS " + NutritionInfoDAO.TABLE_FOODS + ";";
 	private static final String DROP_TABLE_IMAGES = "DROP TABLE IF EXISTS " + ImageDAO.TABLE_IMAGES + ";";
 
 	private static DatabaseManager instance = null;

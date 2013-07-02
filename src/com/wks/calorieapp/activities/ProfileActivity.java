@@ -1,12 +1,17 @@
 package com.wks.calorieapp.activities;
 
+import java.io.IOException;
+
 import com.wks.calorieapp.R;
 import com.wks.calorieapp.adapters.ActivityLifestyleSpinnerAdapter;
-import com.wks.calorieapp.models.Profile;
-import com.wks.calorieapp.models.Profile.Sex;
+import com.wks.calorieapp.pojos.Profile;
+import com.wks.calorieapp.pojos.Profile.Sex;
+import com.wks.calorieapp.pojos.ProfileException;
+import com.wks.calorieapp.utils.FileUtil;
 
 import android.app.ActionBar;
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
@@ -17,47 +22,63 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ImageView;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.Spinner;
-import android.widget.TextView;
+import android.widget.Toast;
 
 public class ProfileActivity extends Activity
 {
+	//private static final String TAG = ProfileActivity.class.getCanonicalName ();
 	private RadioGroup radiogroupSex;
 	private RadioButton radioMale;
-	private RadioButton radioFemale;
 
 	private ActivityLifestyleSpinnerAdapter activityLifestyleAdapter;
 	private Spinner spinnerActivityLifestyle;
-
 
 	private EditText editWeightLossGoal;
 	private EditText editAge;
 	private EditText editHeight;
 	private EditText editWeight;
 
-	private TextView textRecommendedCalories;
+	private Button buttonCalculateRecommendedCalories;
 
-	private Profile profile;
+	private ViewMode mode;
+	
+	private float selectedActivityFactor;//<- symptomn of bad programming :(
 
 	@Override
 	protected void onCreate ( Bundle savedInstanceState )
 	{
 		super.onCreate ( savedInstanceState );
-		this.setContentView ( R.layout.activity_profile );
-
-		this.profile = new Profile ();
-
+		Bundle extras = this.getIntent ().getExtras ();
+		
+		this.mode = ViewMode.REGULAR;
+		
+		if(extras != null)
+		{
+			this.mode = ViewMode.valueOf (extras.getString ( ExtraKey.KEY_PROFILE_ACTIVITY_MODE.key ()));
+		}
+		
+		this.setContentView ( this.mode == ViewMode.REGULAR? R.layout.activity_profile : R.layout.activity_profile_welcome );
+		
 		this.setupActionBar ();
 		this.setupView ();
 		this.setupListeners ();
 		this.bindView ();
-
 	}
 
+	@Override
+	protected void onPause ()
+	{
+		
+		//remove from activity stack.
+		if(this.mode == ViewMode.WELCOME)
+			this.finish ();
+	}
+	
 	@Override
 	public boolean onCreateOptionsMenu ( Menu menu )
 	{
@@ -65,7 +86,7 @@ public class ProfileActivity extends Activity
 		inflater.inflate ( R.menu.activity_profile, menu );
 		return true;
 	}
-	
+
 	@Override
 	public boolean onOptionsItemSelected ( MenuItem item )
 	{
@@ -74,15 +95,34 @@ public class ProfileActivity extends Activity
 		case android.R.id.home:
 			Intent homeIntent = new Intent ( this, HomeActivity.class );
 			homeIntent.addFlags ( Intent.FLAG_ACTIVITY_CLEAR_TOP );
-			startActivity(homeIntent);
+			startActivity ( homeIntent );
 			return true;
 
 		case R.id.profile_menu_done:
-			//TODO
-			//-store in file
-			//-set as application variable.
-			//-implement in journalActivity.
-			return true;
+			// TODO
+			
+			try
+			{
+				Profile profile = this.createProfile ();
+				
+				if(profile == null)
+					return false;
+				
+				FileUtil.writeToFile ( this, CalorieApplication.FILENAME_PROFILE_JSON, profile.toJSON (), Context.MODE_WORLD_READABLE );
+				CalorieApplication app = (CalorieApplication)  this.getApplication ();
+				app.setProfile ( profile );
+				
+				Intent homeIntent2 = new Intent(this, HomeActivity.class);
+				homeIntent2.addFlags ( Intent.FLAG_ACTIVITY_CLEAR_TOP );
+				this.startActivity ( homeIntent2 );
+				return true;
+			}
+			catch ( IOException e )
+			{
+				// do nothing.
+			}
+			
+			return true;	
 			
 		default:
 			return super.onOptionsItemSelected ( item );
@@ -92,8 +132,13 @@ public class ProfileActivity extends Activity
 	private void setupActionBar ()
 	{
 		ActionBar actionBar = this.getActionBar ();
-
-		actionBar.setDisplayHomeAsUpEnabled ( true );
+		
+		if(this.mode == ViewMode.WELCOME)
+		{
+			actionBar.setTitle ( this.getResources ().getString ( R.string.title_activity_profile_welcome ) );
+		}
+		
+		actionBar.setDisplayHomeAsUpEnabled ( this.mode == ViewMode.REGULAR );
 
 		Drawable d = this.getResources ().getDrawable ( R.drawable.bg_actionbar );
 		actionBar.setBackgroundDrawable ( d );
@@ -101,9 +146,11 @@ public class ProfileActivity extends Activity
 
 	private void setupView ()
 	{
+		
 		this.radiogroupSex = ( RadioGroup ) this.findViewById ( R.id.profile_radiogroup_sex );
 		this.radioMale = ( RadioButton ) this.findViewById ( R.id.profile_radio_male );
-		this.radioFemale = ( RadioButton ) this.findViewById ( R.id.profile_radio_female );
+		// this.radioFemale = ( RadioButton ) this.findViewById (
+		// R.id.profile_radio_female );
 
 		this.spinnerActivityLifestyle = ( Spinner ) this.findViewById ( R.id.profile_spinner_activity_lifestyle );
 		this.activityLifestyleAdapter = new ActivityLifestyleSpinnerAdapter ( this );
@@ -114,18 +161,18 @@ public class ProfileActivity extends Activity
 		this.editHeight = ( EditText ) this.findViewById ( R.id.profile_edit_height );
 		this.editAge = ( EditText ) this.findViewById ( R.id.profile_edit_age );
 
-		this.textRecommendedCalories = ( TextView ) this.findViewById ( R.id.profile_text_recommended_calories );
+		this.buttonCalculateRecommendedCalories = ( Button ) this.findViewById ( R.id.profile_button_calculate_recommended_calories );
 	}
 
 	private void setupListeners ()
 	{
 		this.radiogroupSex.setOnCheckedChangeListener ( new OnSexToggled () );
-
 		this.spinnerActivityLifestyle.setOnItemSelectedListener ( new onActivityLifestyleSelected () );
+		this.buttonCalculateRecommendedCalories.setOnClickListener ( new OnCalculateRecommendedCaloriesClicked () );
 
 		OnTextChanged onTextChanged = new OnTextChanged ();
 
-		this.editWeight.addTextChangedListener ( onTextChanged );
+		this.editWeightLossGoal.addTextChangedListener ( onTextChanged );
 		this.editWeight.addTextChangedListener ( onTextChanged );
 		this.editHeight.addTextChangedListener ( onTextChanged );
 		this.editAge.addTextChangedListener ( onTextChanged );
@@ -133,22 +180,63 @@ public class ProfileActivity extends Activity
 
 	private void bindView ()
 	{
+		CalorieApplication app = (CalorieApplication) this.getApplication ();
+		Profile profile = app.getProfile ();
+		
+		if(profile == null)
+			profile = new Profile();
+		
 		this.radioMale.setChecked ( profile.getSex ().equals ( Profile.Sex.MALE ) );
-		this.editAge.setText ( "" + this.profile.getAge () );
-		this.editWeight.setText ( "" + this.profile.getWeight () );
-		this.editHeight.setText ( "" + this.profile.getHeight () );
-		this.editWeightLossGoal.setText ( "" + this.profile.getWeightLossGoal () );
+		this.editAge.setText ( "" + profile.getAge () );
+		this.editWeight.setText ( "" + profile.getWeight () );
+		this.editHeight.setText ( "" + profile.getHeight () );
+		this.editWeightLossGoal.setText ( "" + profile.getWeightLossGoal () );
 
-		int position = this.activityLifestyleAdapter.getPositionForActivityFactor ( this.profile.getActivityFactor () );
+		int position = this.activityLifestyleAdapter.getPositionForActivityFactor ( profile.getActivityFactor () );
 		this.spinnerActivityLifestyle.setSelection ( position );
 
 	}
 
-	private void updateTextRecommendedCalories ()
+	private void toggleButtonCalculateRecommendedCaloriesText ()
 	{
-		String templateText = this.getResources ().getString ( R.string.profile_layout_text_recommended_calories );
-		float recommendedCalories = this.profile.getDailyCaloricNeeds ();
-		this.textRecommendedCalories.setText ( String.format ( templateText, recommendedCalories ) );
+		this.buttonCalculateRecommendedCalories.setText ( this.getResources ().getString (
+				R.string.profile_layout_button_get_recommended_calories_update ) );
+	}
+
+	private Profile createProfile () 
+	{
+		try
+		{
+			Sex sex = this.radioMale.isChecked () ? Sex.MALE : Sex.FEMALE;
+			float activityFactor = this.selectedActivityFactor;
+			String sAge = ProfileActivity.this.editAge.getText ().toString ();
+			String sHeight = ProfileActivity.this.editHeight.getText ().toString ();
+			String sWeight = ProfileActivity.this.editWeight.getText ().toString ();
+			String sWeightLossGoal = ProfileActivity.this.editWeightLossGoal.getText ().toString ();
+
+			
+			Profile profile = new Profile();
+			
+			profile.setSex ( sex );
+			profile.setActivityFactor ( activityFactor );
+			profile.setAge ( Integer.parseInt ( sAge ) );
+			profile.setHeight ( Float.parseFloat ( sHeight ) );
+			profile.setWeight ( Float.parseFloat ( sWeight ) );
+			profile.setWeightLossGoal ( Integer.parseInt ( sWeightLossGoal ) );
+
+			return profile;
+		}
+		catch ( NumberFormatException e )
+		{
+			Toast.makeText ( this, this.getResources ().getString ( R.string.profile_error_data_missing ), Toast.LENGTH_LONG ).show ();
+			return null;
+		}
+		catch ( ProfileException e )
+		{
+			Toast.makeText ( this, e.getMessage (), Toast.LENGTH_LONG ).show ();
+
+			return null;
+		}
 	}
 
 	class OnSexToggled implements RadioGroup.OnCheckedChangeListener
@@ -156,9 +244,7 @@ public class ProfileActivity extends Activity
 
 		public void onCheckedChanged ( RadioGroup group, int checkedId )
 		{
-			Sex sex = checkedId == R.id.profile_radio_male ? Sex.MALE : Sex.FEMALE;
-			ProfileActivity.this.profile.setSex ( sex );
-			ProfileActivity.this.updateTextRecommendedCalories ();
+			ProfileActivity.this.toggleButtonCalculateRecommendedCaloriesText ();
 		}
 	}
 
@@ -167,53 +253,57 @@ public class ProfileActivity extends Activity
 
 		public void onItemSelected ( AdapterView< ? > parent, View v, int position, long id )
 		{
-			float activityFactor = ProfileActivity.this.activityLifestyleAdapter.getItem ( position );
-			ProfileActivity.this.profile.setActivityFactor ( activityFactor );
-			ProfileActivity.this.updateTextRecommendedCalories ();
+			ProfileActivity.this.selectedActivityFactor = ProfileActivity.this.activityLifestyleAdapter.getItem ( position );
+			ProfileActivity.this.toggleButtonCalculateRecommendedCaloriesText ();
 		}
 
 		@Override
 		public void onNothingSelected ( AdapterView< ? > parent )
 		{
-			ProfileActivity.this.profile.setActivityFactor ( Profile.MIN_ACTIVITY_FACTOR );
-			ProfileActivity.this.updateTextRecommendedCalories ();
+			ProfileActivity.this.selectedActivityFactor = Profile.MIN_ACTIVITY_FACTOR;
+			ProfileActivity.this.toggleButtonCalculateRecommendedCaloriesText ();
 		}
+	}
+
+	class OnCalculateRecommendedCaloriesClicked implements View.OnClickListener
+	{
+		public void onClick ( View v )
+		{
+
+			Profile profile = ProfileActivity.this.createProfile ();
+
+			String template = ProfileActivity.this.getResources ().getString ( R.string.profile_layout_button_get_recommended_calories_template );
+			template = String.format ( template, profile.getRecommendedDailyCalories () );
+
+			ProfileActivity.this.buttonCalculateRecommendedCalories.setText ( template );
+
+		}
+
 	}
 
 	class OnTextChanged implements TextWatcher
 	{
-
-		public void afterTextChanged ( Editable editable )
+		@Override
+		public void afterTextChanged ( Editable arg0 )
 		{
-			try
-			{
-				String sAge = ProfileActivity.this.editAge.getText ().toString ();
-				String sWeight = ProfileActivity.this.editWeight.getText ().toString ();
-				String sHeight = ProfileActivity.this.editHeight.getText ().toString ();
-				String sWeightLossGoal = ProfileActivity.this.editWeightLossGoal.getText ().toString ();
-
-				ProfileActivity.this.profile.setAge ( sAge.isEmpty () ? 0 : Integer.parseInt ( sAge ) );
-				ProfileActivity.this.profile.setHeight ( sHeight.isEmpty () ? 0 : Float.parseFloat ( sHeight ) );
-				ProfileActivity.this.profile.setWeight ( sWeight.isEmpty () ? 0 : Float.parseFloat ( sWeight ) );
-				ProfileActivity.this.profile.setWeightLossGoal ( sWeightLossGoal.isEmpty () ? 0 : Integer.parseInt ( sWeightLossGoal ) );
-			
-				ProfileActivity.this.updateTextRecommendedCalories ();
-			}
-			catch ( NumberFormatException e )
-			{
-				// do nothing
-			}
 		}
 
+		@Override
 		public void beforeTextChanged ( CharSequence arg0, int arg1, int arg2, int arg3 )
 		{
-
 		}
 
-		public void onTextChanged ( CharSequence arg0, int arg1, int arg2, int arg3 )
+		@Override
+		public void onTextChanged ( CharSequence s, int start, int before, int count )
 		{
-
+			ProfileActivity.this.toggleButtonCalculateRecommendedCaloriesText ();
 		}
 
+	}
+	
+	public enum ViewMode
+	{
+		WELCOME,
+		REGULAR;
 	}
 }

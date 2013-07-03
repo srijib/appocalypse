@@ -2,8 +2,6 @@ package com.wks.calorieapp.activities;
 
 import java.io.IOException;
 
-import org.json.simple.parser.ParseException;
-
 import com.wks.calorieapp.pojos.Profile;
 import com.wks.calorieapp.pojos.ProfileException;
 import com.wks.calorieapp.pojos.ProfileFactory;
@@ -24,13 +22,15 @@ public class StartActivity extends Activity
 		// TODO Auto-generated method stub
 		super.onCreate ( savedInstanceState );
 		// you might want to set content view over here.
+		Log.e ( TAG, "BEGIN" );
+		String profileCsv = this.loadProfileCsv ();
 
-		String profileJson = this.loadProfileJson ();
-
-		if ( profileJson != null && !profileJson.isEmpty () )
+		if ( profileCsv != null && !profileCsv.isEmpty () )
 		{
-			if ( this.loadProfile ( profileJson ) )
+
+			if ( this.loadProfile ( profileCsv ) )
 			{
+
 				Intent homeIntent = new Intent ( this, HomeActivity.class );
 				homeIntent.addFlags ( Intent.FLAG_ACTIVITY_CLEAR_TOP );
 				startActivity ( homeIntent );
@@ -40,6 +40,7 @@ public class StartActivity extends Activity
 
 		// assume first launch. Direct user to profile activity with welcome
 		// view.
+
 		Intent welcomeIntent = new Intent ( this, ProfileActivity.class );
 		welcomeIntent.addFlags ( Intent.FLAG_ACTIVITY_CLEAR_TOP );
 		welcomeIntent.putExtra ( ExtraKey.KEY_PROFILE_ACTIVITY_MODE.key (), ProfileActivity.ViewMode.WELCOME.toString () );
@@ -54,43 +55,41 @@ public class StartActivity extends Activity
 		super.onPause ();
 		this.finish ();
 	}
-	
-	private String loadProfileJson ()
+
+	private String loadProfileCsv ()
 	{
-		String profileJson = null;
+		String profileCsv = null;
+
 		try
 		{
-			profileJson = FileUtil.readFromFile ( this, CalorieApplication.FILENAME_PROFILE_JSON );
+			profileCsv = FileUtil.readFromFile ( this, CalorieApplication.FILENAME_PROFILE_CSV);
+
 		}
 		catch ( IOException e )
 		{
 			Log.e ( TAG, e.getMessage () );
 		}
 
-		return profileJson;
+		return profileCsv;
 	}
 
-	private boolean loadProfile ( String profileJson )
+	private boolean loadProfile ( String profileCSV )
 	{
 		try
 		{
-			Profile profile = ProfileFactory.createProfileFromJson ( profileJson );
-			if ( profile != null )
+
+			Profile profile = ProfileFactory.createProfileFromCSV ( profileCSV );
+			if(profile!=null)
 			{
 				CalorieApplication app = ( CalorieApplication ) this.getApplication ();
 				app.setProfile ( profile );
-				return true;
 			}
-
-		}
-		catch ( ParseException e )
-		{
-			Log.e ( TAG, e.getMessage () );
-
+			return true;
+			
 		}
 		catch ( ProfileException e )
 		{
-			Log.e ( TAG, e.getMessage () );
+			Log.e ( TAG, "" + e.getMessage () );
 
 		}
 		return false;

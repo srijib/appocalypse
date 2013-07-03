@@ -15,6 +15,7 @@ import com.wks.calorieapp.pojos.NutritionInfo;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteQueryBuilder;
 import android.util.Log;
 
 public class JournalDAO
@@ -27,14 +28,6 @@ public class JournalDAO
 			Column.ID.getName (), Column.DATE.getName (), Column.TIME.getName (), Column.FOOD_ID.getName (), Column.IMAGE_ID.getName ()
 	};
 	
-
-	public static final String TOTAL_CALORIES = "total_calories";
-	public static final String queryCaloriesEachDayOfParameterMonth = "SELECT "+JournalDAO.Column.DATE.getFullName ()+", SUM("+NutritionInfoDAO.Column.CALORIES.getFullName ()+") FROM "+JournalDAO.TABLE_JOURNALS+", "+NutritionInfoDAO.TABLE_FOODS+"  WHERE ("+JournalDAO.Column.ID.getFullName ()+" = "+NutritionInfoDAO.Column.ID.getFullName ()+")"
-			+ " AND ("+JournalDAO.Column.DATE.getFullName ()+" LIKE %s) GROUP BY "+JournalDAO.Column.DATE.getFullName ()+";";
-	
-	public static final String queryFoodEntriesForParameterDate = "SELECT "+NutritionInfoDAO.Column.ID.getFullName ()+", "+NutritionInfoDAO.Column.NAME.getFullName ()+", "+NutritionInfoDAO.Column.TYPE.getFullName ()+", "+NutritionInfoDAO.Column.URL.getFullName ()+", "+NutritionInfoDAO.Column.CALORIES.getFullName ()+", "+NutritionInfoDAO.Column.FAT.getFullName ()+", "+NutritionInfoDAO.Column.CARBS.getFullName ()+", "+NutritionInfoDAO.Column.PROTEINS.getFullName ()+", "+ ImageDAO.Column.ID.getFullName ()+", "+ImageDAO.Column.FILE_NAME.getFullName ()+", "+JournalDAO.Column.ID.getFullName()+","+JournalDAO.Column.TIME.getFullName()+"  FROM "+NutritionInfoDAO.TABLE_FOODS+", "+JournalDAO.TABLE_JOURNALS+", "+ImageDAO.TABLE_IMAGES+" WHERE ("+JournalDAO.Column.FOOD_ID.getFullName ()+" = "+NutritionInfoDAO.Column.ID.getFullName ()+") AND ("+JournalDAO.Column.DATE.getFullName ()+" LIKE %s)";
-	
-	
 	private SQLiteDatabase db;
 
 	public JournalDAO ( SQLiteDatabase db )
@@ -43,7 +36,7 @@ public class JournalDAO
 	}
 
 
-	public long addToJournal ( JournalEntry journal)
+	public long create ( JournalEntry journal)
 	{
 		//if journal entry or food entry are null, throw exception
 		if ( journal == null || journal.getNutritionInfo () == null) throw new IllegalStateException ( "A Journal entry can not be null or have a null food entry" );
@@ -121,6 +114,27 @@ public class JournalDAO
 		c.close ();
 		return journal;
 	}
+	
+	public List< JournalEntry > read ( Calendar cal ) throws ParseException
+	{
+		SimpleDateFormat formatter = new SimpleDateFormat(JournalEntry.DATE_FORMAT);
+		String monthRegex = "'"+formatter.format ( cal.getTimeInMillis () )+"'";
+		
+		Cursor c = this.db.query ( TABLE_JOURNALS, JournalDAO.COLUMNS, Column.DATE.getName () + " = "+monthRegex, null, null, null, null );
+		
+		List<JournalEntry> entries = new ArrayList<JournalEntry>();
+		if ( c != null && c.moveToFirst () )
+		{
+			while ( !c.isAfterLast () )
+			{
+				entries.add ( cursorToJournalDataTransferObject ( c ) );
+				c.moveToNext ();
+			}
+		}
+
+		c.close ();
+		return entries;
+	}
 
 	public List< JournalEntry > read () throws ParseException
 	{
@@ -158,26 +172,21 @@ public class JournalDAO
 		return db.delete ( TABLE_JOURNALS, Column.ID.getName () + " = " + id, null );
 	}
 
-	
-	public Map< Calendar, Float > getCaloriesForEachDay ( long timeInMillis )
-	{
-		Calendar calendar = Calendar.getInstance ();
-		calendar.setTimeInMillis ( timeInMillis );
-		return getCaloriesForMonth(calendar);
-	}
 
 	public Map< Calendar, Float > getCaloriesForMonth ( Calendar cal )
 	{
 		SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM");
-		String monthRegex = formatter.format ( cal.getTimeInMillis () ) + "-__";
+		String monthRegex = "'"+formatter.format ( cal.getTimeInMillis () ) + "-__"+"'";
 		
 		Map< Calendar, Float > dayCaloriesMap = new HashMap< Calendar, Float > ();
-
-		//This works. DO NOT TOUCH!!!!!!!!!!
-		String unparameterQuery = "SELECT journals.date,SUM(nutrinfo.calories) FROM journals, nutrinfo WHERE (journals.food_id = nutrinfo._id) AND (journals.date LIKE %s) GROUP BY journals.date;";
-		String query = String.format ( unparameterQuery, "'"+monthRegex+"'");
-		Cursor c = this.db.rawQuery ( query, null);
-
+		
+		SQLiteQueryBuilder query = new SQLiteQueryBuilder();
+		query.setTables ( JournalDAO.TABLE_JOURNALS+","+NutritionInfoDAO.TABLE_NUTRITION );
+		
+		String whereClause = "("+JournalDAO.Column.FOOD_ID.getFullName ()+" = "+NutritionInfoDAO.Column.ID.getFullName ()+") AND ("+JournalDAO.Column.DATE+" LIKE "+monthRegex+")";
+		
+		Cursor c = query.query ( db, new String[]{JournalDAO.Column.DATE.getFullName (),"SUM("+NutritionInfoDAO.Column.CALORIES.getFullName ()+")"}, whereClause, null, JournalDAO.Column.DATE.getFullName (), null, null );
+		
 		if ( c != null && c.moveToFirst () )
 		{
 
@@ -212,49 +221,7 @@ public class JournalDAO
 		return dayCaloriesMap;
 	}
 
-	public List< JournalEntry > getEntriesForDay ( Calendar cal ) throws ParseException
-	{
-		
-		//TODO sort this out.
-		SimpleDateFormat formatter = new SimpleDateFormat(JournalEntry.DATE_FORMAT);
-		String monthRegex = formatter.format ( cal.getTimeInMillis () );
-		
-		List<JournalEntry> entries = new ArrayList<JournalEntry>();
-		
-		String query = String.format ( queryFoodEntriesForParameterDate, monthRegex );
-		
-		Cursor c = this.db.rawQuery ( query,null);
-		
-		if(c != null && c.moveToFirst ())
-		{
-			while(!c.isAfterLast ())
-			{
-				NutritionInfo nutrInfo = new NutritionInfo();
-				nutrInfo.setId ( c.getLong ( 0 ) );
-				nutrInfo.setName ( c.getString ( 1 ) );
-				nutrInfo.setType( c.getString ( 2 ));
-				nutrInfo.setUrl ( c.getString ( 3 ) );
-				nutrInfo.setCaloriesPer100g ( c.getFloat ( 4 ) );
-				nutrInfo.setGramFatPer100g ( c.getFloat ( 5 ) );
-				nutrInfo.setGramCarbsPer100g ( c.getFloat ( 6 ) );
-				nutrInfo.setGramProteinsPer100g ( c.getFloat ( 7 ) );
-				
-				ImageEntry imageEntry = new ImageEntry();
-				imageEntry.setId ( c.getLong ( 8 ) );
-				imageEntry.setFileName ( c.getString ( 9 ) );
-				
-				JournalEntry journalEntry = new JournalEntry();
-				journalEntry.setId ( c.getLong ( 10 ) );
-				journalEntry.setTime ( c.getString ( 11 ) );
-				journalEntry.setDate ( monthRegex );
-				journalEntry.setNutritionInfo ( nutrInfo );
-				journalEntry.setImageEntry ( imageEntry );
-				entries.add ( journalEntry );
-			}
-		}
-		
-		return entries;
-	}
+	
 	
 	
 
@@ -275,6 +242,7 @@ public class JournalDAO
 		return new JournalEntry ( id, date, time, info, imageEntry );
 	}
 
+	
 	public static enum Column
 	{
 		ID ( "_id" ), DATE ( "date" ), TIME ( "time" ), FOOD_ID ( "food_id" ), IMAGE_ID ( "image_id" );

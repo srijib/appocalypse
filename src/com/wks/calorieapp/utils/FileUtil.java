@@ -1,11 +1,14 @@
 package com.wks.calorieapp.utils;
 
+import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
 
 import android.content.Context;
+import android.util.Log;
 
 public class FileUtil
 {
@@ -15,7 +18,9 @@ public class FileUtil
 		try
 		{
 			fos = context.openFileOutput ( filename, mode );
-			fos.write ( text.getBytes () );
+			fos.write ( text.getBytes ( "UTF-8" ) );
+
+			Log.e ( "WRITTEN", text );
 		}
 		catch ( FileNotFoundException e )
 		{
@@ -44,16 +49,18 @@ public class FileUtil
 	public static String readFromFile ( Context context, String fileName ) throws IOException
 	{
 		FileInputStream fis = null;
-
+		InputStreamReader isr = null;
+		BufferedReader reader = null;
 		StringBuilder content = new StringBuilder ( "" );
 		try
 		{
-			byte [] buffer = new byte [1024];
 			fis = context.openFileInput ( fileName );
-
-			while ( fis.read ( buffer ) != -1 )
+			isr = new InputStreamReader ( fis );
+			reader = new BufferedReader ( isr );
+			String line;
+			while ( ( line =reader.readLine () ) != null )
 			{
-				content.append ( new String ( buffer ) );
+				content.append ( line );
 			}
 		}
 		catch ( FileNotFoundException e )
@@ -70,6 +77,8 @@ public class FileUtil
 			{
 				try
 				{
+					reader.close ();
+					isr.close ();
 					fis.close ();
 				}
 				catch ( IOException e )
@@ -79,7 +88,7 @@ public class FileUtil
 				}
 			}
 		}
-
+		Log.e ( "READ", content.toString () );
 		return content.toString ();
 	}
 }

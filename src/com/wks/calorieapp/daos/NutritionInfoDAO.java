@@ -12,7 +12,7 @@ import android.database.sqlite.SQLiteDatabase;
 public class NutritionInfoDAO
 {
 
-	public static final String TABLE_FOODS = "nutrinfo";
+	public static final String TABLE_NUTRITION = "nutrition";
 	public static final String[] COLUMNS = {Column.ID.getName (),Column.NAME.getName (),Column.TYPE.getName (),Column.URL.getName (),Column.CALORIES.getName (),Column.FAT.getName (),Column.CARBS.getName (),Column.PROTEINS.getName ()};
 
 	
@@ -34,14 +34,14 @@ public class NutritionInfoDAO
 		values.put ( Column.FAT.getName (), nutrInfo.getFatPer100g () );
 		values.put ( Column.CARBS.getName (), nutrInfo.getGramCarbsPer100g () );
 		values.put ( Column.PROTEINS.getName (), nutrInfo.getGramProteinsPer100g () );
-		return db.insert ( TABLE_FOODS, null, values );
+		return db.insert ( TABLE_NUTRITION, null, values );
 	}
 	
 	public NutritionInfo read(long id)
 	{
 		NutritionInfo food = null;
 		
-		Cursor c = db.query ( TABLE_FOODS, COLUMNS, Column.ID.getName ()+" = "+id, null, null, null, null );
+		Cursor c = db.query ( TABLE_NUTRITION, COLUMNS, Column.ID.getName ()+" = "+id, null, null, null, null );
 		
 		if(c != null && c.moveToFirst())
 		{
@@ -56,7 +56,7 @@ public class NutritionInfoDAO
 	{
 		List<NutritionInfo> foods = new ArrayList<NutritionInfo>();
 		
-		Cursor c = db.query ( TABLE_FOODS, COLUMNS, null, null, null, null, null );
+		Cursor c = db.query ( TABLE_NUTRITION, COLUMNS, null, null, null, null, null );
 		
 		if(c != null && c.moveToFirst())
 		{
@@ -83,12 +83,12 @@ public class NutritionInfoDAO
 		values.put ( Column.CARBS.getName (), nutrInfo.getGramCarbsPer100g () );
 		values.put ( Column.PROTEINS.getName (), nutrInfo.getGramProteinsPer100g () );
 		
-		return db.update ( TABLE_FOODS, values, Column.ID.getName ()+" = "+nutrInfo.getId (), null );
+		return db.update ( TABLE_NUTRITION, values, Column.ID.getName ()+" = "+nutrInfo.getId (), null );
 	}
 	
 	public int delete(long id)
 	{
-		return db.delete ( TABLE_FOODS, Column.ID.getName ()+" = "+id, null );
+		return db.delete ( TABLE_NUTRITION, Column.ID.getName ()+" = "+id, null );
 	}
 	
 	private NutritionInfo cursorToNutritionInfoObject(Cursor c)
@@ -131,7 +131,7 @@ public class NutritionInfoDAO
 		
 		public String getFullName()
 		{
-			return NutritionInfoDAO.TABLE_FOODS+"."+name;
+			return NutritionInfoDAO.TABLE_NUTRITION+"."+name;
 		}
 	}
 }

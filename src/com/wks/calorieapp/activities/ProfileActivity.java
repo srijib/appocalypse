@@ -73,7 +73,7 @@ public class ProfileActivity extends Activity
 	@Override
 	protected void onPause ()
 	{
-		
+		super.onPause ();
 		//remove from activity stack.
 		if(this.mode == ViewMode.WELCOME)
 			this.finish ();
@@ -108,7 +108,7 @@ public class ProfileActivity extends Activity
 				if(profile == null)
 					return false;
 				
-				FileUtil.writeToFile ( this, CalorieApplication.FILENAME_PROFILE_JSON, profile.toJSON (), Context.MODE_WORLD_READABLE );
+				FileUtil.writeToFile ( this, CalorieApplication.FILENAME_PROFILE_CSV, profile.toCSV (), Context.MODE_PRIVATE );
 				CalorieApplication app = (CalorieApplication)  this.getApplication ();
 				app.setProfile ( profile );
 				
@@ -271,12 +271,14 @@ public class ProfileActivity extends Activity
 		{
 
 			Profile profile = ProfileActivity.this.createProfile ();
+			
+			if(profile != null)
+			{
+				String template = ProfileActivity.this.getResources ().getString ( R.string.profile_layout_button_get_recommended_calories_template );
+				template = String.format ( template, profile.getRecommendedDailyCalories () );
 
-			String template = ProfileActivity.this.getResources ().getString ( R.string.profile_layout_button_get_recommended_calories_template );
-			template = String.format ( template, profile.getRecommendedDailyCalories () );
-
-			ProfileActivity.this.buttonCalculateRecommendedCalories.setText ( template );
-
+				ProfileActivity.this.buttonCalculateRecommendedCalories.setText ( template );
+			}
 		}
 
 	}

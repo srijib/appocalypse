@@ -8,8 +8,12 @@ import java.util.List;
 import com.wks.calorieapp.R;
 import com.wks.calorieapp.adapters.DateCaloriesListAdapter;
 import com.wks.calorieapp.daos.DatabaseManager;
+import com.wks.calorieapp.daos.ImageDAO;
 import com.wks.calorieapp.daos.JournalDAO;
+import com.wks.calorieapp.daos.NutritionInfoDAO;
+import com.wks.calorieapp.pojos.ImageEntry;
 import com.wks.calorieapp.pojos.JournalEntry;
+import com.wks.calorieapp.pojos.NutritionInfo;
 
 import android.app.ActionBar;
 import android.app.Activity;
@@ -51,7 +55,35 @@ public class DateCaloriesActivity extends Activity
 		this.setupActionBar();
 		this.setupView();
 		this.setupListeners();
+		//this.test();
 	}
+	/*
+	private void test()
+	{
+		try
+		{
+			DatabaseManager manager = DatabaseManager.getInstance ( this );
+			SQLiteDatabase db = manager.open ();
+			
+			JournalDAO j = new JournalDAO(db);
+			List<JournalEntry> js = j.read ();
+			
+			NutritionInfoDAO n = new NutritionInfoDAO(db);
+			List<NutritionInfo> ns = n.read ();
+			
+			ImageDAO i = new ImageDAO(db);
+			List<ImageEntry> is = i.read ();
+			
+			Log.e("fuck android",js.toString ());
+			Log.e("fuck android",ns.toString ());
+			Log.e("fuck android",is.toString ());
+		}
+		catch ( ParseException e )
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}*/
 	
 	private void setupActionBar()
 	{
@@ -88,7 +120,7 @@ public class DateCaloriesActivity extends Activity
 		List<JournalEntry> mealList = new ArrayList<JournalEntry>();
 		try
 		{
-			mealList = journalDao.getEntriesForDay ( this.calendar );
+			mealList = journalDao.read ( this.calendar );
 		}
 		catch ( ParseException e )
 		{

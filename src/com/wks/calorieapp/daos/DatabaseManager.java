@@ -8,7 +8,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 public class DatabaseManager extends SQLiteOpenHelper
 {
 	public static final String DATABASE_NAME = "calorieapp";
-	public static final int DATABASE_VERSION = 4;
+	public static final int DATABASE_VERSION = 5;
 
 	private static final String CREATE_TABLE_JOURNALS =
 			"CREATE TABLE IF NOT EXISTS "+JournalDAO.TABLE_JOURNALS+" ("+
@@ -17,11 +17,11 @@ public class DatabaseManager extends SQLiteOpenHelper
 			""+JournalDAO.Column.TIME.getName()+" TEXT,"+
 			""+JournalDAO.Column.FOOD_ID.getName ()+" INTEGER,"+
 			""+JournalDAO.Column.IMAGE_ID.getName ()+" INTEGER,"+
-			"FOREIGN KEY ("+JournalDAO.Column.FOOD_ID.getName ()+") REFERENCES "+NutritionInfoDAO.TABLE_FOODS+" ("+NutritionInfoDAO.Column.ID.getName ()+"),"+
+			"FOREIGN KEY ("+JournalDAO.Column.FOOD_ID.getName ()+") REFERENCES "+NutritionInfoDAO.TABLE_NUTRITION+" ("+NutritionInfoDAO.Column.ID.getName ()+"),"+
 			"FOREIGN KEY ("+JournalDAO.Column.IMAGE_ID.getName ()+") REFERENCES "+ImageDAO.TABLE_IMAGES+" ("+ImageDAO.Column.ID.getName ()+"));";
 					
 	private static final String CREATE_TABLE_FOODS = 
-			"CREATE TABLE IF NOT EXISTS "+NutritionInfoDAO.TABLE_FOODS+" ("+
+			"CREATE TABLE IF NOT EXISTS "+NutritionInfoDAO.TABLE_NUTRITION+" ("+
 			""+NutritionInfoDAO.Column.ID.getName ()+" INTEGER PRIMARY KEY,"+
 			""+NutritionInfoDAO.Column.NAME.getName ()+" TEXT,"+
 			""+NutritionInfoDAO.Column.TYPE.getName ()+" TEXT,"+
@@ -37,7 +37,7 @@ public class DatabaseManager extends SQLiteOpenHelper
 			""+ImageDAO.Column.FILE_NAME.getName ()+" TEXT);";
 	
 	private static final String DROP_TABLE_JOURNAL = "DROP TABLE IF EXISTS " + JournalDAO.TABLE_JOURNALS + ";";
-	private static final String DROP_TABLE_FOODS = "DROP TABLE IF EXISTS " + NutritionInfoDAO.TABLE_FOODS + ";";
+	private static final String DROP_TABLE_FOODS = "DROP TABLE IF EXISTS " + NutritionInfoDAO.TABLE_NUTRITION + ";";
 	private static final String DROP_TABLE_IMAGES = "DROP TABLE IF EXISTS " + ImageDAO.TABLE_IMAGES + ";";
 
 	private static DatabaseManager instance = null;

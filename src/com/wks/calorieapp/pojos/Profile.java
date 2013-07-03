@@ -15,8 +15,6 @@ public class Profile implements JSONWriteable
 	public static final float MIN_ACTIVITY_FACTOR = 1.200F;
 	public static final float MAX_ACTIVITY_FACTOR = 1.900F;
 	
-	private static final float CALORIES_PER_KILOGRAM_LOST = 1000;
-
 	public enum Sex
 	{
 		MALE, FEMALE
@@ -83,7 +81,7 @@ public class Profile implements JSONWriteable
 
 	public void setWeightLossGoal ( int weightLossGoal ) throws ProfileException
 	{
-		if(weightLossGoal > this.weight)
+		if(weightLossGoal >= this.weight)
 			throw new ProfileException("Weight Loss Goal can't be greater than actual weight.");
 		this.weightLossGoal = weightLossGoal;
 	}
@@ -102,19 +100,24 @@ public class Profile implements JSONWriteable
 	
 	public float getRecommendedDailyCalories()
 	{
-		double bmr = 10*this.weight + 6.25*height -5*this.age;
+		double bmr = 10*(this.weight - this.weightLossGoal) + 6.25*height -5*this.age;
 		if(this.sex.equals ( Sex.MALE ))
 			bmr += 5;
 		else
 			bmr -= 161;
 		
 		double dailyCaloricNeeds = this.activityFactor * bmr;
-		double dailyCaloricNeedsFactoringWeightLoss = dailyCaloricNeeds - this.weightLossGoal*(CALORIES_PER_KILOGRAM_LOST);
+		//double dailyCaloricNeedsFactoringWeightLoss = dailyCaloricNeeds - this.weightLossGoal*(CALORIES_PER_KILOGRAM_LOST);
 		
-		return (float) dailyCaloricNeedsFactoringWeightLoss;
+		return (float) dailyCaloricNeeds;
+	}
+	
+	@Override
+	public String toString ()
+	{
+		return String.format ( "[age: %d,sex: %s,height: %f,weight: %f,weightLossGoal: %d,activityFactor: %f]", this.age, this.sex.toString (),this.height,this.weight,this.weightLossGoal,this.activityFactor );
 	}
 
-	//----------------JSONWriteable Interface-------//
 	public static final String KEY_AGE = "age";
 	public static final String KEY_SEX = "sex";
 	public static final String KEY_HEIGHT = "height";
@@ -122,19 +125,27 @@ public class Profile implements JSONWriteable
 	public static final String KEY_ACTIVITY_FACTOR = "activity_factor";
 	public static final String KEY_WEIGHT_LOSS_GOAL = "weight_loss_goal";
 	
+	//DOESNT WORK!
 	@SuppressWarnings ( "unchecked" )
 	@Override
 	public String toJSON ()
 	{
+		
+		//I'm just using Strings now cuz the author c
 		JSONObject profileJSON = new JSONObject();
-		profileJSON.put ( KEY_AGE, this.age );
-		profileJSON.put ( KEY_SEX, this.sex.toString () );
-		profileJSON.put ( KEY_HEIGHT, this.height );
-		profileJSON.put ( KEY_WEIGHT, this.weightLossGoal );
-		profileJSON.put ( KEY_WEIGHT_LOSS_GOAL, this.weightLossGoal );
-		profileJSON.put ( KEY_ACTIVITY_FACTOR, this.activityFactor );
+		profileJSON.put ( KEY_AGE, ""+this.age );
+		profileJSON.put ( KEY_SEX, ""+this.sex.toString () );
+		profileJSON.put ( KEY_HEIGHT, ""+this.height );
+		profileJSON.put ( KEY_WEIGHT, ""+this.weightLossGoal );
+		profileJSON.put ( KEY_WEIGHT_LOSS_GOAL, ""+this.weightLossGoal );
+		profileJSON.put ( KEY_ACTIVITY_FACTOR, ""+this.activityFactor );
 		
 		return profileJSON.toJSONString ();
 	}
 	
+
+	public String toCSV()
+	{
+		return String.format ( "%s,%d,%f,%f,%f,%d", this.sex, this.age,this.height,this.weight,this.activityFactor,this.weightLossGoal);
+	}
 }

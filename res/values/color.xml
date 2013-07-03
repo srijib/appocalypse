@@ -15,4 +15,7 @@
     <color name="gray_medium">#cccccc</color>
 	<color name="cornflower_blue">#6495ED</color>
 	<color name="turquoise_blue">#00C78C</color>
+	<color name="brick_red">#b22222</color>
+	<color name="journal_calories_consumed_good">#308014</color>
+	<color name="journal_calories_consumed_bad">#b22222</color>
 </resources>

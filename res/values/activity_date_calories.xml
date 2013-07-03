@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="date_calories_template_calories_consumed">Total Calories Consumed: %.1f Cal</string>
+</resources>

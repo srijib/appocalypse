@@ -43,7 +43,7 @@ public class StartActivity extends Activity
 
 		Intent welcomeIntent = new Intent ( this, ProfileActivity.class );
 		welcomeIntent.addFlags ( Intent.FLAG_ACTIVITY_CLEAR_TOP );
-		welcomeIntent.putExtra ( ExtraKey.KEY_PROFILE_ACTIVITY_MODE.key (), ProfileActivity.ViewMode.WELCOME.toString () );
+		welcomeIntent.putExtra ( Key.PROFILE_MODE.key (), ProfileActivity.ViewMode.WELCOME.toString () );
 		startActivity ( welcomeIntent );
 		return;
 	}

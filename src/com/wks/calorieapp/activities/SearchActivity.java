@@ -109,7 +109,11 @@ public class SearchActivity extends Activity
 			return true;
 
 		case R.id.search_menu_done:
-			Toast.makeText ( this, "Goes to todays calorie", Toast.LENGTH_SHORT ).show ();
+			Calendar calendar = Calendar.getInstance ();
+
+			Intent dateCaloriesIntent = new Intent ( this, DateCaloriesActivity.class );
+			dateCaloriesIntent.putExtra ( Key.DATE_CALORIES_DATE.key (), calendar.getTimeInMillis () );
+			startActivity ( dateCaloriesIntent );
 			return true;
 		default:
 			return super.onOptionsItemSelected ( item );
@@ -245,15 +249,15 @@ public class SearchActivity extends Activity
 				image = new ImageEntry ();
 				image.setFileName ( this.fileName );
 			}
-			
+
 			Calendar cal = Calendar.getInstance ();
-			SimpleDateFormat formatter = new SimpleDateFormat();
-			
+			SimpleDateFormat formatter = new SimpleDateFormat ();
+
 			formatter.applyPattern ( JournalEntry.DATE_FORMAT );
 			String date = formatter.format ( cal.getTimeInMillis () );
-			
+
 			formatter.applyPattern ( JournalEntry.TIME_FORMAT );
-			String time = formatter.format ( cal.getTimeInMillis ());
+			String time = formatter.format ( cal.getTimeInMillis () );
 
 			JournalEntry journal = new JournalEntry ();
 			journal.setDate ( date );
@@ -263,10 +267,10 @@ public class SearchActivity extends Activity
 
 			DatabaseManager manager = DatabaseManager.getInstance ( this );
 			SQLiteDatabase db = manager.open ();
-			
+
 			JournalDAO journalDao = new JournalDAO ( db );
-			long journalId = journalDao.create ( journal);
-			
+			long journalId = journalDao.create ( journal );
+
 			db.close ();
 			return journalId;
 		}
@@ -325,11 +329,8 @@ public class SearchActivity extends Activity
 		{
 			boolean success = ( SearchActivity.this.addToJournal () > 0 );
 			String message = String.format (
-					SearchActivity.this.getString ( 
-							success ? 
-									R.string.search_toast_entry_added
-									: R.string.search_toast_entry_not_added ), 
-							SearchActivity.this.selectedFood.getName () );
+					SearchActivity.this.getString ( success ? R.string.search_toast_entry_added : R.string.search_toast_entry_not_added ),
+					SearchActivity.this.selectedFood.getName () );
 
 			Toast.makeText ( SearchActivity.this, message, Toast.LENGTH_LONG ).show ();
 		}

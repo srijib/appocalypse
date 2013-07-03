@@ -12,6 +12,8 @@ import com.wks.calorieapp.adapters.CalendarEvent;
 import com.wks.calorieapp.adapters.DaysOfWeekAdapter;
 import com.wks.calorieapp.daos.DatabaseManager;
 import com.wks.calorieapp.daos.JournalDAO;
+import com.wks.calorieapp.pojos.Profile;
+
 import android.app.ActionBar;
 import android.app.Activity;
 import android.content.Intent;
@@ -46,6 +48,7 @@ public class JournalActivity extends Activity
 	private ImageButton buttonNextYear;
 	private ImageButton [] buttonsDateControl;
 
+	private Profile profile;
 	
 	private CalendarAdapter adapter;
 	private Calendar calendar;
@@ -57,6 +60,8 @@ public class JournalActivity extends Activity
 		super.onCreate ( savedInstanceState );
 		this.setContentView ( R.layout.activity_journal );
 		
+		
+		this.init();
 		this.setupActionBar ();
 		this.setupView ();
 		this.setupListeners ();
@@ -78,6 +83,11 @@ public class JournalActivity extends Activity
 		default:
 			return super.onOptionsItemSelected ( item );
 		}
+	}
+	
+	private void init()
+	{
+		this.profile = ((CalorieApplication) this.getApplication ()).getProfile ();
 	}
 
 	private void setupActionBar ()
@@ -114,7 +124,7 @@ public class JournalActivity extends Activity
 		for ( ImageButton button : buttonsDateControl )
 			button.setOnClickListener ( new OnDateControlButtonClicked () );
 
-		this.gridCalendar.setOnItemClickListener ( new OnCalendarDateClicked() );
+		this.gridCalendar.setOnItemClickListener ( new OnDateClicked() );
 	}
 	
 	private void initCalendar()
@@ -165,9 +175,14 @@ public class JournalActivity extends Activity
 			
 			for(Entry<Calendar,Float> calorieEntry : caloriesEachDay.entrySet ())
 			{
+				float calories = calorieEntry.getValue ();
+				
 				CalendarEvent event = new CalendarEvent();
-				event.setDescription ( String.format ( "%.1f cal", calorieEntry.getValue () ) );
-				//TODO set colour.
+				event.setDescription ( String.format ( "%.1f cal", calories ) );
+				
+				int caloriesExtra = (int)(calories - this.profile.getRecommendedDailyCalories ());
+				event.setBackgroundColor ( this.getResources ().getColor ( caloriesExtra <= 0? R.color.journal_calories_consumed_good: R.color.journal_calories_consumed_bad ));
+				
 				calorieCalendar.put ( calorieEntry.getKey (), event );
 				
 			}
@@ -252,7 +267,7 @@ public class JournalActivity extends Activity
 
 	}
 	
-	class OnCalendarDateClicked implements AdapterView.OnItemClickListener
+	class OnDateClicked implements AdapterView.OnItemClickListener
 	{
 		@Override
 		public void onItemClick ( AdapterView< ? > parent, View view, int position, long id )
@@ -265,7 +280,7 @@ public class JournalActivity extends Activity
 				cal.set ( Calendar.DAY_OF_MONTH, date );
 				
 				Intent dateCaloriesIntent = new Intent(JournalActivity.this,DateCaloriesActivity.class);
-				dateCaloriesIntent.putExtra ( "date", cal.getTimeInMillis () );
+				dateCaloriesIntent.putExtra ( Key.DATE_CALORIES_DATE.key (), cal.getTimeInMillis () );
 				startActivity(dateCaloriesIntent);
 			}
 		}

@@ -1,12 +1,13 @@
 package com.wks.calorieapp.activities;
 
-public enum ExtraKey
+public enum Key
 {
-	KEY_PROFILE_ACTIVITY_MODE("profile_mode");
+	PROFILE_MODE("profile_mode"),
+	DATE_CALORIES_DATE("date");
 	
 	private final String key;
 	
-	private ExtraKey(String key)
+	private Key(String key)
 	{
 		this.key = key;
 	}

@@ -59,7 +59,7 @@ public class ProfileActivity extends Activity
 		
 		if(extras != null)
 		{
-			this.mode = ViewMode.valueOf (extras.getString ( ExtraKey.KEY_PROFILE_ACTIVITY_MODE.key ()));
+			this.mode = ViewMode.valueOf (extras.getString ( Key.PROFILE_MODE.key ()));
 		}
 		
 		this.setContentView ( this.mode == ViewMode.REGULAR? R.layout.activity_profile : R.layout.activity_profile_welcome );

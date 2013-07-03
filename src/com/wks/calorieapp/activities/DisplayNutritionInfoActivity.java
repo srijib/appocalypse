@@ -86,7 +86,12 @@ public class DisplayNutritionInfoActivity extends Activity
 			return true;
 
 		case R.id.display_nutrition_info_menu_done:
-			Toast.makeText ( this, "goes to days calories", Toast.LENGTH_SHORT ).show ();
+			Calendar calendar = Calendar.getInstance ();
+			
+			Intent dateCaloriesIntent = new Intent(this,DateCaloriesActivity.class);
+			dateCaloriesIntent.putExtra( Key.DATE_CALORIES_DATE.key (), calendar.getTimeInMillis () );
+			startActivity(dateCaloriesIntent);
+			
 			return true;
 
 		case R.id.display_nutrition_info_menu_no_match:

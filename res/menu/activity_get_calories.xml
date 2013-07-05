@@ -2,17 +2,17 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android" >
 
     <item
-        android:id="@+id/display_nutrition_info_menu_no_match"
+        android:id="@+id/get_calories_menu_no_match"
         android:icon="@drawable/ic_cancel"
         android:showAsAction="always"
-        android:title="@string/display_nutrition_info_menu_no_match">
+        android:title="@string/get_calories_menu_no_match">
     </item>
     
      <item
-        android:id="@+id/display_nutrition_info_menu_done"
+        android:id="@+id/get_calories_menu_done"
         android:icon="@drawable/ic_action_done"
         android:showAsAction="always"
-        android:title="@string/display_nutrition_info_menu_done">
+        android:title="@string/get_calories_menu_done">
     </item>
 
 </menu>

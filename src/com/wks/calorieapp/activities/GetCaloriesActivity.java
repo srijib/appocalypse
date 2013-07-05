@@ -2,12 +2,20 @@ package com.wks.calorieapp.activities;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
 import org.json.simple.parser.ParseException;
 
 import com.wks.calorieapp.R;
+import com.wks.calorieapp.adapters.NutritionInfoListAdapter;
+import com.wks.calorieapp.daos.DatabaseManager;
+import com.wks.calorieapp.daos.JournalDAO;
 import com.wks.calorieapp.pojos.FoodSimilarity;
+import com.wks.calorieapp.pojos.ImageEntry;
+import com.wks.calorieapp.pojos.JournalEntry;
 import com.wks.calorieapp.pojos.NutritionInfo;
 import com.wks.calorieapp.pojos.Response;
 import com.wks.calorieapp.pojos.ResponseFactory;
@@ -19,14 +27,22 @@ import com.wks.calorieapp.utils.WebServiceUrlFactory;
 import android.app.ActionBar;
 import android.app.Activity;
 import android.content.Intent;
+import android.database.sqlite.SQLiteDatabase;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.ExpandableListView;
+import android.widget.ImageButton;
 import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.ViewSwitcher;
 
 public class GetCaloriesActivity extends Activity
 {
@@ -34,33 +50,45 @@ public class GetCaloriesActivity extends Activity
 
 	private static final int NUM_TRIES_GET_NUTR_INFO = 3;
 
-	@SuppressWarnings ( "unused" )
-	private ProgressBar progressbarLoading;
-	private TextView textLoadingActivity;
+	private RelativeLayout viewLoading;
+	private RelativeLayout viewResults;
+	private ViewSwitcher viewSwitcher;
+	
+	private ProgressBar progressLoading;
+	private TextView textLoading;
 	private GetCaloriesTask getCaloriesTask;
+
+	private ExpandableListView listNutritionInfo;
+	private ImageButton buttonAddToJournal;
+	private TextView textConfirm;
+
+	private enum ViewMode
+	{
+		VIEW_LOADING, VIEW_RESULTS;
+	}
+
+	private enum TextConfirmGist
+	{
+		DEFAULT, CONFIRM_ADD, ADDED, NOT_ADDED;
+	}
+
+	private String cameraPhotoName;
+	private NutritionInfoListAdapter adapter;
+	private NutritionInfo selectedFood;
 
 	@Override
 	protected void onCreate ( Bundle savedInstanceState )
 	{
 		super.onCreate ( savedInstanceState );
 		this.setContentView ( R.layout.activity_get_calories );
-
-		setupActionBar ();
-		setupView ();
-
-		Bundle extras = this.getIntent ().getExtras ();
-		String fileName = extras.getString ( "image" );
-
-		if ( fileName == null )
-		{
-			Toast.makeText ( this, R.string.get_calories_error_image_not_found, Toast.LENGTH_LONG ).show ();
-			this.finish ();
-			return;
-		}
-
+	
+		this.init();
+		this.setupActionBar ();
+		this.setupView ();
+		this.setupListeners ();
+		
 		getCaloriesTask = new GetCaloriesTask ();
-		getCaloriesTask.execute ( fileName );
-
+		getCaloriesTask.execute ( cameraPhotoName );
 	}
 
 	@Override
@@ -72,21 +100,59 @@ public class GetCaloriesActivity extends Activity
 	}
 
 	@Override
+	public boolean onCreateOptionsMenu ( Menu menu )
+	{
+		MenuInflater inflater = this.getMenuInflater ();
+		inflater.inflate ( R.menu.activity_get_calories, menu );
+		return true;
+	}
+
+	@Override
 	public boolean onOptionsItemSelected ( MenuItem item )
 	{
 		switch ( item.getItemId () )
 		{
 		case android.R.id.home:
-			Intent intent = new Intent ( GetCaloriesActivity.this, CameraActivity.class );
-			intent.addFlags ( Intent.FLAG_ACTIVITY_REORDER_TO_FRONT );
-			startActivity ( intent );
+			Intent cameraIntent = new Intent ( this, CameraActivity.class );
+			cameraIntent.addFlags ( Intent.FLAG_ACTIVITY_REORDER_TO_FRONT );
+			startActivity ( cameraIntent );
+			return true;
+
+		case R.id.get_calories_menu_done:
+			Calendar calendar = Calendar.getInstance ();
+			
+			Intent dateCaloriesIntent = new Intent(this,DateCaloriesActivity.class);
+			dateCaloriesIntent.putExtra( DateCaloriesActivity.KEY_DATE, calendar.getTimeInMillis () );
+			startActivity(dateCaloriesIntent);
+			
+			return true;
+
+		case R.id.get_calories_menu_no_match:
+			Intent searchIntent = new Intent ( this, SearchActivity.class );
+			searchIntent.putExtra ( SearchActivity.KEY_IMAGE, this.cameraPhotoName );
+			startActivity ( searchIntent );
 			return true;
 
 		default:
 			return super.onOptionsItemSelected ( item );
 		}
+
 	}
 
+	private void init()
+	{
+		Bundle extras = this.getIntent ().getExtras ();
+		if ( extras != null )
+		{
+			this.cameraPhotoName = extras.getString ( "image" );
+		}else
+		{
+			Toast.makeText ( this, R.string.get_calories_error_image_not_found, Toast.LENGTH_LONG ).show ();
+			this.finish ();
+			return;
+		}
+	}
+	
 	private void setupActionBar ()
 	{
 		ActionBar actionBar = this.getActionBar ();
@@ -99,18 +165,151 @@ public class GetCaloriesActivity extends Activity
 
 	private void setupView ()
 	{
-		this.progressbarLoading = ( ProgressBar ) findViewById ( R.id.get_calories_spinner_loading );
-		this.textLoadingActivity = ( TextView ) findViewById ( R.id.get_calories_text_loading );
+		this.viewSwitcher = (ViewSwitcher) this.findViewById ( R.id.get_calories_view_switcher );
+		
+		this.viewLoading = (RelativeLayout) this.findViewById ( R.id.get_calories_relativelayout_loading );
+		this.viewResults = (RelativeLayout) this.findViewById ( R.id.get_calories_relativelayout_results );
+		
+		this.progressLoading = ( ProgressBar ) this.findViewById ( R.id.get_calories_spinner_loading );
+		this.textLoading = ( TextView ) this.findViewById ( R.id.get_calories_text_loading );
+		this.listNutritionInfo = ( ExpandableListView ) this.findViewById ( R.id.get_calories_expandlist_nutrition_info );
+		this.buttonAddToJournal = ( ImageButton ) this.findViewById ( R.id.get_calories_button_add_to_journal );
+		this.textConfirm = ( TextView ) this.findViewById ( R.id.get_calories_text_confirm );
+	
+		this.setViewMode(ViewMode.VIEW_LOADING);
 	}
 
-	public String getProgressBarText ()
+	private void setupListeners ()
 	{
-		return this.textLoadingActivity.getText ().toString ();
+		this.listNutritionInfo.setOnChildClickListener ( new OnListItemClicked () );
+		this.buttonAddToJournal.setOnClickListener ( new OnAddToJournalClicked () );
+	}
+	
+	private void setListContents ( Map< String, List< NutritionInfo >> nutritionInfoDictionary )
+	{
+		if ( nutritionInfoDictionary != null )
+		{
+			this.adapter = new NutritionInfoListAdapter ( this, nutritionInfoDictionary );
+			this.listNutritionInfo.setAdapter ( adapter );
+		}
 	}
 
-	public void setProgressBarText ( String text )
+	private void setViewMode ( ViewMode view )
 	{
-		this.textLoadingActivity.setText ( text );
+		switch ( view )
+		{
+		case VIEW_LOADING:
+			this.setLoadingProgressVisible ( true );
+			if ( viewSwitcher.getCurrentView () != viewLoading )
+			{
+				viewSwitcher.showPrevious ();
+			}
+			return;
+		case VIEW_RESULTS:
+			this.setLoadingProgressVisible ( false );
+			if ( viewSwitcher.getCurrentView () != viewResults )
+			{
+				viewSwitcher.showNext ();
+			}
+			return;
+		}
+	}
+	
+	private void setLoadingProgressVisible ( boolean visible )
+	{
+		this.progressLoading.setVisibility ( visible ? View.VISIBLE : View.GONE );
+		this.textLoading.setVisibility ( visible ? View.VISIBLE : View.GONE );
+	}
+	
+	private void setTextConfirm ( TextConfirmGist gist )
+	{
+		String confirmMessage = "";
+		switch ( gist )
+		{
+		case ADDED:
+			if ( this.selectedFood != null )
+			{
+				String confirmTemplate = this.getString ( R.string.get_calories_template_added );
+				confirmMessage = String.format ( confirmTemplate, this.selectedFood.getName () );
+			}
+			break;
+		case NOT_ADDED:
+			if ( this.selectedFood != null )
+			{
+				String confirmTemplate = this.getString ( R.string.get_calories_template_not_added );
+				confirmMessage = String.format ( confirmTemplate, this.selectedFood.getName () );
+			}
+			break;
+		case CONFIRM_ADD:
+			if ( this.selectedFood != null )
+			{
+				String confirmTemplate = this.getString ( R.string.get_calories_template_confirm_add );
+				confirmMessage = String.format ( confirmTemplate, this.selectedFood.getName () );
+			}
+			break;
+		default:
+			confirmMessage = this.getString ( R.string.search_layout_text_confirm_default );
+			break;
+		}
+
+		this.textConfirm.setText ( confirmMessage );
+	}
+
+	private long addToJournal ()
+	{
+
+		if ( this.selectedFood == null ) return -1;
+
+		ImageEntry image = null;
+		if ( this.cameraPhotoName != null && !this.cameraPhotoName.isEmpty () )
+		{
+			image = new ImageEntry ();
+			image.setFileName ( this.cameraPhotoName );
+		}
+
+		Calendar cal = Calendar.getInstance ();
+
+		JournalEntry journal = new JournalEntry ();
+		journal.setTimestamp ( cal.getTimeInMillis () );
+		journal.setNutritionInfo ( this.selectedFood );
+		journal.setImageEntry ( image );
+
+		DatabaseManager manager = DatabaseManager.getInstance ( this );
+		SQLiteDatabase db = manager.open ();
+
+		JournalDAO journalDao = new JournalDAO ( db );
+		long journalId = journalDao.create ( journal );
+
+		db.close ();
+		return journalId;
+
+	}
+
+	class OnListItemClicked implements ExpandableListView.OnChildClickListener
+	{
+
+		@Override
+		public boolean onChildClick ( ExpandableListView parent, View v, int groupPosition, int childPosition, long id )
+		{
+			NutritionInfo info = GetCaloriesActivity.this.adapter.getChild ( groupPosition, childPosition );
+
+			GetCaloriesActivity.this.selectedFood = info;
+			GetCaloriesActivity.this.setTextConfirm ( TextConfirmGist.CONFIRM_ADD );
+
+			return true;
+		}
+
+	}
+
+	class OnAddToJournalClicked implements View.OnClickListener
+	{
+
+		@Override
+		public void onClick ( View v )
+		{
+			boolean success = ( GetCaloriesActivity.this.addToJournal () > 0 );
+			GetCaloriesActivity.this.setTextConfirm ( success ? TextConfirmGist.ADDED : TextConfirmGist.NOT_ADDED );
+		}
 	}
 
 	class GetCaloriesTask extends AsyncTask< String, String, Response >
@@ -120,13 +319,13 @@ public class GetCaloriesActivity extends Activity
 		@Override
 		protected void onPreExecute ()
 		{
-			if(!NetworkUtils.isConnectedToNetwork ( GetCaloriesActivity.this ))
+			if ( !NetworkUtils.isConnectedToNetwork ( GetCaloriesActivity.this ) )
 			{
-				publishProgress("No Internet Connection.");
+				publishProgress ( "No Internet Connection." );
 				this.cancel ( true );
 			}
 		}
-		
+
 		@Override
 		protected void onPostExecute ( Response response )
 		{
@@ -136,13 +335,9 @@ public class GetCaloriesActivity extends Activity
 				@SuppressWarnings ( "unchecked" )
 				HashMap< String, List< NutritionInfo >> nutritionInfoForFoods = ( HashMap< String, List< NutritionInfo >> ) response.getData ();
 				// pass data to Application object
-				CalorieApplication.setNutritionInfoDictionary ( nutritionInfoForFoods );
-
-				// move to diplay nutrition info activity.
-				Intent displayNutritionInfoIntent = new Intent ( GetCaloriesActivity.this, DisplayNutritionInfoActivity.class );
-				displayNutritionInfoIntent.putExtra ( "image", this.fileName );
-
-				startActivity ( displayNutritionInfoIntent );
+				
+				GetCaloriesActivity.this.setListContents ( nutritionInfoForFoods );
+				GetCaloriesActivity.this.setViewMode ( ViewMode.VIEW_RESULTS );
 
 			}else
 			{
@@ -156,7 +351,6 @@ public class GetCaloriesActivity extends Activity
 			}
 		}
 
-		// TODO check the cancelling thing.
 		/**
 		 * I just want to go on record saying that I am definitely not pleased
 		 * with the quality of code in this method. but i'm really frustrated so
@@ -262,11 +456,11 @@ public class GetCaloriesActivity extends Activity
 			}
 			catch ( IOException e )
 			{
-				Log.e ( TAG, ""+e.getMessage () );
+				Log.e ( TAG, "" + e.getMessage () );
 			}
 			catch ( ParseException e )
 			{
-				Log.e ( TAG, ""+e.getMessage () );
+				Log.e ( TAG, "" + e.getMessage () );
 			}
 
 			if ( this.isCancelled () ) this.cancel ( true );
@@ -276,9 +470,8 @@ public class GetCaloriesActivity extends Activity
 		@Override
 		protected void onProgressUpdate ( String... values )
 		{
-			setProgressBarText ( values[0] );
+			GetCaloriesActivity.this.textLoading.setText ( values[0] );
 		}
-
 
 	}
 

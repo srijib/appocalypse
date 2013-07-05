@@ -49,6 +49,8 @@ public class SearchActivity extends Activity
 	private static final String TAG = SearchActivity.class.getCanonicalName ();
 	private static final int NUM_TRIES = 3;
 
+	public static final String KEY_IMAGE = "image";
+	
 	private EditText editSearch;
 	private TextView textConfirm;
 	private ImageButton buttonAddToJournal;
@@ -125,7 +127,7 @@ public class SearchActivity extends Activity
 		Bundle extras = this.getIntent ().getExtras ();
 		if ( extras != null )
 		{
-			this.cameraPhotoName = extras.getString ( "image" );
+			this.cameraPhotoName = extras.getString ( KEY_IMAGE );
 		}
 	}
 

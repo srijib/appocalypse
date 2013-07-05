@@ -13,7 +13,7 @@ import com.wks.calorieapp.pojos.Response;
 import com.wks.calorieapp.pojos.ResponseFactory;
 import com.wks.calorieapp.utils.FileSystem;
 import com.wks.calorieapp.utils.HttpClient;
-import com.wks.calorieapp.utils.Uploader;
+import com.wks.calorieapp.utils.NetworkUtils;
 import com.wks.calorieapp.utils.WebServiceUrlFactory;
 
 import android.app.ActionBar;
@@ -45,7 +45,7 @@ public class GetCaloriesActivity extends Activity
 		super.onCreate ( savedInstanceState );
 		this.setContentView ( R.layout.activity_get_calories );
 
-		setupActionBar();
+		setupActionBar ();
 		setupView ();
 
 		Bundle extras = this.getIntent ().getExtras ();
@@ -58,14 +58,8 @@ public class GetCaloriesActivity extends Activity
 			return;
 		}
 
-		if ( !HttpClient.isConnectedToNetwork ( GetCaloriesActivity.this ) )
-		{
-			setProgressBarText ( GetCaloriesActivity.this.getString ( R.string.get_calories_error_no_internet_connection ) );
-		}else
-		{
-			getCaloriesTask = new GetCaloriesTask ();
-			getCaloriesTask.execute ( fileName );
-		}
+		getCaloriesTask = new GetCaloriesTask ();
+		getCaloriesTask.execute ( fileName );
 
 	}
 
@@ -76,40 +70,38 @@ public class GetCaloriesActivity extends Activity
 		getCaloriesTask.cancel ( true );
 		this.finish ();
 	}
-	
+
 	@Override
 	public boolean onOptionsItemSelected ( MenuItem item )
 	{
-		switch(item.getItemId ())
+		switch ( item.getItemId () )
 		{
 		case android.R.id.home:
-			Intent intent = new Intent(GetCaloriesActivity.this,CameraActivity.class);
+			Intent intent = new Intent ( GetCaloriesActivity.this, CameraActivity.class );
 			intent.addFlags ( Intent.FLAG_ACTIVITY_REORDER_TO_FRONT );
-			startActivity(intent);
+			startActivity ( intent );
 			return true;
-			
+
 		default:
 			return super.onOptionsItemSelected ( item );
 		}
 	}
 
-	private void setupActionBar()
+	private void setupActionBar ()
 	{
 		ActionBar actionBar = this.getActionBar ();
-		
+
 		Drawable d = this.getResources ().getDrawable ( R.drawable.bg_actionbar );
 		actionBar.setBackgroundDrawable ( d );
-		
+
 		actionBar.setDisplayHomeAsUpEnabled ( true );
 	}
-	
+
 	private void setupView ()
 	{
 		this.progressbarLoading = ( ProgressBar ) findViewById ( R.id.get_calories_spinner_loading );
 		this.textLoadingActivity = ( TextView ) findViewById ( R.id.get_calories_text_loading );
 	}
-
-
 
 	public String getProgressBarText ()
 	{
@@ -124,6 +116,16 @@ public class GetCaloriesActivity extends Activity
 	class GetCaloriesTask extends AsyncTask< String, String, Response >
 	{
 		private String fileName;
+
+		@Override
+		protected void onPreExecute ()
+		{
+			if(!NetworkUtils.isConnectedToNetwork ( GetCaloriesActivity.this ))
+			{
+				publishProgress("No Internet Connection.");
+				this.cancel ( true );
+			}
+		}
 		
 		@Override
 		protected void onPostExecute ( Response response )
@@ -135,26 +137,26 @@ public class GetCaloriesActivity extends Activity
 				HashMap< String, List< NutritionInfo >> nutritionInfoForFoods = ( HashMap< String, List< NutritionInfo >> ) response.getData ();
 				// pass data to Application object
 				CalorieApplication.setNutritionInfoDictionary ( nutritionInfoForFoods );
-				
+
 				// move to diplay nutrition info activity.
 				Intent displayNutritionInfoIntent = new Intent ( GetCaloriesActivity.this, DisplayNutritionInfoActivity.class );
 				displayNutritionInfoIntent.putExtra ( "image", this.fileName );
-				
+
 				startActivity ( displayNutritionInfoIntent );
 
 			}else
 			{
-				if(response != null)
+				if ( response != null )
 				{
 					Log.e ( TAG, response.getMessage () );
 				}
-				
+
 				Intent searchFoodIntent = new Intent ( GetCaloriesActivity.this, SearchActivity.class );
 				startActivity ( searchFoodIntent );
 			}
 		}
 
-		//TODO check the cancelling thing.
+		// TODO check the cancelling thing.
 		/**
 		 * I just want to go on record saying that I am definitely not pleased
 		 * with the quality of code in this method. but i'm really frustrated so
@@ -175,23 +177,23 @@ public class GetCaloriesActivity extends Activity
 			{
 				// upload image
 				publishProgress ( "Uploading Image..." );
-				json = Uploader.uploadFile ( imageFile, WebServiceUrlFactory.upload () );
+				json = HttpClient.uploadFile ( imageFile, WebServiceUrlFactory.upload () );
 				response = ResponseFactory.createResponseForUploadRequest ( json );
 
-				Log.e("UPLOAD",json);
-				
+				Log.e ( "UPLOAD", json );
+
 				if ( response == null || !response.isSuccessful () ) return response;
-				if (this.isCancelled ()) this.cancel ( true );
+				if ( this.isCancelled () ) this.cancel ( true );
 				// get matches for image
 				publishProgress ( "Identifying Food..." );
-				json = HttpClient.get ( WebServiceUrlFactory.identify ( "lime.jpg" ) );
+				json = HttpClient.get ( WebServiceUrlFactory.identify ( fileName ) );
 				response = ResponseFactory.createResponseForIdentifyRequest ( json );
 
-				Log.e("IDENTIFY",json);
-				
+				Log.e ( "IDENTIFY", json );
+
 				// if response not received or matching foods not found, return
 				if ( response == null || !response.isSuccessful () ) return response;
-				if (this.isCancelled ()) this.cancel ( true );
+				if ( this.isCancelled () ) this.cancel ( true );
 				// if matching foods found
 				if ( response.getData () != null )
 				{
@@ -209,7 +211,7 @@ public class GetCaloriesActivity extends Activity
 						// get nutrition info for each food in list.
 						for ( int i = 0 ; i < foodSimilarity.size () ; i++ )
 						{
-							String foodName = "chips";//foodSimilarity.get ( i ).getFoodName ();
+							String foodName = foodSimilarity.get ( i ).getFoodName ();
 
 							// nutrition info request doesn't always work, so if
 							// it fails,
@@ -217,18 +219,18 @@ public class GetCaloriesActivity extends Activity
 							// up.
 							for ( int j = 0 ; j < NUM_TRIES_GET_NUTR_INFO ; j++ )
 							{
-								if (this.isCancelled ()) this.cancel ( true );
+								if ( this.isCancelled () ) this.cancel ( true );
 								json = HttpClient.get ( WebServiceUrlFactory.getNutritionInfo ( foodName ) );
 								response = ResponseFactory.createResponseForNutritionInfoRequest ( json );
-								
-								Log.e("GET INFO",json);
+
+								Log.e ( "GET INFO", json );
 								// when response is received with data, move on
 								// to next step.
-								
+
 								if ( response != null && response.isSuccessful () ) break;
 							}
 
-							if (this.isCancelled ()) this.cancel ( true );
+							if ( this.isCancelled () ) this.cancel ( true );
 							publishProgress ( "Proccessing Information" );
 							// double check that the response is not null and
 							// that data is received.
@@ -260,15 +262,14 @@ public class GetCaloriesActivity extends Activity
 			}
 			catch ( IOException e )
 			{
-				//TODO
+				Log.e ( TAG, ""+e.getMessage () );
 			}
 			catch ( ParseException e )
 			{
-				//TODO
-				e.printStackTrace ();
+				Log.e ( TAG, ""+e.getMessage () );
 			}
-			
-			if (this.isCancelled ()) this.cancel ( true );
+
+			if ( this.isCancelled () ) this.cancel ( true );
 			return response;
 		}
 
@@ -278,12 +279,7 @@ public class GetCaloriesActivity extends Activity
 			setProgressBarText ( values[0] );
 		}
 
-		@Override
-		protected void onCancelled ()
-		{
-			GetCaloriesActivity.this.textLoadingActivity.setText ( "Cancelled" );
-		}
-		
+
 	}
 
 }

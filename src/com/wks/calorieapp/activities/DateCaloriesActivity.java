@@ -8,12 +8,8 @@ import java.util.List;
 import com.wks.calorieapp.R;
 import com.wks.calorieapp.adapters.DateCaloriesListAdapter;
 import com.wks.calorieapp.daos.DatabaseManager;
-import com.wks.calorieapp.daos.ImageDAO;
 import com.wks.calorieapp.daos.JournalDAO;
-import com.wks.calorieapp.daos.NutritionInfoDAO;
-import com.wks.calorieapp.pojos.ImageEntry;
 import com.wks.calorieapp.pojos.JournalEntry;
-import com.wks.calorieapp.pojos.NutritionInfo;
 import com.wks.calorieapp.pojos.Profile;
 
 import android.app.ActionBar;
@@ -25,20 +21,18 @@ import android.util.Log;
 import android.view.MenuItem;
 import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 public class DateCaloriesActivity extends Activity
 {
 	private static final String TAG = DateCaloriesActivity.class.getCanonicalName ();
-	
 
+	public static final String KEY_DATE = "date";
+	
 	private Profile profile;
 	private ListView listMeals;
 	private TextView textTotalCalories;
 	private DateCaloriesListAdapter adapter;
 	private List< JournalEntry > journalEntries;
-
-	private Calendar calendar = Calendar.getInstance ();
 
 	@Override
 	protected void onCreate ( Bundle savedInstanceState )
@@ -55,22 +49,21 @@ public class DateCaloriesActivity extends Activity
 
 	private void init ()
 	{
-
-		this.journalEntries = this.getListOfMeals ();
-
 		this.profile = ( ( CalorieApplication ) this.getApplication () ).getProfile ();
+		
 		Bundle extras = this.getIntent ().getExtras ();
-		if ( extras != null )
-		{
-			long date = extras.getLong ( Key.DATE_CALORIES_DATE.key () );
-			this.calendar.setTimeInMillis ( date );
-
-		}else
+		if ( extras == null )
 		{
 			Log.e ( TAG, "Date was not received by activity." );
 			this.finish ();
 		}
-
+		
+		long date = extras.getLong ( KEY_DATE );
+		
+		Calendar calendar = Calendar.getInstance ();
+		calendar.setTimeInMillis ( date );
+		this.journalEntries = this.getListOfMeals (calendar);
+		
 	}
 
 	@Override
@@ -110,15 +103,15 @@ public class DateCaloriesActivity extends Activity
 		templateCaloriesConsumed = String.format ( templateCaloriesConsumed, this.getTotalCaloriesConsumed () );
 
 		this.textTotalCalories.setText ( templateCaloriesConsumed );
-		this.textTotalCalories.setBackgroundColor ( this.getResources ().getColor ( this.getExcessiveCalories () <= 0 ? R.color.journal_calories_consumed_good : R.color.journal_calories_consumed_bad ) );
+		this.textTotalCalories.setBackgroundColor ( this.getResources ().getColor ( this.getCaloriesInExcess () <= 0 ? R.color.date_calories_consumed_good : R.color.date_calories_consumed_bad ) );
 	}
 
 	private void setupListeners ()
 	{
-
+		//TODO add swipe listener
 	}
 
-	private int getExcessiveCalories ()
+	private int getCaloriesInExcess ()
 	{
 		int extra = 0;
 		if ( this.profile != null )
@@ -139,7 +132,7 @@ public class DateCaloriesActivity extends Activity
 		return totalCaloriesConsumed;
 	}
 
-	private List< JournalEntry > getListOfMeals ()
+	private List< JournalEntry > getListOfMeals ( Calendar date )
 	{
 		DatabaseManager manager = DatabaseManager.getInstance ( this );
 		SQLiteDatabase db = manager.open ();
@@ -148,7 +141,8 @@ public class DateCaloriesActivity extends Activity
 		List< JournalEntry > mealList = new ArrayList< JournalEntry > ();
 		try
 		{
-			mealList = journalDao.read ( this.calendar );
+			
+			mealList = journalDao.read ( date );
 		}
 		catch ( ParseException e )
 		{

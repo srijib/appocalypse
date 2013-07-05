@@ -29,7 +29,7 @@
         android:id="@+id/search_viewswitcher"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
-        android:background="@drawable/bg_home"
+        android:background="@color/very_light_gray"
         android:inAnimation="@android:anim/slide_in_left" >
 
         <RelativeLayout
@@ -79,7 +79,7 @@
                     android:layout_gravity="center"
                     android:maxLines="3"
                     android:layout_weight="1"
-                    android:text="@string/search_layout_text_default_confirm"
+                    android:text="@string/search_layout_text_confirm_default"
                     android:textColor="@color/white" />
 
                 <ImageButton

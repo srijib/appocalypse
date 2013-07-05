@@ -1,7 +1,6 @@
 package com.wks.calorieapp.activities;
 
 import java.io.IOException;
-import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
@@ -17,8 +16,9 @@ import com.wks.calorieapp.pojos.JournalEntry;
 import com.wks.calorieapp.pojos.NutritionInfo;
 import com.wks.calorieapp.pojos.Response;
 import com.wks.calorieapp.pojos.ResponseFactory;
-import com.wks.calorieapp.utils.AndroidUtils;
+import com.wks.calorieapp.utils.ViewUtils;
 import com.wks.calorieapp.utils.HttpClient;
+import com.wks.calorieapp.utils.NetworkUtils;
 import com.wks.calorieapp.utils.WebServiceUrlFactory;
 
 import android.app.ActionBar;
@@ -58,17 +58,23 @@ public class SearchActivity extends Activity
 	private TextView textLoading;
 	private ProgressBar progressLoading;
 
-	private String fileName;
-	private NutritionInfo selectedFood;
+	private String currentFoodSearch;
+	private String cameraPhotoName;
+	private NutritionInfo selectedFoodInfo;
 	private NutritionInfoListAdapter adapter;
 	private ExpandableListView listNutritionInfo;
 
-	private enum SearchActivityView
+	private enum ViewMode
 	{
 		VIEW_IDLE, VIEW_LOADING, VIEW_RESULTS
 	};
 
-	private SearchActivityView searchActivityView;
+	private enum TextConfirmGist
+	{
+		DEFAULT, CONFIRM_ADD, ADDED, NOT_ADDED;
+	}
+
+	private ViewMode viewMode;
 
 	@Override
 	protected void onCreate ( Bundle savedInstanceState )
@@ -76,17 +82,11 @@ public class SearchActivity extends Activity
 		super.onCreate ( savedInstanceState );
 		this.setContentView ( R.layout.activity_search );
 
-		Bundle extras = this.getIntent ().getExtras ();
-		if ( extras != null )
-		{
-			this.fileName = extras.getString ( "image" );
-		}
+		this.init ();
+		this.setupActionBar ();
+		this.setupView ();
+		this.setupListeners ();
 
-		setupActionBar ();
-		setupView ();
-		setupListeners ();
-		// set up list when it is ready.
-		// setuplist will be called by onPostExecute in the GetNutritionInfoTasl
 	}
 
 	@Override
@@ -112,11 +112,20 @@ public class SearchActivity extends Activity
 			Calendar calendar = Calendar.getInstance ();
 
 			Intent dateCaloriesIntent = new Intent ( this, DateCaloriesActivity.class );
-			dateCaloriesIntent.putExtra ( Key.DATE_CALORIES_DATE.key (), calendar.getTimeInMillis () );
+			dateCaloriesIntent.putExtra ( DateCaloriesActivity.KEY_DATE, calendar.getTimeInMillis () );
 			startActivity ( dateCaloriesIntent );
 			return true;
 		default:
 			return super.onOptionsItemSelected ( item );
+		}
+	}
+
+	private void init ()
+	{
+		Bundle extras = this.getIntent ().getExtras ();
+		if ( extras != null )
+		{
+			this.cameraPhotoName = extras.getString ( "image" );
 		}
 	}
 
@@ -145,7 +154,7 @@ public class SearchActivity extends Activity
 		textConfirm = ( TextView ) this.findViewById ( R.id.search_text_confirm );
 		buttonAddToJournal = ( ImageButton ) this.findViewById ( R.id.search_button_add_to_journal );
 
-		setSearchActivityView ( SearchActivityView.VIEW_IDLE );
+		setViewMode ( ViewMode.VIEW_IDLE );
 
 	}
 
@@ -156,62 +165,7 @@ public class SearchActivity extends Activity
 		this.buttonAddToJournal.setOnClickListener ( new OnAddToJournalClicked () );
 	}
 
-	private void setSearchActivityView ( SearchActivityView view )
-	{
-		this.searchActivityView = view;
-		switch ( view )
-		{
-		case VIEW_IDLE:
-
-			this.setLoadingProgressVisible ( false );
-			if ( viewSwitcher.getCurrentView () != viewLoading )
-			{
-				viewSwitcher.showPrevious ();
-			}
-			return;
-		case VIEW_LOADING:
-
-			setLoadingProgressVisible ( true );
-			if ( viewSwitcher.getCurrentView () != viewLoading )
-			{
-				viewSwitcher.showPrevious ();
-			}
-			return;
-		case VIEW_RESULTS:
-
-			setLoadingProgressVisible ( false );
-			if ( viewSwitcher.getCurrentView () != viewResults )
-			{
-				viewSwitcher.showNext ();
-
-			}
-			return;
-		}
-	}
-
-	private SearchActivityView getSearchActivityView ()
-	{
-		return this.searchActivityView;
-	}
-
-	private void setLoadingProgressVisible ( boolean visible )
-	{
-		this.progressLoading.setVisibility ( visible ? View.VISIBLE : View.GONE );
-		this.textLoading.setVisibility ( visible ? View.VISIBLE : View.GONE );
-	}
-
-	private void setLoadingText ( String text )
-	{
-		this.textLoading.setText ( text );
-	}
-
-	@SuppressWarnings ( "unused" )
-	private String getLoadingText ()
-	{
-		return this.textLoading.getText ().toString ();
-	}
-
-	private void setupList ( Map< String, List< NutritionInfo >> nutritionInfoDictionary )
+	private void setListContents ( Map< String, List< NutritionInfo >> nutritionInfoDictionary )
 	{
 		if ( nutritionInfoDictionary != null )
 		{
@@ -220,66 +174,118 @@ public class SearchActivity extends Activity
 		}
 	}
 
-	private void showConfirmMessage ()
+	private void setViewMode ( ViewMode view )
+	{
+		this.viewMode = view;
+
+		switch ( view )
+		{
+		case VIEW_IDLE:
+			this.setLoadingProgressVisible ( false );
+			if ( viewSwitcher.getCurrentView () != viewLoading )
+			{
+				viewSwitcher.showPrevious ();
+			}
+			return;
+		case VIEW_LOADING:
+			this.setLoadingProgressVisible ( true );
+			if ( viewSwitcher.getCurrentView () != viewLoading )
+			{
+				viewSwitcher.showPrevious ();
+			}
+			return;
+		case VIEW_RESULTS:
+			this.setLoadingProgressVisible ( false );
+			if ( viewSwitcher.getCurrentView () != viewResults )
+			{
+				viewSwitcher.showNext ();
+			}
+			return;
+		}
+	}
+
+	private void setLoadingProgressVisible ( boolean visible )
+	{
+		this.progressLoading.setVisibility ( visible ? View.VISIBLE : View.GONE );
+		this.textLoading.setVisibility ( visible ? View.VISIBLE : View.GONE );
+	}
+
+	//TODO Refactor
+	//YUCK!! 
+	private void setTextConfirm ( TextConfirmGist gist )
 	{
 		String confirmMessage = "";
-
-		if ( this.selectedFood != null )
+		switch ( gist )
 		{
-			String confirmTemplate = this.getString ( R.string.search_confirm );
-			confirmMessage = String.format ( confirmTemplate, SearchActivity.this.selectedFood.getName () );
-
-		}else
-		{
-			confirmMessage = this.getString ( R.string.search_layout_text_default_confirm );
+		case ADDED:
+			if ( this.selectedFoodInfo != null )
+			{
+				String confirmTemplate = this.getString ( R.string.search_layout_text_confirm_template_added );
+				confirmMessage = String.format ( confirmTemplate, this.selectedFoodInfo.getName () );
+			}
+			break;
+		case NOT_ADDED:
+			if ( this.selectedFoodInfo != null )
+			{
+				String confirmTemplate = this.getString ( R.string.search_layout_text_confirm_template_not_added );
+				confirmMessage = String.format ( confirmTemplate, this.selectedFoodInfo.getName () );
+			}
+			break;
+		case CONFIRM_ADD:
+			if ( this.selectedFoodInfo != null )
+			{
+				String confirmTemplate = this.getString ( R.string.search_layout_text_confirm_template_confirm_add );
+				confirmMessage = String.format ( confirmTemplate, this.selectedFoodInfo.getName () );
+			}
+			break;
+		default:
+			confirmMessage = this.getString ( R.string.search_layout_text_confirm_default );
+			break;
 		}
 
 		this.textConfirm.setText ( confirmMessage );
 	}
 
+	private void linkPhotoWithSearchTerm ()
+	{
+		if ( this.currentFoodSearch != null && !this.currentFoodSearch.isEmpty () )
+		{
+			String [] params =
+			{
+					this.cameraPhotoName, this.currentFoodSearch
+			};
+			new LinkImageWithFoodTask ().execute ( params );
+		}
+	}
+
 	private long addToJournal ()
 	{
-		try
+
+		if ( this.selectedFoodInfo == null ) return -1;
+
+		ImageEntry photo = null;
+		if ( this.cameraPhotoName != null && !this.cameraPhotoName.isEmpty () )
 		{
-			if ( this.selectedFood == null ) return -1;
-
-			ImageEntry image = null;
-			if ( this.fileName != null && !this.fileName.isEmpty () )
-			{
-				image = new ImageEntry ();
-				image.setFileName ( this.fileName );
-			}
-
-			Calendar cal = Calendar.getInstance ();
-			SimpleDateFormat formatter = new SimpleDateFormat ();
-
-			formatter.applyPattern ( JournalEntry.DATE_FORMAT );
-			String date = formatter.format ( cal.getTimeInMillis () );
-
-			formatter.applyPattern ( JournalEntry.TIME_FORMAT );
-			String time = formatter.format ( cal.getTimeInMillis () );
-
-			JournalEntry journal = new JournalEntry ();
-			journal.setDate ( date );
-			journal.setTime ( time );
-			journal.setNutritionInfo ( this.selectedFood );
-			journal.setImageEntry ( image );
-
-			DatabaseManager manager = DatabaseManager.getInstance ( this );
-			SQLiteDatabase db = manager.open ();
-
-			JournalDAO journalDao = new JournalDAO ( db );
-			long journalId = journalDao.create ( journal );
-
-			db.close ();
-			return journalId;
+			photo = new ImageEntry ();
+			photo.setFileName ( this.cameraPhotoName );
 		}
-		catch ( java.text.ParseException e )
-		{
 
-			e.printStackTrace ();
-			return -1;
-		}
+		Calendar cal = Calendar.getInstance ();
+
+		JournalEntry journal = new JournalEntry ();
+		journal.setTimestamp ( cal.getTimeInMillis () );
+		journal.setNutritionInfo ( this.selectedFoodInfo );
+		journal.setImageEntry ( photo );
+
+		DatabaseManager manager = DatabaseManager.getInstance ( this );
+		SQLiteDatabase db = manager.open ();
+
+		JournalDAO journalDao = new JournalDAO ( db );
+		long journalId = journalDao.create ( journal );
+
+		db.close ();
+		return journalId;
+
 	}
 
 	class OnEditSearchSubmitted implements OnKeyListener
@@ -289,20 +295,33 @@ public class SearchActivity extends Activity
 		{
 			if ( event.getAction () == KeyEvent.ACTION_DOWN && keyCode == KeyEvent.KEYCODE_ENTER )
 			{
-				SearchActivity.this.selectedFood = null;
-				AndroidUtils.hideKeyboard ( SearchActivity.this, SearchActivity.this.editSearch );
-
+			
+				//validate search data
 				String foodName = editSearch.getText ().toString ();
-				if ( foodName != null && !foodName.isEmpty () )
+				if ( foodName == null || foodName.isEmpty () )
 				{
-					if ( SearchActivity.this.getSearchActivityView () != SearchActivityView.VIEW_LOADING )
-						SearchActivity.this.setSearchActivityView ( SearchActivityView.VIEW_LOADING );
+					Toast.makeText ( SearchActivity.this, R.string.search_error_empty_search_field, Toast.LENGTH_LONG ).show ();
+				}else
+				{
+					//clear previous data
+					SearchActivity.this.selectedFoodInfo = null;
+					SearchActivity.this.setTextConfirm ( TextConfirmGist.DEFAULT );
 
+					//hide keyboard
+					ViewUtils.hideKeyboard (SearchActivity.this.editSearch );
+					
+					//put new search data
+					SearchActivity.this.currentFoodSearch = foodName;
+					
+					//set searching mode
+					if ( SearchActivity.this.viewMode != ViewMode.VIEW_LOADING ) 
+						SearchActivity.this.setViewMode ( ViewMode.VIEW_LOADING );
+
+					//invoke web service.
 					new GetNutritionInfoTask ().execute ( foodName );
-				}else Toast.makeText ( SearchActivity.this, R.string.search_error_empty_search_field, Toast.LENGTH_LONG ).show ();
-				return true;
+				}
 			}
-			return false;
+			return true;
 		}
 
 	}
@@ -314,8 +333,8 @@ public class SearchActivity extends Activity
 		{
 			NutritionInfo info = SearchActivity.this.adapter.getChild ( groupPosition, childPosition );
 
-			SearchActivity.this.selectedFood = info;
-			SearchActivity.this.showConfirmMessage ();
+			SearchActivity.this.selectedFoodInfo = info;
+			SearchActivity.this.setTextConfirm ( TextConfirmGist.CONFIRM_ADD );
 
 			return true;
 		}
@@ -328,11 +347,13 @@ public class SearchActivity extends Activity
 		public void onClick ( View v )
 		{
 			boolean success = ( SearchActivity.this.addToJournal () > 0 );
-			String message = String.format (
-					SearchActivity.this.getString ( success ? R.string.search_toast_entry_added : R.string.search_toast_entry_not_added ),
-					SearchActivity.this.selectedFood.getName () );
+			SearchActivity.this.setTextConfirm ( success ? TextConfirmGist.ADDED : TextConfirmGist.NOT_ADDED );
 
-			Toast.makeText ( SearchActivity.this, message, Toast.LENGTH_LONG ).show ();
+			if ( cameraPhotoName != null )
+			{
+				SearchActivity.this.linkPhotoWithSearchTerm ();
+			}
+
 		}
 	}
 
@@ -340,6 +361,16 @@ public class SearchActivity extends Activity
 	{
 		private String foodName;
 
+		@Override
+		protected void onPreExecute ()
+		{
+			if(!NetworkUtils.isConnectedToNetwork ( SearchActivity.this ))
+			{
+				publishProgress("No Internet Connection.");
+				this.cancel ( true );
+			}
+		}
+		
 		@Override
 		protected Response doInBackground ( String... params )
 		{
@@ -377,7 +408,7 @@ public class SearchActivity extends Activity
 		@Override
 		protected void onProgressUpdate ( String... values )
 		{
-			SearchActivity.this.setLoadingText ( values[0] );
+			SearchActivity.this.textLoading.setText ( values[0] );
 		}
 
 		@SuppressWarnings ( "unchecked" )
@@ -393,9 +424,9 @@ public class SearchActivity extends Activity
 					Map< String, List< NutritionInfo >> nutritionInfoDictionary = new HashMap< String, List< NutritionInfo >> ();
 					nutritionInfoDictionary.put ( this.foodName, nutritionInfoList );
 
-					setupList ( nutritionInfoDictionary );
+					SearchActivity.this.setListContents ( nutritionInfoDictionary );
 
-					SearchActivity.this.setSearchActivityView ( SearchActivityView.VIEW_RESULTS );
+					SearchActivity.this.setViewMode ( ViewMode.VIEW_RESULTS );
 
 					return;
 				}
@@ -406,9 +437,62 @@ public class SearchActivity extends Activity
 					Log.e ( SearchActivity.TAG, response.getMessage () );
 				}
 
-				SearchActivity.this.setLoadingText ( SearchActivity.this.getString ( R.string.search_error_null_response ) );
+				SearchActivity.this.textLoading.setText ( SearchActivity.this.getString ( R.string.search_error_null_response ) );
 			}
 		}
+	}
+
+	class LinkImageWithFoodTask extends AsyncTask< String, Void, Boolean >
+	{
+
+		@Override
+		protected void onPreExecute ()
+		{
+			if(!NetworkUtils.isConnectedToNetwork ( SearchActivity.this ))
+			{
+				this.cancel ( true );
+			}
+		}
+		
+		@Override
+		protected Boolean doInBackground ( String... params )
+		{
+			boolean success = false;
+			if ( params.length >= 2 )
+			{
+				try
+				{
+					String imageName = params[0];
+					String foodName = params[1];
+
+					Log.i ( TAG, "Linking " + foodName + " with " + imageName );
+
+					String json = HttpClient.get ( WebServiceUrlFactory.update ( imageName, foodName ) );
+
+					Log.i ( TAG, json );
+
+					Response response = ResponseFactory.createResponseForUpdateRequest ( json );
+					if ( response != null )
+					{
+						success = response.isSuccessful ();
+					}
+				}
+				catch ( ParseException e )
+				{
+					Log.e ( TAG, e.getMessage () );
+				}
+				catch ( IOException e )
+				{
+					Log.e ( TAG, e.getMessage () );
+				}
+
+			}else
+			{
+				Log.e ( TAG, "Insufficient Parameters." );
+			}
+			return success;
+		}
+
 	}
 
 }

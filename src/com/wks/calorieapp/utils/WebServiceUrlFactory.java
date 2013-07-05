@@ -6,6 +6,7 @@ public class WebServiceUrlFactory
 	private static final String SERVLET_UPLOAD = "upload";
 	private static final String SERVLET_IDENTIFY = "identify";
 	private static final String SERVLET_NUTRITION_INFO = "nutrition_info";
+	private static final String SERVLET_UPDATE = "update";
 	
 	public static String upload()
 	{
@@ -30,5 +31,10 @@ public class WebServiceUrlFactory
 	public static String getNutritionInfo(String foodName, int numResults)
 	{
 		return WEBAPP_URL + SERVLET_NUTRITION_INFO + "/"+foodName+"/"+numResults;
+	}
+	
+	public static String update(String imageName, String foodName)
+	{
+		return WEBAPP_URL + SERVLET_UPDATE + "/"+imageName+"/"+foodName;
 	}
 }

@@ -131,12 +131,8 @@ public class CalendarAdapter extends BaseAdapter
 		{
 			inflater = LayoutInflater.from ( context );
 			resultView = inflater.inflate ( R.layout.activity_journal_calendar_cell, null );
-
-			holder = new ViewHolder ();
-			holder.cellCalendar = ( LinearLayout ) resultView.findViewById ( R.id.calendar_cell_layout );
-			holder.textDate = ( TextView ) resultView.findViewById ( R.id.calendar_cell_date );
-			holder.image = ( ImageView ) resultView.findViewById ( R.id.calendar_cell_image );
-			holder.textDescription = ( TextView ) resultView.findViewById ( R.id.calendar_cell_description );
+			
+			holder = new ViewHolder(resultView);
 			
 			resultView.setMinimumHeight ( this.height );
 			resultView.setTag ( holder );
@@ -145,11 +141,13 @@ public class CalendarAdapter extends BaseAdapter
 			holder = ( ViewHolder ) resultView.getTag ();
 		}
 
+		holder.clear ();
+		
 		int date = this.getDateAtPosition ( position );
 		if ( date != -1 )
 		{
 			// show the date in the calendar.
-			holder.textDate.setText ( "" + date );
+			holder.setTextDate ( "" + date );
 			if ( this.events != null )
 			{
 				Calendar currentDay = ( Calendar ) this.calendar.clone ();
@@ -159,9 +157,7 @@ public class CalendarAdapter extends BaseAdapter
 				CalendarEvent event = events.get ( eventDay );
 				if ( event != null )
 				{
-					holder.image.setImageDrawable ( event.getDrawable () );
-					holder.textDescription.setText ( event.getDescription () );
-					holder.cellCalendar.setBackgroundColor ( event.getBackgroundColor() );
+					holder.setCalendarEvent ( event );
 				}
 			}
 
@@ -213,14 +209,6 @@ public class CalendarAdapter extends BaseAdapter
 		return i;
 	}
 
-	private static class ViewHolder
-	{
-		private LinearLayout cellCalendar;
-		private TextView textDate;
-		private ImageView image;
-		private TextView textDescription;
-	}
-
 	public void setDate ( Calendar calendar )
 	{
 		this.calendar = ( Calendar ) calendar.clone ();
@@ -230,6 +218,43 @@ public class CalendarAdapter extends BaseAdapter
 	public long getDate ()
 	{
 		return this.calendar.getTimeInMillis ();
+	}
+	
+	private static class ViewHolder
+	{
+		private LinearLayout cellCalendar;
+		private TextView textDate;
+		private ImageView image;
+		private TextView textDescription;
+		
+		public ViewHolder(View view)
+		{
+			this.cellCalendar = ( LinearLayout ) view.findViewById ( R.id.calendar_cell_layout );
+			this.textDate = ( TextView ) view.findViewById ( R.id.calendar_cell_date );
+			this.image = ( ImageView ) view.findViewById ( R.id.calendar_cell_image );
+			this.textDescription = ( TextView ) view.findViewById ( R.id.calendar_cell_description );
+			
+		}
+		
+		public void clear()
+		{
+			this.cellCalendar.setBackgroundColor ( 0 );
+			this.textDate.setText ( "" );
+			this.image.setImageDrawable ( null );
+			this.textDescription.setText ( "" );
+		}
+		
+		public void setTextDate(String date)
+		{
+			this.textDate.setText ( date );
+		}
+		
+		public void setCalendarEvent(CalendarEvent event)
+		{
+			this.image.setImageDrawable ( event.getDrawable () );
+			this.textDescription.setText ( event.getDescription () );
+			this.cellCalendar.setBackgroundColor ( event.getBackgroundColor() );
+		}
 	}
 
 }

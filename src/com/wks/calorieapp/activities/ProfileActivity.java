@@ -7,7 +7,7 @@ import com.wks.calorieapp.adapters.ActivityLifestyleSpinnerAdapter;
 import com.wks.calorieapp.pojos.Profile;
 import com.wks.calorieapp.pojos.Profile.Sex;
 import com.wks.calorieapp.pojos.ProfileException;
-import com.wks.calorieapp.utils.FileUtil;
+import com.wks.calorieapp.utils.FileUtils;
 
 import android.app.ActionBar;
 import android.app.Activity;
@@ -31,7 +31,10 @@ import android.widget.Toast;
 
 public class ProfileActivity extends Activity
 {
-	//private static final String TAG = ProfileActivity.class.getCanonicalName ();
+	// private static final String TAG = ProfileActivity.class.getCanonicalName
+	
+	public static final String KEY_VIEW_MODE = "mode";
+
 	private RadioGroup radiogroupSex;
 	private RadioButton radioMale;
 
@@ -45,40 +48,30 @@ public class ProfileActivity extends Activity
 
 	private Button buttonCalculateRecommendedCalories;
 
+	public enum ViewMode{REGULAR, WELCOME};
 	private ViewMode mode;
-	
-	private float selectedActivityFactor;//<- symptomn of bad programming :(
+
+	private float selectedActivityFactor;// TODO refactor and get rid of this.
 
 	@Override
 	protected void onCreate ( Bundle savedInstanceState )
 	{
 		super.onCreate ( savedInstanceState );
-		Bundle extras = this.getIntent ().getExtras ();
-		
-		this.mode = ViewMode.REGULAR;
-		
-		if(extras != null)
-		{
-			this.mode = ViewMode.valueOf (extras.getString ( Key.PROFILE_MODE.key ()));
-		}
-		
-		this.setContentView ( this.mode == ViewMode.REGULAR? R.layout.activity_profile : R.layout.activity_profile_welcome );
-		
+
+		this.init ();
 		this.setupActionBar ();
 		this.setupView ();
 		this.setupListeners ();
-		this.bindView ();
 	}
 
 	@Override
 	protected void onPause ()
 	{
 		super.onPause ();
-		//remove from activity stack.
-		if(this.mode == ViewMode.WELCOME)
-			this.finish ();
+		// remove from activity stack.
+		if ( this.mode == ViewMode.WELCOME ) this.finish ();
 	}
-	
+
 	@Override
 	public boolean onCreateOptionsMenu ( Menu menu )
 	{
@@ -99,20 +92,18 @@ public class ProfileActivity extends Activity
 			return true;
 
 		case R.id.profile_menu_done:
-			// TODO
-			
+
 			try
 			{
 				Profile profile = this.createProfile ();
-				
-				if(profile == null)
-					return false;
-				
-				FileUtil.writeToFile ( this, CalorieApplication.FILENAME_PROFILE_CSV, profile.toCSV (), Context.MODE_PRIVATE );
-				CalorieApplication app = (CalorieApplication)  this.getApplication ();
+
+				if ( profile == null ) return false;
+
+				FileUtils.writeToFile ( this, CalorieApplication.FILENAME_PROFILE_CSV, profile.toCSV (), Context.MODE_PRIVATE );
+				CalorieApplication app = ( CalorieApplication ) this.getApplication ();
 				app.setProfile ( profile );
-				
-				Intent homeIntent2 = new Intent(this, HomeActivity.class);
+
+				Intent homeIntent2 = new Intent ( this, HomeActivity.class );
 				homeIntent2.addFlags ( Intent.FLAG_ACTIVITY_CLEAR_TOP );
 				this.startActivity ( homeIntent2 );
 				return true;
@@ -121,23 +112,38 @@ public class ProfileActivity extends Activity
 			{
 				// do nothing.
 			}
-			
-			return true;	
-			
+
+			return true;
+
 		default:
 			return super.onOptionsItemSelected ( item );
 		}
 	}
 
+	private void init ()
+	{
+		Bundle extras = this.getIntent ().getExtras ();
+
+		this.mode = ViewMode.REGULAR;
+
+		if ( extras != null )
+		{
+			this.mode = ViewMode.valueOf ( extras.getString ( KEY_VIEW_MODE ) );
+		}
+
+		this.setContentView ( this.mode == ViewMode.REGULAR ? R.layout.activity_profile : R.layout.activity_profile_welcome );
+
+	}
+
 	private void setupActionBar ()
 	{
 		ActionBar actionBar = this.getActionBar ();
-		
-		if(this.mode == ViewMode.WELCOME)
+
+		if ( this.mode == ViewMode.WELCOME )
 		{
 			actionBar.setTitle ( this.getResources ().getString ( R.string.title_activity_profile_welcome ) );
 		}
-		
+
 		actionBar.setDisplayHomeAsUpEnabled ( this.mode == ViewMode.REGULAR );
 
 		Drawable d = this.getResources ().getDrawable ( R.drawable.bg_actionbar );
@@ -146,11 +152,9 @@ public class ProfileActivity extends Activity
 
 	private void setupView ()
 	{
-		
+
 		this.radiogroupSex = ( RadioGroup ) this.findViewById ( R.id.profile_radiogroup_sex );
 		this.radioMale = ( RadioButton ) this.findViewById ( R.id.profile_radio_male );
-		// this.radioFemale = ( RadioButton ) this.findViewById (
-		// R.id.profile_radio_female );
 
 		this.spinnerActivityLifestyle = ( Spinner ) this.findViewById ( R.id.profile_spinner_activity_lifestyle );
 		this.activityLifestyleAdapter = new ActivityLifestyleSpinnerAdapter ( this );
@@ -162,6 +166,7 @@ public class ProfileActivity extends Activity
 		this.editAge = ( EditText ) this.findViewById ( R.id.profile_edit_age );
 
 		this.buttonCalculateRecommendedCalories = ( Button ) this.findViewById ( R.id.profile_button_calculate_recommended_calories );
+		this.bindView ();
 	}
 
 	private void setupListeners ()
@@ -180,12 +185,11 @@ public class ProfileActivity extends Activity
 
 	private void bindView ()
 	{
-		CalorieApplication app = (CalorieApplication) this.getApplication ();
+		CalorieApplication app = ( CalorieApplication ) this.getApplication ();
 		Profile profile = app.getProfile ();
-		
-		if(profile == null)
-			profile = new Profile();
-		
+
+		if ( profile == null ) profile = new Profile ();
+
 		this.radioMale.setChecked ( profile.getSex ().equals ( Profile.Sex.MALE ) );
 		this.editAge.setText ( "" + profile.getAge () );
 		this.editWeight.setText ( "" + profile.getWeight () );
@@ -203,7 +207,7 @@ public class ProfileActivity extends Activity
 				R.string.profile_layout_button_get_recommended_calories_update ) );
 	}
 
-	private Profile createProfile () 
+	private Profile createProfile ()
 	{
 		try
 		{
@@ -214,9 +218,8 @@ public class ProfileActivity extends Activity
 			String sWeight = ProfileActivity.this.editWeight.getText ().toString ();
 			String sWeightLossGoal = ProfileActivity.this.editWeightLossGoal.getText ().toString ();
 
-			
-			Profile profile = new Profile();
-			
+			Profile profile = new Profile ();
+
 			profile.setSex ( sex );
 			profile.setActivityFactor ( activityFactor );
 			profile.setAge ( Integer.parseInt ( sAge ) );
@@ -271,8 +274,8 @@ public class ProfileActivity extends Activity
 		{
 
 			Profile profile = ProfileActivity.this.createProfile ();
-			
-			if(profile != null)
+
+			if ( profile != null )
 			{
 				String template = ProfileActivity.this.getResources ().getString ( R.string.profile_layout_button_get_recommended_calories_template );
 				template = String.format ( template, profile.getRecommendedDailyCalories () );
@@ -301,11 +304,5 @@ public class ProfileActivity extends Activity
 			ProfileActivity.this.toggleButtonCalculateRecommendedCaloriesText ();
 		}
 
-	}
-	
-	public enum ViewMode
-	{
-		WELCOME,
-		REGULAR;
 	}
 }

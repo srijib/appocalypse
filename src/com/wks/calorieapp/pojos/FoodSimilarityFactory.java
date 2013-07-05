@@ -16,15 +16,7 @@ public class FoodSimilarityFactory
 
 		JSONObject jo = ( JSONObject ) object;
 		String foodName = ( String ) jo.get ( KEY_NAME );// gets string
-		float similarity = ( ( Double ) jo.get ( KEY_SIMILARITY ) ).floatValue ();// <--
-																					// this
-																					// is
-																					// the
-																					// stupidest
-																					// convention
-																					// i've
-																					// ever
-																					// seen!!!!
+		float similarity = ( ( Double ) jo.get ( KEY_SIMILARITY ) ).floatValue ();
 		return new FoodSimilarity ( foodName, similarity );
 	}
 }

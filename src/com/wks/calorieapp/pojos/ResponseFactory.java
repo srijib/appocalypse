@@ -111,6 +111,22 @@ public class ResponseFactory
 
 	}
 
+	public static Response createResponseForUpdateRequest ( String json ) throws ParseException
+	{
+		if ( json == null || json.isEmpty () ) return null;
+
+		JSONObject jsonObject = jsonify ( json );
+		int statusCode = getStatusCode ( jsonObject );
+		String message = getMessage ( jsonObject );
+
+		Response response = new Response ();
+		response.setStatusCode ( statusCode );
+		response.setMessage ( message );
+		response.setData ( null );
+
+		return response;
+	}
+	
 	private static JSONObject jsonify ( String json ) throws ParseException
 	{
 		Object object = parser.parse ( json );
@@ -127,4 +143,6 @@ public class ResponseFactory
 	{
 		return ( ( Long ) jsonObject.get ( KEY_STATUS_CODE ) ).intValue ();
 	}
+
+	
 }

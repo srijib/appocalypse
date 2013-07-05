@@ -20,7 +20,8 @@ public enum StatusCode
     DB_NULL_CONNECTION(15,"Operation could not be completed because a connection to database could not be established."),
     DB_SQL_EXCEPTION(16,"Database could not be queried"),
     DB_INTEGRITY_VIOLATION(17,"Query could not be completed because of violation with db constraints"),
-    DB_INSERT_FAILED(18,"Insertion to db failed possibly because record already exists.");
+    DB_INSERT_FAILED(18,"Insertion to db failed possibly because record already exists."),
+    UPDATE_FAILED(19,"Image could not be linked with food.");
     
     private final int code;
     private final String description;

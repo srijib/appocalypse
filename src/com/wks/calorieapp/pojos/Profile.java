@@ -2,7 +2,6 @@ package com.wks.calorieapp.pojos;
 
 import org.json.simple.JSONObject;
 
-import com.wks.calorieapp.utils.JSONWriteable;
 
 
 public class Profile implements JSONWriteable
@@ -46,7 +45,7 @@ public class Profile implements JSONWriteable
 
 	public void setHeight ( float height ) throws ProfileException
 	{
-		if(height <= MIN_ZERO)
+		if(height <= MIN_ZERO || height > MAX_HEIGHT)
 			throw new ProfileException("Height must be between "+MIN_ZERO+" and "+MAX_HEIGHT+".");
 		this.height = height;
 	}
@@ -58,7 +57,7 @@ public class Profile implements JSONWriteable
 
 	public void setWeight ( float weight ) throws ProfileException
 	{
-		if(weight <= MIN_ZERO )
+		if(weight <= MIN_ZERO || weight > MAX_WEIGHT)
 			throw new ProfileException("Weight must be between "+MIN_ZERO+" and "+MAX_WEIGHT+".");
 		this.weight = weight;
 	}

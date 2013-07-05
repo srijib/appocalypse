@@ -1,11 +1,7 @@
 package com.wks.calorieapp.activities;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import com.wks.calorieapp.R;
-import com.wks.calorieapp.adapters.NavigationListAdapter;
-import com.wks.calorieapp.adapters.GridItem;
+import com.wks.calorieapp.adapters.HomeMenuAdapter;
 
 import android.app.ActionBar;
 import android.app.Activity;
@@ -19,23 +15,15 @@ import android.widget.Toast;
 
 public class HomeActivity extends Activity
 {
-	private static final int NUM_ROWS = 3;
 	
 	ListView listviewActivities;
-	List<GridItem> activitiesList;
+	HomeMenuAdapter adapter;
 	
 	@Override
 	protected void onCreate ( Bundle savedInstanceState )
 	{
 		super.onCreate ( savedInstanceState );
 		this.setContentView ( R.layout.activity_home );
-		
-		
-		this.activitiesList = new ArrayList<GridItem>();
-		
-		Activity[] activities = Activity.values ();
-		for(Activity activity: activities)
-			activitiesList.add ( new GridItem(activity.getText (),activity.getResourceId ()) );
 		
 		setupActionBar();
 		setupView();
@@ -53,41 +41,13 @@ public class HomeActivity extends Activity
 	private void setupView()
 	{
 		this.listviewActivities = (ListView) this.findViewById ( R.id.home_listview_activities );
-		this.listviewActivities.setAdapter ( new NavigationListAdapter(this, this.activitiesList, NUM_ROWS));
+		this.adapter = new HomeMenuAdapter(this);
+		this.listviewActivities.setAdapter ( this.adapter);
 	}
 	
 	private void setupListeners()
 	{
 		this.listviewActivities.setOnItemClickListener ( new OnGridActivitiesClicked() );
-	}
-	
-	enum Activity
-	{
-		CAMERA("Calorie Camera",R.drawable.ic_launcher),
-		SEARCH("Food Search",R.drawable.search),
-		JOURNAL("Calorie Journal",R.drawable.ic_launcher),
-		GALLERY("Gallery",R.drawable.gallery),
-		PROFILE("Profile",R.drawable.ic_launcher);
-		
-		private final String text;
-		private final int resourceId;
-		
-		Activity(String text, int resourceId)
-		{
-			this.text = text;
-			this.resourceId = resourceId;
-		}
-		
-		public String getText ()
-		{
-			return text;
-		}
-		
-		public int getResourceId ()
-		{
-			return resourceId;
-		}
-	
 	}
 	
 	class OnGridActivitiesClicked implements AdapterView.OnItemClickListener
@@ -97,7 +57,7 @@ public class HomeActivity extends Activity
 		{
 			
 			
-			switch(Activity.values ()[position])
+			switch(HomeActivity.this.adapter.getItem ( position ))
 			{
 			case CAMERA:
 				Intent cameraIntent = new Intent(HomeActivity.this, CameraActivity.class);

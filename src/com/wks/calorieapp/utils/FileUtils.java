@@ -10,7 +10,7 @@ import java.io.InputStreamReader;
 import android.content.Context;
 import android.util.Log;
 
-public class FileUtil
+public class FileUtils
 {
 	public static void writeToFile ( Context context, String filename, String text, int mode ) throws IOException
 	{

@@ -1,4 +1,4 @@
-package com.wks.calorieapp.utils;
+package com.wks.calorieapp.pojos;
 
 public interface JSONWriteable
 {

@@ -119,7 +119,7 @@ public class JournalDAO
 	{
 		SimpleDateFormat formatter = new SimpleDateFormat(JournalEntry.DATE_FORMAT);
 		String monthRegex = "'"+formatter.format ( cal.getTimeInMillis () )+"'";
-		
+		Log.e(TAG,"Journal DAO: "+monthRegex);
 		Cursor c = this.db.query ( TABLE_JOURNALS, JournalDAO.COLUMNS, Column.DATE.getName () + " = "+monthRegex, null, null, null, null );
 		
 		List<JournalEntry> entries = new ArrayList<JournalEntry>();

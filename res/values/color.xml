@@ -11,11 +11,14 @@
     <color name="transparent_black_medium">#662c2c2c</color>
     <color name="transparent_black">#66000000</color>
     <color name="transparent">#00ffffff</color>
-    <color name="gray_light">#eeeeee</color>
-    <color name="gray_medium">#cccccc</color>
+    <color name="very_light_gray">#ebebeb</color>
+    <color name="light_gray">#eeeeee</color>
+    <color name="medium_gray">#cccccc</color>
 	<color name="cornflower_blue">#6495ED</color>
 	<color name="turquoise_blue">#00C78C</color>
 	<color name="brick_red">#b22222</color>
-	<color name="journal_calories_consumed_good">#308014</color>
-	<color name="journal_calories_consumed_bad">#b22222</color>
+	<color name="journal_calories_consumed_good">#F0FFF0</color>
+	<color name="journal_calories_consumed_bad">#FFC1C1</color>
+	<color name="date_calories_consumed_good">#308014</color>
+	<color name="date_calories_consumed_bad">#b22222</color>
 </resources>

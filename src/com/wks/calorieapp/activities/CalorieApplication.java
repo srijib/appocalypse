@@ -15,7 +15,6 @@ public class CalorieApplication extends Application
 	public static final String FILENAME_PROFILE_CSV = "profile.csv";
 	
 	private Profile profile;
-	private static CalorieApplication instance;
 	private static Map<String,List<NutritionInfo>> nutritionInfoDictionary;
 
 	
@@ -23,22 +22,15 @@ public class CalorieApplication extends Application
 	public void onCreate ()
 	{
 		super.onCreate ();
-		CalorieApplication.instance = this;
-		
-		
 	}
 	
-	public static CalorieApplication getInstance()
-	{
-		return CalorieApplication.instance;
-	}
 	
 	public static void setNutritionInfoDictionary(Map<String,List<NutritionInfo>> dictionary)
 	{
 		CalorieApplication.nutritionInfoDictionary = dictionary;
 	}
 	
-	public static Map<String,List<NutritionInfo>> getNutritionInfoDictionary()
+	public static Map<String,List<NutritionInfo>> getNutritionInfoMap()
 	{
 		return CalorieApplication.nutritionInfoDictionary;
 	}

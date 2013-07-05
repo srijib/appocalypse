@@ -31,8 +31,9 @@ import android.widget.TextView;
 public class JournalActivity extends Activity
 {
 	public static final String TAG = JournalActivity.class.getCanonicalName ();
-	
+
 	public static final String FORMAT_DATE_HEADER = "MMMM yyyy";
+
 	public enum CalendarPeriod
 	{
 		TODAY, NEXT_WEEK, NEXT_MONTH, NEXT_YEAR, LAST_WEEK, LAST_MONTH, LAST_YEAR
@@ -49,25 +50,20 @@ public class JournalActivity extends Activity
 	private ImageButton [] buttonsDateControl;
 
 	private Profile profile;
-	
-	private CalendarAdapter adapter;
-	private Calendar calendar;
 
+	private CalendarAdapter adapter;
 
 	@Override
 	protected void onCreate ( Bundle savedInstanceState )
 	{
 		super.onCreate ( savedInstanceState );
 		this.setContentView ( R.layout.activity_journal );
-		
-		
-		this.init();
+
+		this.init ();
 		this.setupActionBar ();
 		this.setupView ();
 		this.setupListeners ();
-		this.initCalendar();
 	}
-	
 
 	@Override
 	public boolean onOptionsItemSelected ( MenuItem item )
@@ -84,10 +80,10 @@ public class JournalActivity extends Activity
 			return super.onOptionsItemSelected ( item );
 		}
 	}
-	
-	private void init()
+
+	private void init ()
 	{
-		this.profile = ((CalorieApplication) this.getApplication ()).getProfile ();
+		this.profile = ( ( CalorieApplication ) this.getApplication () ).getProfile ();
 	}
 
 	private void setupActionBar ()
@@ -102,100 +98,100 @@ public class JournalActivity extends Activity
 
 	private void setupView ()
 	{
-		textDateHeader = (TextView) this.findViewById ( R.id.journal_text_date_header );
-		gridDaysOfWeek = (GridView) this.findViewById ( R.id.journal_grid_days_of_week );
-		gridCalendar = (GridView) this.findViewById ( R.id.journal_grid_calendar );
+		textDateHeader = ( TextView ) this.findViewById ( R.id.journal_text_date_header );
+		gridDaysOfWeek = ( GridView ) this.findViewById ( R.id.journal_grid_days_of_week );
+		gridCalendar = ( GridView ) this.findViewById ( R.id.journal_grid_calendar );
 		buttonLastYear = ( ImageButton ) this.findViewById ( R.id.journal_button_last_year );
 		buttonLastMonth = ( ImageButton ) this.findViewById ( R.id.journal_button_last_month );
 		buttonToday = ( ImageButton ) this.findViewById ( R.id.journal_button_today );
 		buttonNextMonth = ( ImageButton ) this.findViewById ( R.id.journal_button_next_month );
 		buttonNextYear = ( ImageButton ) this.findViewById ( R.id.journal_button_next_year );
 
-		buttonsDateControl = new ImageButton [] { buttonLastYear, buttonLastMonth, buttonToday, buttonNextMonth, buttonNextYear };
-	
-		this.gridDaysOfWeek.setAdapter ( new DaysOfWeekAdapter(this) );
-		this.adapter = new CalendarAdapter(this);
+		buttonsDateControl = new ImageButton []
+		{
+				buttonLastYear, buttonLastMonth, buttonToday, buttonNextMonth, buttonNextYear
+		};
+
+		this.gridDaysOfWeek.setAdapter ( new DaysOfWeekAdapter ( this ) );
+		this.adapter = new CalendarAdapter ( this );
 		this.gridCalendar.setAdapter ( adapter );
+
+		this.updateCalendar ( Calendar.getInstance () );
 	}
 
-	
 	private void setupListeners ()
 	{
 		for ( ImageButton button : buttonsDateControl )
 			button.setOnClickListener ( new OnDateControlButtonClicked () );
 
-		this.gridCalendar.setOnItemClickListener ( new OnDateClicked() );
-	}
-	
-	private void initCalendar()
-	{
-		this.calendar = Calendar.getInstance ();
-		this.updateCalendar ( );
+		this.gridCalendar.setOnItemClickListener ( new OnDateClicked () );
 	}
 
-	private void updateCalendar()
+	private void updateCalendar ( Calendar newCalendar )
 	{
+		// update calendar view
+		JournalActivity.this.adapter.setDate ( newCalendar );
+
+		// update calendar view heading
 		this.updateDateHeader ( this.adapter.getDate () );
-		
-		Map<Calendar,CalendarEvent> caloriesForMonth = JournalActivity.this.getCalorieCalendar ( this.calendar );
-		if(caloriesForMonth != null)
+
+		// load any calendar events for this
+		Map< Calendar, CalendarEvent > caloriesForMonth = JournalActivity.this.getCalendarEvents ( newCalendar );
+		if ( caloriesForMonth != null )
 		{
 			JournalActivity.this.adapter.setItems ( caloriesForMonth );
 		}
-		
-		
-		//update adapter date
-		JournalActivity.this.adapter.setDate ( this.calendar );
+
 	}
-		
-	private void updateDateHeader(long newDate)
+
+	private void updateDateHeader ( long newDate )
 	{
-		SimpleDateFormat formatter = new SimpleDateFormat(FORMAT_DATE_HEADER);
+		SimpleDateFormat formatter = new SimpleDateFormat ( FORMAT_DATE_HEADER );
 		String dateText = formatter.format ( newDate );
 		this.textDateHeader.setText ( dateText );
 	}
-	
-	private Map<Calendar,CalendarEvent> getCalorieCalendar(Calendar cal)
+
+	private Map< Calendar, CalendarEvent > getCalendarEvents ( Calendar cal )
 	{
 		DatabaseManager manager = DatabaseManager.getInstance ( this );
 		SQLiteDatabase db = manager.open ();
-		
-		Map<Calendar,CalendarEvent> calorieCalendar = new HashMap<Calendar,CalendarEvent>();
-		//retrieve calories consumed for each day of selected month
-		if(db == null)
+
+		Map< Calendar, CalendarEvent > calorieCalendar = new HashMap< Calendar, CalendarEvent > ();
+		// retrieve calories consumed for each day of selected month
+		if ( db == null )
 		{
-			Log.e(TAG,"Can not load calorie data - null connection to db.");
-			
+			Log.e ( TAG, "Can not load calorie data - null connection to db." );
 		}else
 		{
-			JournalDAO journalDao = new JournalDAO(db);
-			Map<Calendar,Float> caloriesEachDay = journalDao.getCaloriesForMonth ( cal );
-			
-			//create calendar events for that period. 
-			
-			for(Entry<Calendar,Float> calorieEntry : caloriesEachDay.entrySet ())
+			JournalDAO journalDao = new JournalDAO ( db );
+			Map< Calendar, Float > caloriesForMonth = journalDao.getCaloriesForMonth ( cal );
+
+			// create calendar events for that period.
+
+			for ( Entry< Calendar, Float > caloriesForDate : caloriesForMonth.entrySet () )
 			{
-				float calories = calorieEntry.getValue ();
-				
-				CalendarEvent event = new CalendarEvent();
-				event.setDescription ( String.format ( "%.1f cal", calories ) );
-				
-				int caloriesExtra = (int)(calories - this.profile.getRecommendedDailyCalories ());
-				event.setBackgroundColor ( this.getResources ().getColor ( caloriesExtra <= 0? R.color.journal_calories_consumed_good: R.color.journal_calories_consumed_bad ));
-				
-				calorieCalendar.put ( calorieEntry.getKey (), event );
-				
+				float caloriesConsumed = caloriesForDate.getValue ();
+
+				CalendarEvent event = new CalendarEvent ();
+				event.setDescription ( String.format ( "%.f cal", caloriesConsumed ) );
+
+				int extraCalories = ( int ) ( caloriesConsumed - this.profile.getRecommendedDailyCalories () );
+				event.setBackgroundColor ( this.getResources ().getColor (
+						extraCalories <= 0 ? R.color.journal_calories_consumed_good : R.color.journal_calories_consumed_bad ) );
+
+				calorieCalendar.put ( caloriesForDate.getKey (), event );
+
 			}
+
+			db.close ();
 		}
-		
-		db.close ();
+
 		return calorieCalendar;
 	}
 
-	private Calendar getCalendarForDate ( int day, int month, int year )
+	private Calendar getCalendarForMonth ( int month, int year )
 	{
 		Calendar calendar = Calendar.getInstance ();
-		calendar.set ( Calendar.DAY_OF_MONTH, day );
 		calendar.set ( Calendar.MONTH, month );
 		calendar.set ( Calendar.YEAR, year );
 
@@ -206,22 +202,21 @@ public class JournalActivity extends Activity
 	{
 		Calendar cal = Calendar.getInstance ();
 		cal.setTimeInMillis ( this.adapter.getDate () );
-		int day = cal.get ( Calendar.DAY_OF_MONTH );
 		int month = cal.get ( Calendar.MONTH );
 		int year = cal.get ( Calendar.YEAR );
 
 		switch ( period )
 		{
 		case LAST_YEAR:
-			return getCalendarForDate ( day, month, ( year - 1 ) );
+			return getCalendarForMonth ( month, ( year - 1 ) );
 		case LAST_MONTH:
-			return getCalendarForDate ( day, ( month - 1 ), year );
-			
+			return getCalendarForMonth ( ( month - 1 ), year );
+
 		case NEXT_MONTH:
-			return getCalendarForDate ( day, ( month + 1 ), year );
-			
+			return getCalendarForMonth ( ( month + 1 ), year );
+
 		case NEXT_YEAR:
-			return getCalendarForDate ( day, month, ( year + 1 ) );
+			return getCalendarForMonth ( month, ( year + 1 ) );
 		case TODAY:
 		default:
 			Calendar calendar = Calendar.getInstance ();
@@ -235,53 +230,56 @@ public class JournalActivity extends Activity
 
 		public void onClick ( View v )
 		{
-			//get time period selected by user
+			// get time period selected by user
 			Calendar calendar = Calendar.getInstance ();
-			
+
 			switch ( v.getId () )
 			{
 			case R.id.journal_button_last_year:
-				calendar = (Calendar) JournalActivity.this.getCalendarForPeriod ( CalendarPeriod.LAST_YEAR ).clone ();
+				calendar = ( Calendar ) JournalActivity.this.getCalendarForPeriod ( CalendarPeriod.LAST_YEAR ).clone ();
 				break;
 			case R.id.journal_button_last_month:
-				calendar = (Calendar) JournalActivity.this.getCalendarForPeriod ( CalendarPeriod.LAST_MONTH ).clone();
+				calendar = ( Calendar ) JournalActivity.this.getCalendarForPeriod ( CalendarPeriod.LAST_MONTH ).clone ();
 				break;
 			case R.id.journal_button_today:
-				calendar = (Calendar) JournalActivity.this.getCalendarForPeriod ( CalendarPeriod.TODAY ).clone();
+				calendar = ( Calendar ) JournalActivity.this.getCalendarForPeriod ( CalendarPeriod.TODAY ).clone ();
 				break;
 			case R.id.journal_button_next_month:
-				calendar = (Calendar) JournalActivity.this.getCalendarForPeriod ( CalendarPeriod.NEXT_MONTH ).clone();
+				calendar = ( Calendar ) JournalActivity.this.getCalendarForPeriod ( CalendarPeriod.NEXT_MONTH ).clone ();
 				break;
 			case R.id.journal_button_next_year:
-				calendar = (Calendar) JournalActivity.this.getCalendarForPeriod ( CalendarPeriod.NEXT_YEAR ).clone();
+				calendar = ( Calendar ) JournalActivity.this.getCalendarForPeriod ( CalendarPeriod.NEXT_YEAR ).clone ();
 				break;
 			default:
-				calendar = (Calendar) JournalActivity.this.getCalendarForPeriod ( CalendarPeriod.TODAY ).clone();
+				calendar = ( Calendar ) JournalActivity.this.getCalendarForPeriod ( CalendarPeriod.TODAY ).clone ();
 				break;
 			}
-					
-			//update view.
-			JournalActivity.this.calendar = calendar;
-			JournalActivity.this.updateCalendar ();
+
+			// update view.
+			JournalActivity.this.updateCalendar ( calendar );
 		}
 
 	}
-	
+
 	class OnDateClicked implements AdapterView.OnItemClickListener
 	{
 		@Override
 		public void onItemClick ( AdapterView< ? > parent, View view, int position, long id )
 		{
 			CalendarEvent event = JournalActivity.this.adapter.getItem ( position );
-			if(event != null)
+			if ( event != null )
 			{
-				int date = JournalActivity.this.adapter.getDateAtPosition ( position );
-				Calendar cal = (Calendar) JournalActivity.this.calendar.clone ();
-				cal.set ( Calendar.DAY_OF_MONTH, date );
+				Calendar cal = Calendar.getInstance ();
+				//set month and year
+				cal.setTimeInMillis ( JournalActivity.this.adapter.getDate () );
 				
-				Intent dateCaloriesIntent = new Intent(JournalActivity.this,DateCaloriesActivity.class);
-				dateCaloriesIntent.putExtra ( Key.DATE_CALORIES_DATE.key (), cal.getTimeInMillis () );
-				startActivity(dateCaloriesIntent);
+				//set date.
+				int date = JournalActivity.this.adapter.getDateAtPosition ( position );
+				cal.set ( Calendar.DAY_OF_MONTH, date );
+
+				Intent dateCaloriesIntent = new Intent ( JournalActivity.this, DateCaloriesActivity.class );
+				dateCaloriesIntent.putExtra ( DateCaloriesActivity.KEY_DATE, cal.getTimeInMillis () );
+				startActivity ( dateCaloriesIntent );
 			}
 		}
 	}

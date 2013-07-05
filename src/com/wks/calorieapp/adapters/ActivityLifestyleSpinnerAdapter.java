@@ -10,6 +10,7 @@ import android.widget.TextView;
 
 public class ActivityLifestyleSpinnerAdapter extends BaseAdapter
 {
+	private static final int PADDING = 5;
 	public Context context;
 	//I won't use a hashmap because it's difficult to iterate through it in same order.
 	//cant put them in string array cuz of null pointer exception
@@ -60,6 +61,7 @@ public class ActivityLifestyleSpinnerAdapter extends BaseAdapter
 	{
 		TextView textView = (convertView == null)? new TextView(this.context) : (TextView) convertView;
 		textView.setText ( entries[position] );
+		textView.setPadding ( PADDING, PADDING, PADDING, PADDING );
 		return textView;
 	}
 	

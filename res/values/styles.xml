@@ -24,7 +24,6 @@
     </style>
     
     <style name="GridItem">
-        <item name="android:textColor">@color/sea_green</item>
         <item name="android:textSize">14dip</item>
         <item name="android:textStyle">bold</item>
     </style>

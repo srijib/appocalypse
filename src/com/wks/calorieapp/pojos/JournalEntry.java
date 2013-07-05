@@ -10,8 +10,7 @@ public class JournalEntry
 	public static final String TIME_FORMAT = "HH:mm:ss";
 	
 	private long id;
-	private long date;
-	private long time = 0;
+	private long timestamp;
 	private NutritionInfo nutritionInfo;
 	private ImageEntry imageEntry;
 	
@@ -32,8 +31,7 @@ public class JournalEntry
 	public JournalEntry(long id, long date,long time, NutritionInfo nutritionInfo, ImageEntry imageEntry)
 	{
 		this.setId(id);
-		this.setDate(date);
-		this.setTime(time);
+		this.setTimestamp(date);
 		this.setNutritionInfo ( nutritionInfo );
 		this.setImageEntry(imageEntry);
 	}
@@ -50,52 +48,44 @@ public class JournalEntry
 		return id;
 	}
 	
-	public void setDate ( long date )
+	
+	public void setTimestamp ( long date )
 	{
 		if(date < 0) throw new IllegalStateException("timestamp must be a positive value");
-		this.date = date;
+		this.timestamp = date;
 	}
 	
-	private void setTime(long time)
+	
+	public long getTimestamp ()
 	{
-		if(time < 0) throw new IllegalStateException("timestamp must be a positive value");
-		this.time = time;	
+		return timestamp;
 	}
 	
-	public long getDate ()
-	{
-		return date;
-	}
-	
-	public long getTime()
-	{
-		return time;
-	}
 	
 	public void setDate(String date) throws ParseException
 	{
 		SimpleDateFormat formatter = new SimpleDateFormat(DATE_FORMAT);
 		Date d = formatter.parse ( date );
-		this.date = d.getTime ();
+		this.timestamp = d.getTime ();
 	}
 	
 	public void setTime(String time) throws ParseException
 	{
 		SimpleDateFormat formatter = new SimpleDateFormat(TIME_FORMAT);
 		Date d = formatter.parse ( time );
-		this.time = d.getTime ();
+		this.timestamp = d.getTime ();
 	}
 	
 	public String getDateAsString()
 	{
 		SimpleDateFormat formatter = new SimpleDateFormat(DATE_FORMAT);
-		return formatter.format ( this.date );
+		return formatter.format ( this.timestamp );
 	}
 	
 	public String getTimeAsString()
 	{
 		SimpleDateFormat formatter = new SimpleDateFormat(TIME_FORMAT);
-		return formatter.format ( this.time );
+		return formatter.format ( this.timestamp );
 	}
 	
 	public void setNutritionInfo ( NutritionInfo nutritionInfo )

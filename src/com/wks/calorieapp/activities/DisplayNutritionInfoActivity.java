@@ -1,6 +1,5 @@
 package com.wks.calorieapp.activities;
 
-import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Map;
@@ -18,7 +17,6 @@ import android.content.Intent;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -36,34 +34,25 @@ public class DisplayNutritionInfoActivity extends Activity
 
 	private String fileName;
 	private NutritionInfoListAdapter adapter;
-	private Map< String, List< NutritionInfo >> nutritionInfoDictionary;
+	private Map< String, List< NutritionInfo >> nutritionInfoMap;
 	private NutritionInfo selectedFood;
 
+	private enum TextConfirmGist
+	{
+		DEFAULT,CONFIRM_ADD,ADDED,NOT_ADDED;
+	}
+	
 	@Override
 	protected void onCreate ( Bundle savedInstanceState )
 	{
 		super.onCreate ( savedInstanceState );
 		setContentView ( R.layout.activity_display_nutrition_info );
-
-		this.nutritionInfoDictionary = CalorieApplication.getNutritionInfoDictionary ();
-		if ( nutritionInfoDictionary == null )
-		{
-			Toast.makeText ( this, R.string.diplay_nutrition_info_error_display, Toast.LENGTH_LONG ).show ();
-			this.finish ();
-		}
-
-		Log.e ( "shit", nutritionInfoDictionary.toString () );
-
-		Bundle extras = this.getIntent ().getExtras ();
-		if ( extras != null )
-		{
-			this.fileName = extras.getString ( "image" );
-		}
-
-		setupActionBar ();
-		setupView ();
-		setupListeners ();
-		setupList ();
+		
+		this.init();
+		this.setupActionBar ();
+		this.setupView ();
+		this.setupListeners ();
+		this.setListContents ();
 	}
 
 	@Override
@@ -89,7 +78,7 @@ public class DisplayNutritionInfoActivity extends Activity
 			Calendar calendar = Calendar.getInstance ();
 			
 			Intent dateCaloriesIntent = new Intent(this,DateCaloriesActivity.class);
-			dateCaloriesIntent.putExtra( Key.DATE_CALORIES_DATE.key (), calendar.getTimeInMillis () );
+			dateCaloriesIntent.putExtra( DateCaloriesActivity.KEY_DATE, calendar.getTimeInMillis () );
 			startActivity(dateCaloriesIntent);
 			
 			return true;
@@ -106,6 +95,22 @@ public class DisplayNutritionInfoActivity extends Activity
 
 	}
 
+	private void init()
+	{
+		this.nutritionInfoMap = CalorieApplication.getNutritionInfoMap ();
+		if ( nutritionInfoMap == null )
+		{
+			Toast.makeText ( this, R.string.diplay_nutrition_info_error_display, Toast.LENGTH_LONG ).show ();
+			this.finish ();
+		}
+
+		Bundle extras = this.getIntent ().getExtras ();
+		if ( extras != null )
+		{
+			this.fileName = extras.getString ( "image" );
+		}
+	}
+	
 	private void setupActionBar ()
 	{
 		ActionBar actionBar = this.getActionBar ();
@@ -123,11 +128,11 @@ public class DisplayNutritionInfoActivity extends Activity
 		this.textConfirm = ( TextView ) this.findViewById ( R.id.display_nutrition_info_text_confirm );
 	}
 
-	private void setupList ()
+	private void setListContents ()
 	{
-		if ( this.nutritionInfoDictionary != null )
+		if ( this.nutritionInfoMap != null )
 		{
-			this.adapter = new NutritionInfoListAdapter ( this, nutritionInfoDictionary );
+			this.adapter = new NutritionInfoListAdapter ( this, nutritionInfoMap );
 			this.listNutritionInfo.setAdapter ( adapter );
 		}
 	}
@@ -138,27 +143,43 @@ public class DisplayNutritionInfoActivity extends Activity
 		this.buttonAddToJournal.setOnClickListener ( new OnAddToJournalClicked () );
 	}
 
-	private void showConfirmMessage ()
+	private void setTextConfirm (TextConfirmGist gist)
 	{
 		String confirmMessage = "";
-
-		if ( this.selectedFood != null )
+		switch(gist)
 		{
-			String confirmTemplate = this.getString ( R.string.display_nutrition_info_confirm );
-			confirmMessage = String.format ( confirmTemplate, this.selectedFood.getName () );
-
-		}else
-		{
-			confirmMessage = this.getString ( R.string.display_nutrition_info_layout_text_default_confirm );
+		case ADDED:
+			if ( this.selectedFood != null )
+			{
+				String confirmTemplate = this.getString ( R.string.display_nutrition_info_layout_text_confirm_template_added );
+				confirmMessage = String.format ( confirmTemplate, this.selectedFood.getName () );
+			}	
+			break;
+		case NOT_ADDED:
+			if ( this.selectedFood != null )
+			{
+				String confirmTemplate = this.getString ( R.string.display_nutrition_info_layout_text_confirm_template_not_added );
+				confirmMessage = String.format ( confirmTemplate, this.selectedFood.getName () );
+			}
+			break;
+		case CONFIRM_ADD:
+			if ( this.selectedFood != null )
+			{
+				String confirmTemplate = this.getString ( R.string.display_nutrition_info_layout_text_confirm_template_confirm_add );
+				confirmMessage = String.format ( confirmTemplate, this.selectedFood.getName () );
+			}
+			break;
+		default:
+			confirmMessage = this.getString ( R.string.search_layout_text_confirm_default );
+			break;
 		}
-
+		
 		this.textConfirm.setText ( confirmMessage );
 	}
 
 	private long addToJournal ()
 	{
-		try
-		{
+
 			if ( this.selectedFood == null ) return -1;
 
 			ImageEntry image = null;
@@ -169,17 +190,9 @@ public class DisplayNutritionInfoActivity extends Activity
 			}
 			
 			Calendar cal = Calendar.getInstance ();
-			SimpleDateFormat formatter = new SimpleDateFormat();
 			
-			formatter.applyPattern ( JournalEntry.DATE_FORMAT );
-			String date = formatter.format ( cal.getTimeInMillis () );
-			
-			formatter.applyPattern ( JournalEntry.TIME_FORMAT );
-			String time = formatter.format ( cal.getTimeInMillis ());
-
 			JournalEntry journal = new JournalEntry ();
-			journal.setDate ( date );
-			journal.setTime ( time );
+			journal.setTimestamp ( cal.getTimeInMillis () );
 			journal.setNutritionInfo ( this.selectedFood );
 			journal.setImageEntry ( image );
 
@@ -191,12 +204,7 @@ public class DisplayNutritionInfoActivity extends Activity
 			
 			db.close ();
 			return journalId;
-		}
-		catch ( java.text.ParseException e )
-		{
-			e.printStackTrace ();
-			return -1;
-		}
+		
 	}
 
 	class OnListItemClicked implements ExpandableListView.OnChildClickListener
@@ -208,7 +216,7 @@ public class DisplayNutritionInfoActivity extends Activity
 			NutritionInfo info = DisplayNutritionInfoActivity.this.adapter.getChild ( groupPosition, childPosition );
 
 			DisplayNutritionInfoActivity.this.selectedFood = info;
-			DisplayNutritionInfoActivity.this.showConfirmMessage ();
+			DisplayNutritionInfoActivity.this.setTextConfirm (TextConfirmGist.CONFIRM_ADD);
 
 			return true;
 		}
@@ -222,14 +230,7 @@ public class DisplayNutritionInfoActivity extends Activity
 		public void onClick ( View v )
 		{
 			boolean success = ( DisplayNutritionInfoActivity.this.addToJournal () > 0 );
-			String message = String.format (
-					DisplayNutritionInfoActivity.this.getString ( 
-							success ? 
-									R.string.display_nutrition_info_toast_entry_added
-									: R.string.display_nutrition_info_toast_entry_not_added ), 
-							DisplayNutritionInfoActivity.this.selectedFood.getName () );
-
-			Toast.makeText ( DisplayNutritionInfoActivity.this, message, Toast.LENGTH_LONG ).show ();
+			DisplayNutritionInfoActivity.this.setTextConfirm(success?TextConfirmGist.ADDED: TextConfirmGist.NOT_ADDED);
 		}
 	}
 }

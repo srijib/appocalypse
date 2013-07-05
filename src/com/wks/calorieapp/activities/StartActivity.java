@@ -5,7 +5,7 @@ import java.io.IOException;
 import com.wks.calorieapp.pojos.Profile;
 import com.wks.calorieapp.pojos.ProfileException;
 import com.wks.calorieapp.pojos.ProfileFactory;
-import com.wks.calorieapp.utils.FileUtil;
+import com.wks.calorieapp.utils.FileUtils;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -19,7 +19,6 @@ public class StartActivity extends Activity
 	@Override
 	protected void onCreate ( Bundle savedInstanceState )
 	{
-		// TODO Auto-generated method stub
 		super.onCreate ( savedInstanceState );
 		// you might want to set content view over here.
 		Log.e ( TAG, "BEGIN" );
@@ -43,7 +42,7 @@ public class StartActivity extends Activity
 
 		Intent welcomeIntent = new Intent ( this, ProfileActivity.class );
 		welcomeIntent.addFlags ( Intent.FLAG_ACTIVITY_CLEAR_TOP );
-		welcomeIntent.putExtra ( Key.PROFILE_MODE.key (), ProfileActivity.ViewMode.WELCOME.toString () );
+		welcomeIntent.putExtra ( ProfileActivity.KEY_VIEW_MODE, ProfileActivity.ViewMode.WELCOME.toString () );
 		startActivity ( welcomeIntent );
 		return;
 	}
@@ -51,7 +50,6 @@ public class StartActivity extends Activity
 	@Override
 	protected void onPause ()
 	{
-		// TODO Auto-generated method stub
 		super.onPause ();
 		this.finish ();
 	}
@@ -62,7 +60,7 @@ public class StartActivity extends Activity
 
 		try
 		{
-			profileCsv = FileUtil.readFromFile ( this, CalorieApplication.FILENAME_PROFILE_CSV);
+			profileCsv = FileUtils.readFromFile ( this, CalorieApplication.FILENAME_PROFILE_CSV);
 
 		}
 		catch ( IOException e )

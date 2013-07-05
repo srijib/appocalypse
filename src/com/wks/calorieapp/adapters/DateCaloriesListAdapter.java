@@ -1,11 +1,15 @@
 package com.wks.calorieapp.adapters;
 
+import java.io.File;
 import java.util.List;
 
 import com.wks.calorieapp.pojos.JournalEntry;
+import com.wks.calorieapp.utils.FileSystem;
 
 import com.wks.calorieapp.R;
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -18,11 +22,13 @@ public class DateCaloriesListAdapter extends BaseAdapter
 {
 	private static final String TAG = DateCaloriesListAdapter.class.getCanonicalName ();
 	
+	private Context context;
 	private List<JournalEntry> items;
 	private LayoutInflater inflater;
 	
 	public DateCaloriesListAdapter(Context context, List<JournalEntry> items)
 	{
+		this.context = context;
 		this.inflater = LayoutInflater.from ( context );
 		this.setItems ( items );
 	}
@@ -80,6 +86,18 @@ public class DateCaloriesListAdapter extends BaseAdapter
 		
 		JournalEntry entry = this.items.get ( position );
 		try{
+			
+			if(entry.getImageEntry () != null)
+			{
+				File file = new File(FileSystem.getPicturesDirectory ( context )+entry.getImageEntry ().getFileName ());
+				if(file.exists ())
+				{	
+					Bitmap photo = BitmapFactory.decodeFile ( file.getAbsolutePath () );
+					if(photo != null)
+					holder.imageMeal.setImageBitmap ( photo );
+				}
+			}
+			
 			holder.textMealName.setText ( entry.getNutritionInfo ().getName () );
 			holder.textMealCalories.setText ( String.format ( "%.1f cal", entry.getNutritionInfo ().getCaloriesPer100g () ));
 		}catch(NullPointerException npe)

@@ -124,27 +124,26 @@ public class Profile implements JSONWriteable
 	public static final String KEY_ACTIVITY_FACTOR = "activity_factor";
 	public static final String KEY_WEIGHT_LOSS_GOAL = "weight_loss_goal";
 	
-	//DOESNT WORK!
+	//WORKS
 	@SuppressWarnings ( "unchecked" )
 	@Override
 	public String toJSON ()
 	{
-		
-		//I'm just using Strings now cuz the author c
+	
 		JSONObject profileJSON = new JSONObject();
-		profileJSON.put ( KEY_AGE, ""+this.age );
-		profileJSON.put ( KEY_SEX, ""+this.sex.toString () );
-		profileJSON.put ( KEY_HEIGHT, ""+this.height );
-		profileJSON.put ( KEY_WEIGHT, ""+this.weightLossGoal );
-		profileJSON.put ( KEY_WEIGHT_LOSS_GOAL, ""+this.weightLossGoal );
-		profileJSON.put ( KEY_ACTIVITY_FACTOR, ""+this.activityFactor );
+		profileJSON.put ( KEY_AGE, this.age );
+		profileJSON.put ( KEY_SEX, this.sex.toString () );
+		profileJSON.put ( KEY_HEIGHT, this.height );
+		profileJSON.put ( KEY_WEIGHT, this.weight );
+		profileJSON.put ( KEY_WEIGHT_LOSS_GOAL, this.weightLossGoal );
+		profileJSON.put ( KEY_ACTIVITY_FACTOR, this.activityFactor );
 		
 		return profileJSON.toJSONString ();
 	}
 	
-
+	/*
 	public String toCSV()
 	{
 		return String.format ( "%s,%d,%f,%f,%f,%d", this.sex, this.age,this.height,this.weight,this.activityFactor,this.weightLossGoal);
-	}
+	}*/
 }

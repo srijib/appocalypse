@@ -41,7 +41,7 @@
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:layout_alignParentBottom="true"
-            android:background="@color/transparent_black"
+            android:background="@color/sap_green"
             android:orientation="horizontal"
             android:padding="2dip" >
 

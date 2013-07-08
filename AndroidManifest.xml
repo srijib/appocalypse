@@ -70,6 +70,15 @@
             android:label="@string/title_activity_profile"
             android:screenOrientation="portrait"></activity>
         
+        <activity 
+            android:name=".activities.GalleryActivity"
+            android:label="@string/title_activity_gallery"
+            android:screenOrientation="portrait"></activity>
+        
+        <activity 
+            android:name=".activities.FullScreenImageActivity"
+            android:screenOrientation="portrait"></activity>
+        
         <activity
             android:name=".activities.StartActivity"
             android:screenOrientation="portrait">

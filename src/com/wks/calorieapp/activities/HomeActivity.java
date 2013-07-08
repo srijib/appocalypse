@@ -75,7 +75,11 @@ public class HomeActivity extends Activity
 				Intent profileIntent = new Intent(HomeActivity.this,ProfileActivity.class);
 				startActivity(profileIntent);
 				return;
-			
+			case GALLERY: 
+				Intent galleryIntent = new Intent(HomeActivity.this, GalleryActivity.class);
+				startActivity ( galleryIntent );
+				return;
+				
 			default:
 				Toast.makeText(HomeActivity.this,"Not yet implemented.",Toast.LENGTH_LONG).show();
 				return;

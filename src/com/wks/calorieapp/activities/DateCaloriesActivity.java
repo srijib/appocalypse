@@ -1,6 +1,7 @@
 package com.wks.calorieapp.activities;
 
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
@@ -9,6 +10,7 @@ import com.wks.calorieapp.R;
 import com.wks.calorieapp.adapters.DateCaloriesListAdapter;
 import com.wks.calorieapp.daos.DatabaseManager;
 import com.wks.calorieapp.daos.JournalDAO;
+import com.wks.calorieapp.listeners.SwipeDismissListViewTouchListener;
 import com.wks.calorieapp.pojos.JournalEntry;
 import com.wks.calorieapp.pojos.Profile;
 
@@ -21,12 +23,16 @@ import android.util.Log;
 import android.view.MenuItem;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 public class DateCaloriesActivity extends Activity
 {
 	private static final String TAG = DateCaloriesActivity.class.getCanonicalName ();
-
+	private static final String DATE_FORMAT_ACTION_BAR = "EEEE, d MMMM yyyy";
+	
 	public static final String KEY_DATE = "date";
+	
+	private long date;
 	
 	private Profile profile;
 	private ListView listMeals;
@@ -58,7 +64,7 @@ public class DateCaloriesActivity extends Activity
 			this.finish ();
 		}
 		
-		long date = extras.getLong ( KEY_DATE );
+		this.date = extras.getLong ( KEY_DATE );
 		
 		Calendar calendar = Calendar.getInstance ();
 		calendar.setTimeInMillis ( date );
@@ -89,6 +95,9 @@ public class DateCaloriesActivity extends Activity
 
 		Drawable d = this.getResources ().getDrawable ( R.drawable.bg_actionbar );
 		actionBar.setBackgroundDrawable ( d );
+		
+		SimpleDateFormat formatter = new SimpleDateFormat(DATE_FORMAT_ACTION_BAR);
+		actionBar.setTitle (formatter.format ( this.date ));
 	}
 
 	private void setupView ()
@@ -108,7 +117,9 @@ public class DateCaloriesActivity extends Activity
 
 	private void setupListeners ()
 	{
-		//TODO add swipe listener
+		OnListItemSwipe onListItemSwipe = new OnListItemSwipe(this.listMeals,new OnListItemDismissed());
+		this.listMeals.setOnTouchListener ( onListItemSwipe );
+		this.listMeals.setOnScrollListener ( onListItemSwipe.makeScrollListener () );
 	}
 
 	private int getCaloriesInExcess ()
@@ -152,5 +163,41 @@ public class DateCaloriesActivity extends Activity
 		Log.e ( TAG, "sizee: " + mealList.size () );
 
 		return mealList;
+	}
+	
+	class OnListItemSwipe extends SwipeDismissListViewTouchListener
+	{
+
+		public OnListItemSwipe ( ListView listView, DismissCallbacks callbacks )
+		{
+			super ( listView, callbacks );
+		}
+		
+	}
+	
+	class OnListItemDismissed implements SwipeDismissListViewTouchListener.DismissCallbacks
+	{
+
+		@Override
+		public boolean canDismiss ( int position )
+		{
+			// TODO Auto-generated method stub
+			return true;
+		}
+
+		@Override
+		public void onDismiss ( ListView listView, int [] reverseSortedPositions )
+		{
+			
+			for(int position : reverseSortedPositions)
+			{
+
+				DateCaloriesActivity.this.adapter.remove(position);
+				
+			}
+			
+			
+		}
+		
 	}
 }

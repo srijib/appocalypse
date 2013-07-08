@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+	<string name="full_screen_image_not_found">Image Not Found.</string>   
+	<string name="full_screen_image_progress_dialog_title">Loading</string>
+	<string name="full_screen_image_progress_dialog_default">Waiting</string> 
+	<string name="full_screen_image_progress_dialog_loading">Loading</string>
+	<string name="full_screen_image_could_not_load ">Image could not be loaded.</string> 
+	<string name="full_screen_image_menu_share">Share</string>
+	<string name="full_screen_image_menu_get_calories">Get Calories</string>
+</resources>

@@ -6,7 +6,6 @@ import org.json.simple.parser.ParseException;
 
 public class ProfileFactory
 {
-	//DOESNT WORK!
 	public static Profile createProfileFromJson(String json) throws ParseException, ProfileException
 	{
 		JSONParser parser = new JSONParser();
@@ -15,25 +14,18 @@ public class ProfileFactory
 		
 		Profile profile = new Profile();
 		
-		int age = Integer.parseInt ( (String) profileJson.get ( Profile.KEY_AGE ) );
-		float weight = Float.parseFloat ( (String) profileJson.get ( Profile.KEY_WEIGHT ) );
-		float height = Float.parseFloat ( (String) profileJson.get ( Profile.KEY_HEIGHT ));
-		float activityFactor = Float.parseFloat ( (String) profileJson.get ( Profile.KEY_ACTIVITY_FACTOR ) );
-		int weightLossGoal = Integer.parseInt ( (String) profileJson.get ( Profile.KEY_WEIGHT_LOSS_GOAL ));
-		
 		String sSex = (String) profileJson.get ( Profile.KEY_SEX );
+		
 		profile.setSex ( Profile.Sex.valueOf ( sSex ) );
-		
-		profile.setAge ( age );
-		profile.setWeight ( weight );
-		profile.setHeight ( height );
-		profile.setWeightLossGoal ( weightLossGoal );
-		profile.setActivityFactor ( activityFactor );
-		
+		profile.setAge ( ((Number) profileJson.get ( Profile.KEY_AGE )).intValue () );
+		profile.setWeight ( ((Number) profileJson.get ( Profile.KEY_WEIGHT )).floatValue () );
+		profile.setHeight ( ((Number) profileJson.get ( Profile.KEY_HEIGHT )).floatValue () );
+		profile.setWeightLossGoal ( ((Number) profileJson.get ( Profile.KEY_WEIGHT_LOSS_GOAL )).intValue () );
+		profile.setActivityFactor (((Number) profileJson.get ( Profile.KEY_ACTIVITY_FACTOR )).floatValue () );
 		
 		return profile;
 	}
-	
+	/*
 	public static Profile createProfileFromCSV(String profileCSV) throws NumberFormatException, ProfileException
 	{
 		Profile profile = null;
@@ -50,5 +42,5 @@ public class ProfileFactory
 		}
 		
 		return profile;
-	}
+	}*/
 }

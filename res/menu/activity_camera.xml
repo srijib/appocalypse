@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android" >
+    <item android:id="@+id/camera_menu_ok"
+        android:title="@string/camera_menu_ok"
+        android:icon="@drawable/ic_get_calories"
+        android:showAsAction="always"></item>
+
+    <item android:id="@+id/camera_menu_cancel"
+        android:title="@string/camera_menu_cancel"
+        android:icon="@drawable/ic_cancel"
+        android:showAsAction="always"></item>
+</menu>

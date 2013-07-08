@@ -21,18 +21,6 @@
         android:gravity="center"
         android:orientation="horizontal" >
 
-        <Button
-            android:id="@+id/camera_button_ok"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="50"
-            android:background="@color/transparent_black"
-            android:text="@string/camera_layout_continue"
-            android:textSize="14dp"
-            android:textColor="#ffffff"
-            android:visibility="visible" >
-        </Button>
-
         <ImageButton
             android:id="@+id/camera_button_take_picture"
             android:layout_width="wrap_content"
@@ -41,20 +29,8 @@
             android:contentDescription="@string/camera_layout_content_description_take_picture"
             android:padding="10dip"
             android:src="@drawable/ic_take_picture"
-            android:visibility="gone" >
-        </ImageButton>
-
-        <Button
-            android:id="@+id/camera_button_cancel"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="50"
-            android:background="@color/transparent_black"
-            android:text="@string/camera_layout_retake_photo"
-            android:textColor="#ffffff"
-            android:textSize="14dp"
             android:visibility="visible" >
-        </Button>
+        </ImageButton>
     </LinearLayout>
 
 </RelativeLayout>

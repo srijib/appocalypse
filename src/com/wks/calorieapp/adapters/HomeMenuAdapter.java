@@ -85,7 +85,7 @@ public class HomeMenuAdapter extends BaseAdapter
 	public enum Activity
 	{
 		CAMERA ( "Calorie Camera", R.drawable.ic_calorie_camera ), SEARCH ( "Food Search", R.drawable.search ), JOURNAL ( "Calorie Journal",
-				R.drawable.ic_launcher ), GALLERY ( "Gallery", R.drawable.ic_gallery ), PROFILE ( "Profile", R.drawable.ic_launcher );
+				R.drawable.ic_journal ), GALLERY ( "Gallery", R.drawable.ic_gallery ), PROFILE ( "Profile", R.drawable.ic_profile );
 
 		private final String text;
 		private final int resourceId;

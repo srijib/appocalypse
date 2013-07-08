@@ -3,11 +3,14 @@ package com.wks.calorieapp.adapters;
 import java.io.File;
 import java.util.List;
 
+import com.wks.calorieapp.daos.DatabaseManager;
+import com.wks.calorieapp.daos.JournalDAO;
 import com.wks.calorieapp.pojos.JournalEntry;
 import com.wks.calorieapp.utils.FileSystem;
 
 import com.wks.calorieapp.R;
 import android.content.Context;
+import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.util.Log;
@@ -25,12 +28,16 @@ public class DateCaloriesListAdapter extends BaseAdapter
 	private Context context;
 	private List<JournalEntry> items;
 	private LayoutInflater inflater;
+	private SQLiteDatabase db;
 	
 	public DateCaloriesListAdapter(Context context, List<JournalEntry> items)
 	{
 		this.context = context;
 		this.inflater = LayoutInflater.from ( context );
 		this.setItems ( items );
+		
+		DatabaseManager manager = DatabaseManager.getInstance ( context);
+		this.db = manager.open ();
 	}
 	
 	public void setItems ( List< JournalEntry > items )
@@ -52,7 +59,7 @@ public class DateCaloriesListAdapter extends BaseAdapter
 	}
 
 	@Override
-	public Object getItem ( int position )
+	public JournalEntry getItem ( int position )
 	{
 		return this.items.get ( position );
 	}
@@ -110,11 +117,31 @@ public class DateCaloriesListAdapter extends BaseAdapter
 		return resultView;
 	}
 	
+	public boolean remove ( int position )
+	{
+		boolean success = false;
+		JournalEntry entry = this.getItem ( position );
+		if(this.db != null)
+		{
+			JournalDAO journalDao = new JournalDAO(this.db);
+			if(journalDao.delete ( entry.getId () ) > 0)
+			{
+				//if item has been deleted in db, remove from list
+				this.items.remove ( position );
+				success = true;
+			}
+		}
+		this.notifyDataSetChanged ();
+		return success;
+	}
+	
 	class ViewHolder
 	{
 		ImageView imageMeal;
 		TextView textMealName;
 		TextView textMealCalories;
 	}
+
+	
 	
 }

@@ -64,6 +64,14 @@ public class JournalActivity extends Activity
 		this.setupView ();
 		this.setupListeners ();
 	}
+	
+	@Override
+	protected void onResume ()
+	{
+		super.onResume ();
+		if(this.adapter != null)
+			this.updateCalendar ( Calendar.getInstance () );
+	}
 
 	@Override
 	public boolean onOptionsItemSelected ( MenuItem item )
@@ -115,8 +123,6 @@ public class JournalActivity extends Activity
 		this.gridDaysOfWeek.setAdapter ( new DaysOfWeekAdapter ( this ) );
 		this.adapter = new CalendarAdapter ( this );
 		this.gridCalendar.setAdapter ( adapter );
-
-		this.updateCalendar ( Calendar.getInstance () );
 	}
 
 	private void setupListeners ()
@@ -173,7 +179,7 @@ public class JournalActivity extends Activity
 				float caloriesConsumed = caloriesForDate.getValue ();
 
 				CalendarEvent event = new CalendarEvent ();
-				event.setDescription ( String.format ( "%.f cal", caloriesConsumed ) );
+				event.setDescription ( String.format ( "%.0f cal", caloriesConsumed ) );
 
 				int extraCalories = ( int ) ( caloriesConsumed - this.profile.getRecommendedDailyCalories () );
 				event.setBackgroundColor ( this.getResources ().getColor (

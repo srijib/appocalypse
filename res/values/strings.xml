@@ -10,4 +10,6 @@
 	<string name="title_activity_date_calories">Calorie Journal</string>
 	<string name="title_activity_profile">Profile</string>
 	<string name="title_activity_profile_welcome">Welcome!</string>
+	<string name="title_activity_gallery">Gallery</string>
+	<string name="title_activity_full_screen_image"></string>
 </resources>

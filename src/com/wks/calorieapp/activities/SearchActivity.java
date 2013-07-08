@@ -98,7 +98,7 @@ public class SearchActivity extends Activity
 		inflater.inflate ( R.menu.activity_search, menu );
 		return true;
 	}
-
+	
 	@Override
 	public boolean onOptionsItemSelected ( MenuItem item )
 	{
@@ -122,6 +122,13 @@ public class SearchActivity extends Activity
 		}
 	}
 
+	@Override
+	public boolean onPrepareOptionsMenu ( Menu menu )
+	{
+		menu.findItem ( R.id.search_menu_done ).setVisible ( this.viewMode.equals ( ViewMode.VIEW_RESULTS ) );
+		return true;
+	}
+	
 	private void init ()
 	{
 		Bundle extras = this.getIntent ().getExtras ();
@@ -179,7 +186,7 @@ public class SearchActivity extends Activity
 	private void setViewMode ( ViewMode view )
 	{
 		this.viewMode = view;
-
+		this.invalidateOptionsMenu ();
 		switch ( view )
 		{
 		case VIEW_IDLE:
@@ -323,7 +330,7 @@ public class SearchActivity extends Activity
 					new GetNutritionInfoTask ().execute ( foodName );
 				}
 			}
-			return true;
+			return false;
 		}
 
 	}

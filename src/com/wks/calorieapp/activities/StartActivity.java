@@ -2,6 +2,8 @@ package com.wks.calorieapp.activities;
 
 import java.io.IOException;
 
+import org.json.simple.parser.ParseException;
+
 import com.wks.calorieapp.pojos.Profile;
 import com.wks.calorieapp.pojos.ProfileException;
 import com.wks.calorieapp.pojos.ProfileFactory;
@@ -20,14 +22,14 @@ public class StartActivity extends Activity
 	protected void onCreate ( Bundle savedInstanceState )
 	{
 		super.onCreate ( savedInstanceState );
-		// you might want to set content view over here.
+		
 		Log.e ( TAG, "BEGIN" );
-		String profileCsv = this.loadProfileCsv ();
+		String profileJson = this.loadProfileJson ();
 
-		if ( profileCsv != null && !profileCsv.isEmpty () )
+		if ( profileJson != null && !profileJson.isEmpty () )
 		{
 
-			if ( this.loadProfile ( profileCsv ) )
+			if ( this.loadProfile ( profileJson ) )
 			{
 
 				Intent homeIntent = new Intent ( this, HomeActivity.class );
@@ -54,13 +56,13 @@ public class StartActivity extends Activity
 		this.finish ();
 	}
 
-	private String loadProfileCsv ()
+	private String loadProfileJson ()
 	{
-		String profileCsv = null;
+		String profileJson = null;
 
 		try
 		{
-			profileCsv = FileUtils.readFromFile ( this, CalorieApplication.FILENAME_PROFILE_CSV);
+			profileJson = FileUtils.readFromFile ( this, CalorieApplication.FILENAME_PROFILE_JSON);
 
 		}
 		catch ( IOException e )
@@ -68,27 +70,32 @@ public class StartActivity extends Activity
 			Log.e ( TAG, e.getMessage () );
 		}
 
-		return profileCsv;
+		return profileJson;
 	}
 
-	private boolean loadProfile ( String profileCSV )
+	private boolean loadProfile ( String profileJson )
 	{
 		try
 		{
-
-			Profile profile = ProfileFactory.createProfileFromCSV ( profileCSV );
+		
+			Profile profile = ProfileFactory.createProfileFromJson ( profileJson );
 			if(profile!=null)
 			{
 				CalorieApplication app = ( CalorieApplication ) this.getApplication ();
 				app.setProfile ( profile );
+				return true;
 			}
-			return true;
+			
 			
 		}
 		catch ( ProfileException e )
 		{
 			Log.e ( TAG, "" + e.getMessage () );
 
+		}
+		catch ( ParseException e )
+		{
+			Log.e ( TAG, "" + e.getMessage () );
 		}
 		return false;
 	}

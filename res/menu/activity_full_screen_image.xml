@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android" >
+    <item 
+        android:id="@+id/full_screen_image_menu_share"
+        android:title="@string/full_screen_image_menu_share"
+        android:showAsAction="ifRoom"
+        android:actionProviderClass="android.widget.ShareActionProvider"
+        />
+    
+    <item android:id="@+id/full_screen_image_menu_get_calories"
+        android:title="@string/full_screen_image_menu_get_calories"
+        android:showAsAction="ifRoom"
+        android:icon="@drawable/ic_get_calories"></item>
+</menu>

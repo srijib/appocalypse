@@ -99,7 +99,7 @@ public class ProfileActivity extends Activity
 
 				if ( profile == null ) return false;
 
-				FileUtils.writeToFile ( this, CalorieApplication.FILENAME_PROFILE_CSV, profile.toCSV (), Context.MODE_PRIVATE );
+				FileUtils.writeToFile ( this, CalorieApplication.FILENAME_PROFILE_JSON, profile.toJSON (), Context.MODE_PRIVATE );
 				CalorieApplication app = ( CalorieApplication ) this.getApplication ();
 				app.setProfile ( profile );
 

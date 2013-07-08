@@ -4,7 +4,7 @@
 	<string name="camera_error_file_not_saved">Image could not be saved.</string>
 	<string name="camera_image_saved">Image saved.</string>
 	<string name="camera_error_media_not_ready">Image can not be saved because the SDCard is either not present on your device or is busy.</string>
-	<string name="camera_layout_continue">Get Calories!</string>
-	<string name="camera_layout_retake_photo">Try Again</string>
 	<string name="camera_layout_content_description_take_picture">Take Picture</string>
+	<string name="camera_menu_ok">Get Calories</string>
+	<string name="camera_menu_cancel">Try Again</string>
 </resources>

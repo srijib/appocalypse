@@ -48,6 +48,7 @@ public class GetCaloriesActivity extends Activity
 {
 	private static final String TAG = GetCaloriesActivity.class.getCanonicalName ();
 
+	public static final String KEY_IMAGE = "image";
 	private static final int NUM_TRIES_GET_NUTR_INFO = 3;
 
 	private RelativeLayout viewLoading;
@@ -72,9 +73,11 @@ public class GetCaloriesActivity extends Activity
 		DEFAULT, CONFIRM_ADD, ADDED, NOT_ADDED;
 	}
 
+	private ViewMode viewMode;
 	private String cameraPhotoName;
 	private NutritionInfoListAdapter adapter;
 	private NutritionInfo selectedFood;
+	
 
 	@Override
 	protected void onCreate ( Bundle savedInstanceState )
@@ -106,6 +109,15 @@ public class GetCaloriesActivity extends Activity
 		inflater.inflate ( R.menu.activity_get_calories, menu );
 		return true;
 	}
+	
+	@Override
+	public boolean onPrepareOptionsMenu ( Menu menu )
+	{
+		boolean isDisplayingResults = this.viewMode == ViewMode.VIEW_RESULTS;
+		menu.findItem ( R.id.get_calories_menu_done ).setVisible ( isDisplayingResults );
+		menu.findItem ( R.id.get_calories_menu_no_match ).setVisible ( isDisplayingResults );
+		return true;
+	}
 
 	@Override
 	public boolean onOptionsItemSelected ( MenuItem item )
@@ -113,9 +125,8 @@ public class GetCaloriesActivity extends Activity
 		switch ( item.getItemId () )
 		{
 		case android.R.id.home:
-			Intent cameraIntent = new Intent ( this, CameraActivity.class );
-			cameraIntent.addFlags ( Intent.FLAG_ACTIVITY_REORDER_TO_FRONT );
-			startActivity ( cameraIntent );
+			//return to previous activity.
+			this.finish ();
 			return true;
 
 		case R.id.get_calories_menu_done:
@@ -144,7 +155,7 @@ public class GetCaloriesActivity extends Activity
 		Bundle extras = this.getIntent ().getExtras ();
 		if ( extras != null )
 		{
-			this.cameraPhotoName = extras.getString ( "image" );
+			this.cameraPhotoName = extras.getString ( KEY_IMAGE );
 		}else
 		{
 			Toast.makeText ( this, R.string.get_calories_error_image_not_found, Toast.LENGTH_LONG ).show ();
@@ -196,6 +207,9 @@ public class GetCaloriesActivity extends Activity
 
 	private void setViewMode ( ViewMode view )
 	{
+		this.viewMode = view;
+		this.invalidateOptionsMenu ();
+		
 		switch ( view )
 		{
 		case VIEW_LOADING:

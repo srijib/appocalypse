@@ -5,8 +5,14 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Observable;
+import java.util.Observer;
 
 import com.wks.calorieapp.R;
+import com.wks.calorieapp.entities.CalendarEvent;
+import com.wks.calorieapp.entities.Profile;
+import com.wks.calorieapp.models.JournalModel;
+
 import android.content.Context;
 import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
@@ -18,7 +24,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-public class CalendarAdapter extends BaseAdapter
+public class JournalAdapter extends BaseAdapter implements Observer
 {
 
 	private static final int DAYS_PER_WEEK = 7;
@@ -27,26 +33,30 @@ public class CalendarAdapter extends BaseAdapter
 
 
 	private Context context;
+	private Profile profile;
 	private Calendar calendar;
 	private int height;
 	private Map< String, CalendarEvent > events;
 	private SimpleDateFormat formatter;
 
-	public CalendarAdapter ( Context context )
+	public JournalAdapter ( Context context,Profile profile )
 	{
-		this ( context, null, null );
+		this ( context, profile,null, null );
 	}
 
-	public CalendarAdapter ( Context context, Calendar calendar )
+	public JournalAdapter ( Context context,Profile profile, Calendar calendar )
 	{
-		this ( context, calendar, null );
+		this ( context, profile, calendar, null );
 	}
 
-	public CalendarAdapter ( Context context, Calendar calendar, Map< Calendar, CalendarEvent > events )
+	public JournalAdapter ( Context context,Profile profile, Calendar calendar, Map< Calendar, CalendarEvent > events )
 	{
 		if ( context == null ) throw new IllegalStateException ( "Application context must not be null" );
-
+		if ( profile == null)  throw new IllegalStateException (  "Profile must not ne null");
+		
 		this.context = context;
+		this.profile = profile;
+		
 
 		this.calendar = calendar == null ? Calendar.getInstance () : ( Calendar ) calendar.clone ();
 		this.formatter = new SimpleDateFormat(DATE_FORMAT);
@@ -61,6 +71,7 @@ public class CalendarAdapter extends BaseAdapter
 
 	public void setItems ( Map< Calendar, CalendarEvent > events )
 	{
+	
 		if ( events != null )
 		{
 			this.events = new HashMap< String, CalendarEvent > ();
@@ -69,10 +80,10 @@ public class CalendarAdapter extends BaseAdapter
 			{
 				String date = formatter.format ( entry.getKey ().getTimeInMillis () );
 				this.events.put ( date, entry.getValue () );
+				
 			}
 
 			this.notifyDataSetChanged ();
-
 		}
 
 	}
@@ -90,7 +101,7 @@ public class CalendarAdapter extends BaseAdapter
 	 */
 	public int getCount ()
 	{
-		return CalendarAdapter.DAYS_PER_WEEK * CalendarAdapter.WEEKS_PER_MONTH;
+		return DAYS_PER_WEEK * WEEKS_PER_MONTH;
 	}
 
 	/**
@@ -209,15 +220,56 @@ public class CalendarAdapter extends BaseAdapter
 		return i;
 	}
 
+	
+	public long getDate ()
+	{
+		return this.calendar.getTimeInMillis ();
+	}
+	
+	//update calendar dates
 	public void setDate ( Calendar calendar )
 	{
 		this.calendar = ( Calendar ) calendar.clone ();
 		this.notifyDataSetChanged ();
 	}
 
-	public long getDate ()
+	//update calendar events
+	@Override
+	public void update ( Observable observable, Object data )
 	{
-		return this.calendar.getTimeInMillis ();
+		JournalModel model = (JournalModel) data;
+		Map<Calendar,Float> calorieCalendar = model.getCalorieCalendar ();
+		
+		if(calorieCalendar != null)
+		{
+			Map<Calendar,CalendarEvent> calendarEvents = createEventsForCalendar(calorieCalendar);
+			
+			this.setItems ( calendarEvents );
+			this.notifyDataSetChanged ();
+		}
+		
+	}
+
+	private Map<Calendar,CalendarEvent> createEventsForCalendar(Map<Calendar,Float> caloriesForMonth)
+	{
+		Map< Calendar, CalendarEvent > calorieCalendar = new HashMap< Calendar, CalendarEvent > ();
+
+		for ( Entry< Calendar, Float > caloriesForDate : caloriesForMonth.entrySet () )
+		{
+			float caloriesConsumed = caloriesForDate.getValue ();
+
+			CalendarEvent event = new CalendarEvent ();
+			event.setDescription ( String.format ( "%.0f cal", caloriesConsumed ) );
+
+			int extraCalories = ( int ) ( caloriesConsumed - this.profile.getRecommendedDailyCalories () );
+			event.setBackgroundColor ( context.getResources ().getColor (
+					extraCalories <= 0 ? R.color.journal_calories_consumed_good : R.color.journal_calories_consumed_bad ) );
+
+			calorieCalendar.put ( caloriesForDate.getKey (), event );
+
+		}
+		
+		return calorieCalendar;
 	}
 	
 	private static class ViewHolder

@@ -1,6 +1,7 @@
-package com.wks.calorieapp.pojos;
+package com.wks.calorieapp.apis;
 
 import java.util.List;
+
 
 public class Response
 {

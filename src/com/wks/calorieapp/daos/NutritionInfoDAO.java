@@ -3,13 +3,13 @@ package com.wks.calorieapp.daos;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.wks.calorieapp.pojos.NutritionInfo;
+import com.wks.calorieapp.entities.NutritionInfo;
 
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
-public class NutritionInfoDAO
+public class NutritionInfoDAO implements DataAccessObject<NutritionInfo>
 {
 
 	public static final String TABLE_NUTRITION = "nutrition";

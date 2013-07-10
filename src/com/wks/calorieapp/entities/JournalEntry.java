@@ -1,4 +1,4 @@
-package com.wks.calorieapp.pojos;
+package com.wks.calorieapp.entities;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;

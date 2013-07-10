@@ -3,10 +3,10 @@ package com.wks.calorieapp.activities;
 import java.io.IOException;
 
 import com.wks.calorieapp.R;
-import com.wks.calorieapp.adapters.ActivityLifestyleSpinnerAdapter;
-import com.wks.calorieapp.pojos.Profile;
-import com.wks.calorieapp.pojos.Profile.Sex;
-import com.wks.calorieapp.pojos.ProfileException;
+import com.wks.calorieapp.adapters.ActivityLifestyleAdapter;
+import com.wks.calorieapp.entities.Profile;
+import com.wks.calorieapp.entities.Profile.Sex;
+import com.wks.calorieapp.entities.ProfileException;
 import com.wks.calorieapp.utils.FileUtils;
 
 import android.app.ActionBar;
@@ -38,7 +38,7 @@ public class ProfileActivity extends Activity
 	private RadioGroup radiogroupSex;
 	private RadioButton radioMale;
 
-	private ActivityLifestyleSpinnerAdapter activityLifestyleAdapter;
+	private ActivityLifestyleAdapter activityLifestyleAdapter;
 	private Spinner spinnerActivityLifestyle;
 
 	private EditText editWeightLossGoal;
@@ -50,7 +50,8 @@ public class ProfileActivity extends Activity
 
 	public enum ViewMode{REGULAR, WELCOME};
 	private ViewMode mode;
-
+	
+	private Profile profile;
 	private float selectedActivityFactor;// TODO refactor and get rid of this.
 
 	@Override
@@ -58,7 +59,22 @@ public class ProfileActivity extends Activity
 	{
 		super.onCreate ( savedInstanceState );
 
-		this.init ();
+		Bundle extras = this.getIntent ().getExtras ();
+
+		this.mode = ViewMode.REGULAR;
+
+		if ( extras != null )
+		{
+			this.mode = ViewMode.valueOf ( extras.getString ( KEY_VIEW_MODE ) );
+		}
+
+		this.setContentView ( this.mode == ViewMode.REGULAR ? R.layout.activity_profile : R.layout.activity_profile_welcome );
+
+		CalorieApplication app = ( CalorieApplication ) this.getApplication ();
+		Profile profile = app.getProfile ();
+
+		if ( profile == null ) profile = new Profile ();
+		
 		this.setupActionBar ();
 		this.setupView ();
 		this.setupListeners ();
@@ -120,20 +136,7 @@ public class ProfileActivity extends Activity
 		}
 	}
 
-	private void init ()
-	{
-		Bundle extras = this.getIntent ().getExtras ();
 
-		this.mode = ViewMode.REGULAR;
-
-		if ( extras != null )
-		{
-			this.mode = ViewMode.valueOf ( extras.getString ( KEY_VIEW_MODE ) );
-		}
-
-		this.setContentView ( this.mode == ViewMode.REGULAR ? R.layout.activity_profile : R.layout.activity_profile_welcome );
-
-	}
 
 	private void setupActionBar ()
 	{
@@ -157,7 +160,7 @@ public class ProfileActivity extends Activity
 		this.radioMale = ( RadioButton ) this.findViewById ( R.id.profile_radio_male );
 
 		this.spinnerActivityLifestyle = ( Spinner ) this.findViewById ( R.id.profile_spinner_activity_lifestyle );
-		this.activityLifestyleAdapter = new ActivityLifestyleSpinnerAdapter ( this );
+		this.activityLifestyleAdapter = new ActivityLifestyleAdapter ( this );
 		this.spinnerActivityLifestyle.setAdapter ( this.activityLifestyleAdapter );
 
 		this.editWeightLossGoal = ( EditText ) this.findViewById ( R.id.profile_edit_weight_loss_goal );
@@ -185,11 +188,6 @@ public class ProfileActivity extends Activity
 
 	private void bindView ()
 	{
-		CalorieApplication app = ( CalorieApplication ) this.getApplication ();
-		Profile profile = app.getProfile ();
-
-		if ( profile == null ) profile = new Profile ();
-
 		this.radioMale.setChecked ( profile.getSex ().equals ( Profile.Sex.MALE ) );
 		this.editAge.setText ( "" + profile.getAge () );
 		this.editWeight.setText ( "" + profile.getWeight () );
@@ -277,7 +275,7 @@ public class ProfileActivity extends Activity
 
 			if ( profile != null )
 			{
-				String template = ProfileActivity.this.getResources ().getString ( R.string.profile_layout_button_get_recommended_calories_template );
+				String template = ProfileActivity.this.getResources ().getString ( R.string.profile_template_recommended_calories );
 				template = String.format ( template, profile.getRecommendedDailyCalories () );
 
 				ProfileActivity.this.buttonCalculateRecommendedCalories.setText ( template );

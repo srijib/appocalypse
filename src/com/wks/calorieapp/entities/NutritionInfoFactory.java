@@ -1,4 +1,4 @@
-package com.wks.calorieapp.pojos;
+package com.wks.calorieapp.entities;
 
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;

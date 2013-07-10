@@ -8,7 +8,7 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
 
-public class ActivityLifestyleSpinnerAdapter extends BaseAdapter
+public class ActivityLifestyleAdapter extends BaseAdapter
 {
 	private static final int PADDING = 5;
 	public Context context;
@@ -23,7 +23,7 @@ public class ActivityLifestyleSpinnerAdapter extends BaseAdapter
 			"Daily Intense Exercise"};
 	public float[] values = {1.200F, 1.375F, 1.550F, 1.725F,1.900F};
  	
-	public ActivityLifestyleSpinnerAdapter(Context context)
+	public ActivityLifestyleAdapter(Context context)
 	{
 		this.context = context;
 	}

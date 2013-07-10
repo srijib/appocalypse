@@ -6,23 +6,7 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import org.json.simple.parser.ParseException;
-
-import com.wks.calorieapp.R;
-import com.wks.calorieapp.adapters.NutritionInfoListAdapter;
-import com.wks.calorieapp.daos.DatabaseManager;
-import com.wks.calorieapp.daos.JournalDAO;
-import com.wks.calorieapp.pojos.FoodSimilarity;
-import com.wks.calorieapp.pojos.ImageEntry;
-import com.wks.calorieapp.pojos.JournalEntry;
-import com.wks.calorieapp.pojos.NutritionInfo;
-import com.wks.calorieapp.pojos.Response;
-import com.wks.calorieapp.pojos.ResponseFactory;
-import com.wks.calorieapp.utils.FileSystem;
-import com.wks.calorieapp.utils.HttpClient;
-import com.wks.calorieapp.utils.NetworkUtils;
-import com.wks.calorieapp.utils.WebServiceUrlFactory;
+import java.util.Map.Entry;
 
 import android.app.ActionBar;
 import android.app.Activity;
@@ -44,9 +28,23 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ViewSwitcher;
 
+import com.wks.calorieapp.R;
+import com.wks.calorieapp.adapters.NutritionInfoAdapter;
+import com.wks.calorieapp.apis.CAWebService;
+import com.wks.calorieapp.daos.DatabaseManager;
+import com.wks.calorieapp.daos.JournalDAO;
+import com.wks.calorieapp.entities.ImageEntry;
+import com.wks.calorieapp.entities.JournalEntry;
+import com.wks.calorieapp.entities.NutritionInfo;
+import com.wks.calorieapp.utils.FileSystem;
+import com.wks.calorieapp.utils.NetworkUtils;
+
 public class GetCaloriesActivity extends Activity
 {
 	private static final String TAG = GetCaloriesActivity.class.getCanonicalName ();
+
+	private static final int MAX_HITS = 10;
+	private static final float MIN_SIMILARITY = 0.1F;
 
 	public static final String KEY_IMAGE = "image";
 	private static final int NUM_TRIES_GET_NUTR_INFO = 3;
@@ -54,7 +52,7 @@ public class GetCaloriesActivity extends Activity
 	private RelativeLayout viewLoading;
 	private RelativeLayout viewResults;
 	private ViewSwitcher viewSwitcher;
-	
+
 	private ProgressBar progressLoading;
 	private TextView textLoading;
 	private GetCaloriesTask getCaloriesTask;
@@ -75,21 +73,20 @@ public class GetCaloriesActivity extends Activity
 
 	private ViewMode viewMode;
 	private String cameraPhotoName;
-	private NutritionInfoListAdapter adapter;
+	private NutritionInfoAdapter adapter;
 	private NutritionInfo selectedFood;
-	
 
 	@Override
 	protected void onCreate ( Bundle savedInstanceState )
 	{
 		super.onCreate ( savedInstanceState );
 		this.setContentView ( R.layout.activity_get_calories );
-	
-		this.init();
+
+		this.init ();
 		this.setupActionBar ();
 		this.setupView ();
 		this.setupListeners ();
-		
+
 		getCaloriesTask = new GetCaloriesTask ();
 		getCaloriesTask.execute ( cameraPhotoName );
 	}
@@ -109,7 +106,7 @@ public class GetCaloriesActivity extends Activity
 		inflater.inflate ( R.menu.activity_get_calories, menu );
 		return true;
 	}
-	
+
 	@Override
 	public boolean onPrepareOptionsMenu ( Menu menu )
 	{
@@ -125,17 +122,17 @@ public class GetCaloriesActivity extends Activity
 		switch ( item.getItemId () )
 		{
 		case android.R.id.home:
-			//return to previous activity.
+			// return to previous activity.
 			this.finish ();
 			return true;
 
 		case R.id.get_calories_menu_done:
 			Calendar calendar = Calendar.getInstance ();
-			
-			Intent dateCaloriesIntent = new Intent(this,DateCaloriesActivity.class);
-			dateCaloriesIntent.putExtra( DateCaloriesActivity.KEY_DATE, calendar.getTimeInMillis () );
-			startActivity(dateCaloriesIntent);
-			
+
+			Intent dateCaloriesIntent = new Intent ( this, DateCaloriesActivity.class );
+			dateCaloriesIntent.putExtra ( DateCaloriesActivity.KEY_DATE, calendar.getTimeInMillis () );
+			startActivity ( dateCaloriesIntent );
+
 			return true;
 
 		case R.id.get_calories_menu_no_match:
@@ -150,7 +147,7 @@ public class GetCaloriesActivity extends Activity
 
 	}
 
-	private void init()
+	private void init ()
 	{
 		Bundle extras = this.getIntent ().getExtras ();
 		if ( extras != null )
@@ -163,7 +160,7 @@ public class GetCaloriesActivity extends Activity
 			return;
 		}
 	}
-	
+
 	private void setupActionBar ()
 	{
 		ActionBar actionBar = this.getActionBar ();
@@ -176,18 +173,18 @@ public class GetCaloriesActivity extends Activity
 
 	private void setupView ()
 	{
-		this.viewSwitcher = (ViewSwitcher) this.findViewById ( R.id.get_calories_view_switcher );
-		
-		this.viewLoading = (RelativeLayout) this.findViewById ( R.id.get_calories_relativelayout_loading );
-		this.viewResults = (RelativeLayout) this.findViewById ( R.id.get_calories_relativelayout_results );
-		
+		this.viewSwitcher = ( ViewSwitcher ) this.findViewById ( R.id.get_calories_view_switcher );
+
+		this.viewLoading = ( RelativeLayout ) this.findViewById ( R.id.get_calories_relativelayout_loading );
+		this.viewResults = ( RelativeLayout ) this.findViewById ( R.id.get_calories_relativelayout_results );
+
 		this.progressLoading = ( ProgressBar ) this.findViewById ( R.id.get_calories_spinner_loading );
 		this.textLoading = ( TextView ) this.findViewById ( R.id.get_calories_text_loading );
 		this.listNutritionInfo = ( ExpandableListView ) this.findViewById ( R.id.get_calories_expandlist_nutrition_info );
 		this.buttonAddToJournal = ( ImageButton ) this.findViewById ( R.id.get_calories_button_add_to_journal );
 		this.textConfirm = ( TextView ) this.findViewById ( R.id.get_calories_text_confirm );
-	
-		this.setViewMode(ViewMode.VIEW_LOADING);
+
+		this.setViewMode ( ViewMode.VIEW_LOADING );
 	}
 
 	private void setupListeners ()
@@ -195,12 +192,12 @@ public class GetCaloriesActivity extends Activity
 		this.listNutritionInfo.setOnChildClickListener ( new OnListItemClicked () );
 		this.buttonAddToJournal.setOnClickListener ( new OnAddToJournalClicked () );
 	}
-	
+
 	private void setListContents ( Map< String, List< NutritionInfo >> nutritionInfoDictionary )
 	{
 		if ( nutritionInfoDictionary != null )
 		{
-			this.adapter = new NutritionInfoListAdapter ( this, nutritionInfoDictionary );
+			this.adapter = new NutritionInfoAdapter ( this, nutritionInfoDictionary );
 			this.listNutritionInfo.setAdapter ( adapter );
 		}
 	}
@@ -209,7 +206,7 @@ public class GetCaloriesActivity extends Activity
 	{
 		this.viewMode = view;
 		this.invalidateOptionsMenu ();
-		
+
 		switch ( view )
 		{
 		case VIEW_LOADING:
@@ -228,13 +225,13 @@ public class GetCaloriesActivity extends Activity
 			return;
 		}
 	}
-	
+
 	private void setLoadingProgressVisible ( boolean visible )
 	{
 		this.progressLoading.setVisibility ( visible ? View.VISIBLE : View.GONE );
 		this.textLoading.setVisibility ( visible ? View.VISIBLE : View.GONE );
 	}
-	
+
 	private void setTextConfirm ( TextConfirmGist gist )
 	{
 		String confirmMessage = "";
@@ -326,7 +323,7 @@ public class GetCaloriesActivity extends Activity
 		}
 	}
 
-	class GetCaloriesTask extends AsyncTask< String, String, Response >
+	class GetCaloriesTask extends AsyncTask< String, String, Map< String, List< NutritionInfo >> >
 	{
 		private String fileName;
 
@@ -341,129 +338,66 @@ public class GetCaloriesActivity extends Activity
 		}
 
 		@Override
-		protected void onPostExecute ( Response response )
+		protected void onPostExecute ( Map< String, List< NutritionInfo >> response )
 		{
-			if ( response != null && response.isSuccessful () && response.getData () instanceof HashMap )
+			if ( response != null )
 			{
-				// get data
-				@SuppressWarnings ( "unchecked" )
-				HashMap< String, List< NutritionInfo >> nutritionInfoForFoods = ( HashMap< String, List< NutritionInfo >> ) response.getData ();
-				// pass data to Application object
-				
-				GetCaloriesActivity.this.setListContents ( nutritionInfoForFoods );
+
+				GetCaloriesActivity.this.setListContents ( response );
 				GetCaloriesActivity.this.setViewMode ( ViewMode.VIEW_RESULTS );
 
 			}else
 			{
-				if ( response != null )
-				{
-					Log.e ( TAG, response.getMessage () );
-				}
-
+				Toast.makeText (GetCaloriesActivity.this, "No Matches Found", Toast.LENGTH_LONG ).show();
 				Intent searchFoodIntent = new Intent ( GetCaloriesActivity.this, SearchActivity.class );
+				searchFoodIntent.putExtra ( SearchActivity.KEY_IMAGE,  cameraPhotoName);
 				startActivity ( searchFoodIntent );
 			}
 		}
 
-		/**
-		 * I just want to go on record saying that I am definitely not pleased
-		 * with the quality of code in this method. but i'm really frustrated so
-		 * i jsut want it to work cuz i've got a deadline and a dissertation to
-		 * wrtie.
-		 */
 		@Override
-		protected Response doInBackground ( String... params )
+		protected Map< String, List< NutritionInfo >> doInBackground ( String... params )
 		{
 			String picturesDir = FileSystem.getPicturesDirectory ( GetCaloriesActivity.this );
 			this.fileName = params[0];
 			File imageFile = new File ( picturesDir + this.fileName );
 
-			String json = "";
-			Response response = null;
+			HashMap< String, List< NutritionInfo >> nutritionInfoForFoods = null;
 
 			try
 			{
-				// upload image
+
 				publishProgress ( "Uploading Image..." );
-				json = HttpClient.uploadFile ( imageFile, WebServiceUrlFactory.upload () );
-				response = ResponseFactory.createResponseForUploadRequest ( json );
+				boolean fileUploaded = CAWebService.upload ( imageFile );
 
-				Log.e ( "UPLOAD", json );
+				if ( !fileUploaded ) return null;
 
-				if ( response == null || !response.isSuccessful () ) return response;
 				if ( this.isCancelled () ) this.cancel ( true );
-				// get matches for image
+
 				publishProgress ( "Identifying Food..." );
-				json = HttpClient.get ( WebServiceUrlFactory.identify ( fileName ) );
-				response = ResponseFactory.createResponseForIdentifyRequest ( json );
 
-				Log.e ( "IDENTIFY", json );
+				Map< String, Float > similarFoods = CAWebService.identify ( fileName, MIN_SIMILARITY, MAX_HITS );
 
-				// if response not received or matching foods not found, return
-				if ( response == null || !response.isSuccessful () ) return response;
+				if ( similarFoods.isEmpty () ) return null;
 				if ( this.isCancelled () ) this.cancel ( true );
-				// if matching foods found
-				if ( response.getData () != null )
+
+				publishProgress ( "Getting Nutrition Information..." );
+
+				nutritionInfoForFoods = new HashMap< String, List< NutritionInfo >> ();
+
+				for ( Entry< String, Float > similarFood : similarFoods.entrySet () )
 				{
-					// assert that data is a list of matching foods before
-					// casting.
-					if ( response.getData () instanceof List )
+					String foodName = similarFood.getKey ();
+					List< NutritionInfo > foodInfo = null;
+
+					for ( int j = 0 ; j < NUM_TRIES_GET_NUTR_INFO ; j++ )
 					{
-						@SuppressWarnings ( "unchecked" )
-						List< FoodSimilarity > foodSimilarity = ( List< FoodSimilarity > ) response.getData ();
+						if ( this.isCancelled () ) this.cancel ( true );
+						foodInfo = CAWebService.getNutritionInfo ( foodName );
+						if ( foodInfo != null ) break;
+					}
 
-						publishProgress ( "Getting Nutrition Information..." );
-						// create hashmap containing food name => nutrtion info
-						HashMap< String, List< NutritionInfo >> nutritionInfoForFoods = new HashMap< String, List< NutritionInfo >> ();
-
-						// get nutrition info for each food in list.
-						for ( int i = 0 ; i < foodSimilarity.size () ; i++ )
-						{
-							String foodName = foodSimilarity.get ( i ).getFoodName ();
-
-							// nutrition info request doesn't always work, so if
-							// it fails,
-							// make NUM_TRIES_GET_NUTR_INFO tries before giving
-							// up.
-							for ( int j = 0 ; j < NUM_TRIES_GET_NUTR_INFO ; j++ )
-							{
-								if ( this.isCancelled () ) this.cancel ( true );
-								json = HttpClient.get ( WebServiceUrlFactory.getNutritionInfo ( foodName ) );
-								response = ResponseFactory.createResponseForNutritionInfoRequest ( json );
-
-								Log.e ( "GET INFO", json );
-								// when response is received with data, move on
-								// to next step.
-
-								if ( response != null && response.isSuccessful () ) break;
-							}
-
-							if ( this.isCancelled () ) this.cancel ( true );
-							publishProgress ( "Proccessing Information" );
-							// double check that the response is not null and
-							// that data is received.
-							if ( response != null && response.isSuccessful () )
-							{
-								// asseert tht data is list of nutrition info
-								if ( response.getData () instanceof List )
-								{
-
-									@SuppressWarnings ( "unchecked" )
-									List< NutritionInfo > nutritionInfoForFood = ( List< NutritionInfo > ) response.getData ();
-
-									// put nutrition info into map with food
-									// name as key.
-									nutritionInfoForFoods.put ( foodName, nutritionInfoForFood );
-								}
-							}
-
-						}
-						// replace list of food similarity with hashmap
-						// foodname=>nutrinfo
-						response.setData ( nutritionInfoForFoods );
-					}else
-					// you might want to throw an exception over here.
-					return null;
+					nutritionInfoForFoods.put ( foodName, foodInfo );
 
 				}
 
@@ -472,13 +406,9 @@ public class GetCaloriesActivity extends Activity
 			{
 				Log.e ( TAG, "" + e.getMessage () );
 			}
-			catch ( ParseException e )
-			{
-				Log.e ( TAG, "" + e.getMessage () );
-			}
 
 			if ( this.isCancelled () ) this.cancel ( true );
-			return response;
+			return nutritionInfoForFoods;
 		}
 
 		@Override

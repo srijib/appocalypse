@@ -1,6 +1,9 @@
-package com.wks.calorieapp.pojos;
+package com.wks.calorieapp.entities;
 
 import org.json.simple.JSONObject;
+
+import android.util.Log;
+
 
 
 
@@ -48,6 +51,8 @@ public class Profile implements JSONWriteable
 		if(height <= MIN_ZERO || height > MAX_HEIGHT)
 			throw new ProfileException("Height must be between "+MIN_ZERO+" and "+MAX_HEIGHT+".");
 		this.height = height;
+	
+		Log.e("profile","received height: "+height);
 	}
 
 	public float getWeight ()
@@ -124,7 +129,7 @@ public class Profile implements JSONWriteable
 	public static final String KEY_ACTIVITY_FACTOR = "activity_factor";
 	public static final String KEY_WEIGHT_LOSS_GOAL = "weight_loss_goal";
 	
-	//WORKS
+	//-------------------JSONWritable----------------//
 	@SuppressWarnings ( "unchecked" )
 	@Override
 	public String toJSON ()
@@ -140,10 +145,6 @@ public class Profile implements JSONWriteable
 		
 		return profileJSON.toJSONString ();
 	}
+
 	
-	/*
-	public String toCSV()
-	{
-		return String.format ( "%s,%d,%f,%f,%f,%d", this.sex, this.age,this.height,this.weight,this.activityFactor,this.weightLossGoal);
-	}*/
 }

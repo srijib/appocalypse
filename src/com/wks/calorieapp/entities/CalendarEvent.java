@@ -1,4 +1,4 @@
-package com.wks.calorieapp.adapters;
+package com.wks.calorieapp.entities;
 
 import android.graphics.drawable.Drawable;
 

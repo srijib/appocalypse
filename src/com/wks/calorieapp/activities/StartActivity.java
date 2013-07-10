@@ -4,9 +4,9 @@ import java.io.IOException;
 
 import org.json.simple.parser.ParseException;
 
-import com.wks.calorieapp.pojos.Profile;
-import com.wks.calorieapp.pojos.ProfileException;
-import com.wks.calorieapp.pojos.ProfileFactory;
+import com.wks.calorieapp.entities.Profile;
+import com.wks.calorieapp.entities.ProfileException;
+import com.wks.calorieapp.entities.ProfileFactory;
 import com.wks.calorieapp.utils.FileUtils;
 
 import android.app.Activity;

@@ -4,15 +4,17 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Map.Entry;
 
 import com.wks.calorieapp.R;
-import com.wks.calorieapp.adapters.CalendarAdapter;
-import com.wks.calorieapp.adapters.CalendarEvent;
 import com.wks.calorieapp.adapters.DaysOfWeekAdapter;
+import com.wks.calorieapp.adapters.JournalAdapter;
+import com.wks.calorieapp.daos.DataAccessObject;
 import com.wks.calorieapp.daos.DatabaseManager;
 import com.wks.calorieapp.daos.JournalDAO;
-import com.wks.calorieapp.pojos.Profile;
+import com.wks.calorieapp.entities.CalendarEvent;
+import com.wks.calorieapp.entities.JournalEntry;
+import com.wks.calorieapp.entities.Profile;
+import com.wks.calorieapp.models.JournalModel;
 
 import android.app.ActionBar;
 import android.app.Activity;
@@ -20,13 +22,13 @@ import android.content.Intent;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.GridView;
 import android.widget.ImageButton;
 import android.widget.TextView;
+import android.widget.Toast;
 
 public class JournalActivity extends Activity
 {
@@ -50,8 +52,8 @@ public class JournalActivity extends Activity
 	private ImageButton [] buttonsDateControl;
 
 	private Profile profile;
-
-	private CalendarAdapter adapter;
+	private JournalModel model;
+	private JournalAdapter adapter;
 
 	@Override
 	protected void onCreate ( Bundle savedInstanceState )
@@ -59,7 +61,15 @@ public class JournalActivity extends Activity
 		super.onCreate ( savedInstanceState );
 		this.setContentView ( R.layout.activity_journal );
 
-		this.init ();
+		this.profile = ( ( CalorieApplication ) this.getApplication () ).getProfile ();
+		if(this.profile == null)
+		{
+			Toast.makeText ( this, "Profile Not Found. Please Restart Application", Toast.LENGTH_LONG ).show ();
+			this.finish ();
+		}
+	
+		this.model = new JournalModel(this);
+		
 		this.setupActionBar ();
 		this.setupView ();
 		this.setupListeners ();
@@ -89,10 +99,6 @@ public class JournalActivity extends Activity
 		}
 	}
 
-	private void init ()
-	{
-		this.profile = ( ( CalorieApplication ) this.getApplication () ).getProfile ();
-	}
 
 	private void setupActionBar ()
 	{
@@ -121,8 +127,12 @@ public class JournalActivity extends Activity
 		};
 
 		this.gridDaysOfWeek.setAdapter ( new DaysOfWeekAdapter ( this ) );
-		this.adapter = new CalendarAdapter ( this );
+		
+		this.adapter = new JournalAdapter ( this,profile );
 		this.gridCalendar.setAdapter ( adapter );
+		
+		this.model.addObserver ( adapter );
+
 	}
 
 	private void setupListeners ()
@@ -135,19 +145,10 @@ public class JournalActivity extends Activity
 
 	private void updateCalendar ( Calendar newCalendar )
 	{
-		// update calendar view
-		JournalActivity.this.adapter.setDate ( newCalendar );
-
-		// update calendar view heading
-		this.updateDateHeader ( this.adapter.getDate () );
-
-		// load any calendar events for this
-		Map< Calendar, CalendarEvent > caloriesForMonth = JournalActivity.this.getCalendarEvents ( newCalendar );
-		if ( caloriesForMonth != null )
-		{
-			JournalActivity.this.adapter.setItems ( caloriesForMonth );
-		}
-
+		Map<Calendar,Float> calorieCalendar = this.getCaloriesForMonth(newCalendar);
+		this.model.setCalorieCalendar ( calorieCalendar );//updates calendar events
+		this.adapter.setDate ( newCalendar );//updates calendar dates
+		this.updateDateHeader ( newCalendar.getTimeInMillis () );//updates calendar heading	
 	}
 
 	private void updateDateHeader ( long newDate )
@@ -157,43 +158,6 @@ public class JournalActivity extends Activity
 		this.textDateHeader.setText ( dateText );
 	}
 
-	private Map< Calendar, CalendarEvent > getCalendarEvents ( Calendar cal )
-	{
-		DatabaseManager manager = DatabaseManager.getInstance ( this );
-		SQLiteDatabase db = manager.open ();
-
-		Map< Calendar, CalendarEvent > calorieCalendar = new HashMap< Calendar, CalendarEvent > ();
-		// retrieve calories consumed for each day of selected month
-		if ( db == null )
-		{
-			Log.e ( TAG, "Can not load calorie data - null connection to db." );
-		}else
-		{
-			JournalDAO journalDao = new JournalDAO ( db );
-			Map< Calendar, Float > caloriesForMonth = journalDao.getCaloriesForMonth ( cal );
-
-			// create calendar events for that period.
-
-			for ( Entry< Calendar, Float > caloriesForDate : caloriesForMonth.entrySet () )
-			{
-				float caloriesConsumed = caloriesForDate.getValue ();
-
-				CalendarEvent event = new CalendarEvent ();
-				event.setDescription ( String.format ( "%.0f cal", caloriesConsumed ) );
-
-				int extraCalories = ( int ) ( caloriesConsumed - this.profile.getRecommendedDailyCalories () );
-				event.setBackgroundColor ( this.getResources ().getColor (
-						extraCalories <= 0 ? R.color.journal_calories_consumed_good : R.color.journal_calories_consumed_bad ) );
-
-				calorieCalendar.put ( caloriesForDate.getKey (), event );
-
-			}
-
-			db.close ();
-		}
-
-		return calorieCalendar;
-	}
 
 	private Calendar getCalendarForMonth ( int month, int year )
 	{
@@ -231,6 +195,25 @@ public class JournalActivity extends Activity
 		}
 	}
 
+	private Map< Calendar, Float > getCaloriesForMonth (Calendar calendar)
+	{
+		Map< Calendar, Float > calorieCalendar = null;
+		DatabaseManager manager = DatabaseManager.getInstance ( this );
+		SQLiteDatabase db = manager.open ();
+		// retrieve calories consumed for each day of selected month
+		if ( db != null )
+		{
+			DataAccessObject<JournalEntry> journalDao = new JournalDAO ( db );
+			calorieCalendar = new HashMap< Calendar, Float > ();
+			calorieCalendar = ( ( JournalDAO ) journalDao ).getCaloriesForMonth ( calendar );
+
+			db.close ();
+		}
+		
+		return calorieCalendar;
+	}
+
+	
 	class OnDateControlButtonClicked implements View.OnClickListener
 	{
 

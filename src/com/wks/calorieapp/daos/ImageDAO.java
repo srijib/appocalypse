@@ -3,13 +3,13 @@ package com.wks.calorieapp.daos;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.wks.calorieapp.pojos.ImageEntry;
+import com.wks.calorieapp.entities.ImageEntry;
 
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
-public class ImageDAO
+public class ImageDAO implements DataAccessObject<ImageEntry>
 {
 
 	public static final String TABLE_IMAGES = "images";
@@ -107,4 +107,6 @@ public class ImageDAO
 			return ImageDAO.TABLE_IMAGES+"."+name;
 		}
 	}
+
+
 }

@@ -12,7 +12,7 @@
 	<string name="profile_layout_text_weight_loss_goal">Weight Loss Goal (kg)</string>
 	<string name="profile_layout_button_get_recommended_calories">Calculate Recommended Calories</string>
 	<string name="profile_layout_button_get_recommended_calories_update">Update</string>
-	<string name="profile_layout_button_get_recommended_calories_template">Recommended: %.1f calories/day</string>
+	<string name="profile_template_recommended_calories">Recommended: %.1f calories/day</string>
 	<string name="profile_error_data_missing">Please fill in all fields.</string>
 	<string name="profile_layout_text_welcome">Welcome to Nutri-o-metry! To begin, you must first set-up your profile. Enter your details below and then click done!</string>
 </resources>

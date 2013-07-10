@@ -1,7 +1,7 @@
 package com.wks.calorieapp.activities;
 
 
-import com.wks.calorieapp.pojos.Profile;
+import com.wks.calorieapp.entities.Profile;
 
 import android.app.Application;
 

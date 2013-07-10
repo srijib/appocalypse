@@ -4,26 +4,41 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Observable;
+import java.util.Observer;
 
-import com.wks.calorieapp.pojos.NutritionInfo;
+import com.wks.calorieapp.entities.NutritionInfo;
+import com.wks.calorieapp.models.SearchResultsModel;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseExpandableListAdapter;
 import android.widget.TextView;
 
-public class NutritionInfoListAdapter extends BaseExpandableListAdapter
+public class NutritionInfoAdapter extends BaseExpandableListAdapter implements Observer
 {
 	private static final String FORMAT_CALORIE = "%.2f cal";
 	private List< ParentItem > foodNameList;
 	private LayoutInflater inflater;
 
-	public NutritionInfoListAdapter ( Context context, Map< String, List< NutritionInfo >> items )
+	public NutritionInfoAdapter(Context context)
+	{
+		this ( context, null );
+	}
+	
+	public NutritionInfoAdapter ( Context context, Map< String, List< NutritionInfo>> items )
 	{
 		this.inflater = LayoutInflater.from ( context );
-
+		this.setItems ( items );
+	}
+	
+	public void setItems(Map<String,List<NutritionInfo>> items)
+	{	
+		if(items == null) return;
+		Log.e("WKS","Setting Items" );
 		this.foodNameList = new ArrayList< ParentItem > ();
 		for ( Entry< String, List< NutritionInfo >> e : items.entrySet () )
 		{
@@ -35,13 +50,13 @@ public class NutritionInfoListAdapter extends BaseExpandableListAdapter
 
 			this.foodNameList.add ( food );
 		}
-
+		this.notifyDataSetChanged ();
 	}
 
 	@Override
 	public ParentItem getGroup ( int groupPosition )
 	{
-		return foodNameList.get ( groupPosition );
+		return foodNameList == null? null : foodNameList.get ( groupPosition );
 	}
 
 	@Override
@@ -53,7 +68,7 @@ public class NutritionInfoListAdapter extends BaseExpandableListAdapter
 	@Override
 	public int getGroupCount ()
 	{
-		return foodNameList.size ();
+		return foodNameList == null? 0 : foodNameList.size ();
 	}
 
 	@Override
@@ -76,14 +91,18 @@ public class NutritionInfoListAdapter extends BaseExpandableListAdapter
 		ParentItem foodItem = getGroup ( groupPosition );
 		// holder.textFoodName.setTypeface ( CalorieApplication.getFont (
 		// Font.CANTARELL_REGULAR ) );
-		holder.textFoodName.setText ( foodItem.getFoodName () );
+		if(foodItem != null)
+		{
+			holder.textFoodName.setText ( foodItem == null? "null" : foodItem.getFoodName () );
+		}
+		
 		return resultView;
 	}
 
 	@Override
 	public NutritionInfo getChild ( int groupPosition, int childPosition )
 	{
-		return foodNameList.get ( groupPosition ).getNutritionInfoList ().get ( childPosition );
+		return foodNameList == null? null : foodNameList.get ( groupPosition ).getNutritionInfoList ().get ( childPosition );
 	}
 
 	@Override
@@ -95,7 +114,7 @@ public class NutritionInfoListAdapter extends BaseExpandableListAdapter
 	@Override
 	public int getChildrenCount ( int groupPosition )
 	{
-		return foodNameList.get ( groupPosition ).getNutritionInfoList ().size ();
+		return foodNameList == null? 0 : foodNameList.get ( groupPosition ).getNutritionInfoList ().size ();
 	}
 
 	@Override
@@ -118,13 +137,11 @@ public class NutritionInfoListAdapter extends BaseExpandableListAdapter
 
 		NutritionInfo info = getChild ( groupPosition, childPosition );
 
-		// Typeface t = CalorieApplication.getFont ( Font.CANTARELL_REGULAR );
-		// holder.textFoodName.setTypeface ( t );
-		// holder.textCalories.setTypeface ( t );
-
-		holder.textFoodName.setText ( info.getName () );
-		holder.textCalories.setText ( String.format ( FORMAT_CALORIE, info.getCaloriesPer100g () ) );
-
+		if(info != null)
+		{
+			holder.textFoodName.setText ( info.getName () );
+			holder.textCalories.setText ( String.format ( FORMAT_CALORIE, info.getCaloriesPer100g () ) );
+		}
 		return resultView;
 	}
 
@@ -177,5 +194,15 @@ public class NutritionInfoListAdapter extends BaseExpandableListAdapter
 			return this.nutritionInfoList;
 		}
 
+	}
+
+	@Override
+	public void update ( Observable observable, Object object )
+	{
+	
+		SearchResultsModel model = (SearchResultsModel) object;
+		this.setItems ( model.getSearchResults () );
+		
+	
 	}
 }

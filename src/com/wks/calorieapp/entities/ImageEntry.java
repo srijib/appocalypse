@@ -1,4 +1,4 @@
-package com.wks.calorieapp.pojos;
+package com.wks.calorieapp.entities;
 
 public class ImageEntry
 {

@@ -8,9 +8,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.wks.calorieapp.pojos.ImageEntry;
-import com.wks.calorieapp.pojos.JournalEntry;
-import com.wks.calorieapp.pojos.NutritionInfo;
+import com.wks.calorieapp.entities.ImageEntry;
+import com.wks.calorieapp.entities.JournalEntry;
+import com.wks.calorieapp.entities.NutritionInfo;
 
 import android.content.ContentValues;
 import android.database.Cursor;
@@ -18,7 +18,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteQueryBuilder;
 import android.util.Log;
 
-public class JournalDAO
+public class JournalDAO implements DataAccessObject<JournalEntry>
 {
 	public static final String TAG = JournalDAO.class.getCanonicalName ();
 	
@@ -217,7 +217,7 @@ public class JournalDAO
 				c.moveToNext ();
 			}
 		}
-
+		
 		return dayCaloriesMap;
 	}
 

@@ -108,10 +108,7 @@ public class GalleryActivity extends Activity
 		return null;
 	}
 	
-	/*private void loadGallery()
-	{
-		new LoadGalleryTask().execute ( );
-	}*/
+
 	
 	class OnPictureClicked implements AdapterView.OnItemClickListener
 	{
@@ -128,35 +125,5 @@ public class GalleryActivity extends Activity
 		
 	}
 	
-	/*class LoadGalleryTask extends AsyncTask<Void,Void,Void>
-	{
-		ProgressDialog progressDialog;
-		
-		@Override
-		protected void onPreExecute ()
-		{
-			progressDialog = new ProgressDialog(GalleryActivity.this);
-			progressDialog.setCancelable ( false );
-			progressDialog.setIndeterminate ( true );
-			progressDialog.setTitle ( GalleryActivity.this.getResources ( ).getString ( R.string.gallery_progress_dialog_title ));
-			progressDialog.setMessage ( GalleryActivity.this.getResources ().getString ( R.string.gallery_progress_dialog_default ) );
-			progressDialog.show ();
-		}
-
-		@Override
-		protected Void doInBackground ( Void... arg0 )
-		{
-			progressDialog.setMessage ( GalleryActivity.this.getResources ().getString ( R.string.gallery_progress_dialog_loading ) );
-			//adapter is slow to load because it creates bitmap for each image
-			GalleryActivity.this.adapter = new GalleryAdapter(GalleryActivity.this, GalleryActivity.this.pictureFilesList);
-			GalleryActivity.this.gridviewGallery.setAdapter ( adapter );
-			return null;
-		}
-		
-		@Override
-		protected void onPostExecute ( Void result )
-		{
-			this.progressDialog.dismiss ();
-		}
-	}*/
+	
 }

@@ -5,21 +5,21 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.json.simple.parser.ParseException;
+import java.util.Observable;
+import java.util.Observer;
 
 import com.wks.calorieapp.R;
-import com.wks.calorieapp.adapters.NutritionInfoListAdapter;
+import com.wks.calorieapp.adapters.NutritionInfoAdapter;
+import com.wks.calorieapp.apis.CAWebService;
+import com.wks.calorieapp.daos.DataAccessObject;
 import com.wks.calorieapp.daos.DatabaseManager;
 import com.wks.calorieapp.daos.JournalDAO;
-import com.wks.calorieapp.pojos.ImageEntry;
-import com.wks.calorieapp.pojos.JournalEntry;
-import com.wks.calorieapp.pojos.NutritionInfo;
-import com.wks.calorieapp.pojos.Response;
-import com.wks.calorieapp.pojos.ResponseFactory;
+import com.wks.calorieapp.entities.ImageEntry;
+import com.wks.calorieapp.entities.JournalEntry;
+import com.wks.calorieapp.entities.NutritionInfo;
+import com.wks.calorieapp.models.SearchResultsModel;
 import com.wks.calorieapp.utils.ViewUtils;
-import com.wks.calorieapp.utils.HttpClient;
 import com.wks.calorieapp.utils.NetworkUtils;
-import com.wks.calorieapp.utils.WebServiceUrlFactory;
 
 import android.app.ActionBar;
 import android.app.Activity;
@@ -44,13 +44,12 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ViewSwitcher;
 
-public class SearchActivity extends Activity
+public class SearchActivity extends Activity implements Observer
 {
 	private static final String TAG = SearchActivity.class.getCanonicalName ();
-	private static final int NUM_TRIES = 3;
 
 	public static final String KEY_IMAGE = "image";
-	
+
 	private EditText editSearch;
 	private TextView textConfirm;
 	private ImageButton buttonAddToJournal;
@@ -60,11 +59,11 @@ public class SearchActivity extends Activity
 	private TextView textLoading;
 	private ProgressBar progressLoading;
 
-	private String currentFoodSearch;
 	private String cameraPhotoName;
 	private NutritionInfo selectedFoodInfo;
-	private NutritionInfoListAdapter adapter;
+	private NutritionInfoAdapter adapter;
 	private ExpandableListView listNutritionInfo;
+	private SearchResultsModel searchResultsModel;
 
 	private enum ViewMode
 	{
@@ -84,7 +83,15 @@ public class SearchActivity extends Activity
 		super.onCreate ( savedInstanceState );
 		this.setContentView ( R.layout.activity_search );
 
-		this.init ();
+		Bundle extras = this.getIntent ().getExtras ();
+		if ( extras != null )
+		{
+			this.cameraPhotoName = extras.getString ( KEY_IMAGE );
+			Log.e ( "YO!!!", "camera photo: " + this.cameraPhotoName );
+		}
+
+		this.searchResultsModel = new SearchResultsModel ();
+		
 		this.setupActionBar ();
 		this.setupView ();
 		this.setupListeners ();
@@ -98,7 +105,7 @@ public class SearchActivity extends Activity
 		inflater.inflate ( R.menu.activity_search, menu );
 		return true;
 	}
-	
+
 	@Override
 	public boolean onOptionsItemSelected ( MenuItem item )
 	{
@@ -128,15 +135,6 @@ public class SearchActivity extends Activity
 		menu.findItem ( R.id.search_menu_done ).setVisible ( this.viewMode.equals ( ViewMode.VIEW_RESULTS ) );
 		return true;
 	}
-	
-	private void init ()
-	{
-		Bundle extras = this.getIntent ().getExtras ();
-		if ( extras != null )
-		{
-			this.cameraPhotoName = extras.getString ( KEY_IMAGE );
-		}
-	}
 
 	private void setupActionBar ()
 	{
@@ -163,8 +161,14 @@ public class SearchActivity extends Activity
 		textConfirm = ( TextView ) this.findViewById ( R.id.search_text_confirm );
 		buttonAddToJournal = ( ImageButton ) this.findViewById ( R.id.search_button_add_to_journal );
 
-		setViewMode ( ViewMode.VIEW_IDLE );
+		
+		this.adapter = new NutritionInfoAdapter ( this );
+		this.listNutritionInfo.setAdapter ( adapter );
+		
+		this.searchResultsModel.addObserver ( this );
+		this.searchResultsModel.addObserver ( adapter );
 
+		setViewMode ( ViewMode.VIEW_IDLE );
 	}
 
 	private void setupListeners ()
@@ -172,15 +176,6 @@ public class SearchActivity extends Activity
 		this.editSearch.setOnKeyListener ( new OnEditSearchSubmitted () );
 		this.listNutritionInfo.setOnChildClickListener ( new OnListItemClicked () );
 		this.buttonAddToJournal.setOnClickListener ( new OnAddToJournalClicked () );
-	}
-
-	private void setListContents ( Map< String, List< NutritionInfo >> nutritionInfoDictionary )
-	{
-		if ( nutritionInfoDictionary != null )
-		{
-			this.adapter = new NutritionInfoListAdapter ( this, nutritionInfoDictionary );
-			this.listNutritionInfo.setAdapter ( adapter );
-		}
 	}
 
 	private void setViewMode ( ViewMode view )
@@ -219,8 +214,7 @@ public class SearchActivity extends Activity
 		this.textLoading.setVisibility ( visible ? View.VISIBLE : View.GONE );
 	}
 
-	//TODO Refactor
-	//YUCK!! 
+	// TODO Refactor <- It's android and
 	private void setTextConfirm ( TextConfirmGist gist )
 	{
 		String confirmMessage = "";
@@ -257,13 +251,16 @@ public class SearchActivity extends Activity
 
 	private void linkPhotoWithSearchTerm ()
 	{
-		if ( this.currentFoodSearch != null && !this.currentFoodSearch.isEmpty () )
+		if ( this.searchResultsModel.getSearchTerm () != null && !this.searchResultsModel.getSearchTerm ().isEmpty () )
 		{
 			String [] params =
 			{
-					this.cameraPhotoName, this.currentFoodSearch
+					this.cameraPhotoName, this.searchResultsModel.getSearchTerm ()
 			};
 			new LinkImageWithFoodTask ().execute ( params );
+		}else
+		{
+			Log.e ( "SHIT", "search term:" + this.searchResultsModel.getSearchTerm () );
 		}
 	}
 
@@ -289,12 +286,18 @@ public class SearchActivity extends Activity
 		DatabaseManager manager = DatabaseManager.getInstance ( this );
 		SQLiteDatabase db = manager.open ();
 
-		JournalDAO journalDao = new JournalDAO ( db );
+		DataAccessObject<JournalEntry> journalDao = new JournalDAO ( db );
 		long journalId = journalDao.create ( journal );
 
 		db.close ();
 		return journalId;
 
+	}
+
+	@Override
+	public void update ( Observable arg0, Object arg1 )
+	{
+		this.setViewMode ( ViewMode.VIEW_RESULTS );
 	}
 
 	class OnEditSearchSubmitted implements OnKeyListener
@@ -304,30 +307,25 @@ public class SearchActivity extends Activity
 		{
 			if ( event.getAction () == KeyEvent.ACTION_DOWN && keyCode == KeyEvent.KEYCODE_ENTER )
 			{
-			
-				//validate search data
+
+				// validate search data
 				String foodName = editSearch.getText ().toString ();
-				if ( foodName == null || foodName.isEmpty () )
+				if ( foodName != null && !foodName.isEmpty () )
 				{
-					Toast.makeText ( SearchActivity.this, R.string.search_error_empty_search_field, Toast.LENGTH_LONG ).show ();
-				}else
-				{
-					//clear previous data
+					// clear previous data
 					SearchActivity.this.selectedFoodInfo = null;
 					SearchActivity.this.setTextConfirm ( TextConfirmGist.DEFAULT );
 
-					//hide keyboard
-					ViewUtils.hideKeyboard (SearchActivity.this.editSearch );
-					
-					//put new search data
-					SearchActivity.this.currentFoodSearch = foodName;
-					
-					//set searching mode
-					if ( SearchActivity.this.viewMode != ViewMode.VIEW_LOADING ) 
-						SearchActivity.this.setViewMode ( ViewMode.VIEW_LOADING );
+					ViewUtils.hideKeyboard ( SearchActivity.this.editSearch );
 
-					//invoke web service.
+					SearchActivity.this.searchResultsModel.setSearchTerm ( foodName );
+					SearchActivity.this.setViewMode ( ViewMode.VIEW_LOADING );
 					new GetNutritionInfoTask ().execute ( foodName );
+					
+
+				}else
+				{
+					Toast.makeText ( SearchActivity.this, R.string.search_error_empty_search_field, Toast.LENGTH_LONG ).show ();
 				}
 			}
 			return false;
@@ -350,23 +348,7 @@ public class SearchActivity extends Activity
 
 	}
 
-	class OnAddToJournalClicked implements View.OnClickListener
-	{
-		@Override
-		public void onClick ( View v )
-		{
-			boolean success = ( SearchActivity.this.addToJournal () > 0 );
-			SearchActivity.this.setTextConfirm ( success ? TextConfirmGist.ADDED : TextConfirmGist.NOT_ADDED );
-
-			if ( cameraPhotoName != null )
-			{
-				SearchActivity.this.linkPhotoWithSearchTerm ();
-			}
-
-		}
-	}
-
-	class GetNutritionInfoTask extends AsyncTask< String, String, Response >
+	class GetNutritionInfoTask extends AsyncTask< String, String, List<NutritionInfo> >
 	{
 		private String foodName;
 
@@ -379,24 +361,20 @@ public class SearchActivity extends Activity
 				this.cancel ( true );
 			}
 		}
-		
+
 		@Override
-		protected Response doInBackground ( String... params )
+		protected List<NutritionInfo> doInBackground ( String... params )
 		{
-			Response response = null;
+			List< NutritionInfo > nutritionInfo = null;
 			try
 			{
 				this.foodName = params[0];
 
-				// do REST call to get nutrition information for food.
 				publishProgress ( "Fetching Nutrition Information for " + foodName );
-
-				for ( int i = 0 ; i < SearchActivity.NUM_TRIES ; i++ )
+				for ( int i = 0 ; i < 3 ; i++ )
 				{
-					String json = HttpClient.get ( WebServiceUrlFactory.getNutritionInfo ( foodName ) );
-					response = ResponseFactory.createResponseForNutritionInfoRequest ( json );
-
-					if ( response != null && response.isSuccessful () ) break;
+					nutritionInfo = CAWebService.getNutritionInfo ( foodName );
+					if ( nutritionInfo != null ) break;
 				}
 
 			}
@@ -405,13 +383,8 @@ public class SearchActivity extends Activity
 				Log.e ( TAG, "IOException occured while fetching results." + e.toString () );
 				e.printStackTrace ();
 			}
-			catch ( ParseException e )
-			{
-				Log.e ( TAG, "ParseException while reading results." + e.toString () );
-				e.printStackTrace ();
-			}
 
-			return response;
+			return nutritionInfo;
 		}
 
 		@Override
@@ -420,34 +393,36 @@ public class SearchActivity extends Activity
 			SearchActivity.this.textLoading.setText ( values[0] );
 		}
 
-		@SuppressWarnings ( "unchecked" )
+
 		@Override
-		protected void onPostExecute ( Response response )
+		protected void onPostExecute ( List<NutritionInfo> response )
 		{
-			if ( response != null && response.isSuccessful () )
+			if ( response != null )
 			{
-				if ( response.getData () instanceof List )
-				{
+				Map< String, List< NutritionInfo >> nutritionInfoDictionary = new HashMap< String, List< NutritionInfo >> ();
+				nutritionInfoDictionary.put ( this.foodName, response );
 
-					List< NutritionInfo > nutritionInfoList = ( List< NutritionInfo > ) response.getData ();
-					Map< String, List< NutritionInfo >> nutritionInfoDictionary = new HashMap< String, List< NutritionInfo >> ();
-					nutritionInfoDictionary.put ( this.foodName, nutritionInfoList );
-
-					SearchActivity.this.setListContents ( nutritionInfoDictionary );
-
-					SearchActivity.this.setViewMode ( ViewMode.VIEW_RESULTS );
-
-					return;
-				}
+				SearchActivity.this.searchResultsModel.setSearchResults ( nutritionInfoDictionary );
 			}else
 			{
-				if ( response != null )
-				{
-					Log.e ( SearchActivity.TAG, response.getMessage () );
-				}
-
-				SearchActivity.this.textLoading.setText ( SearchActivity.this.getString ( R.string.search_error_null_response ) );
+				SearchActivity.this.searchResultsModel.setSearchResults ( null );
 			}
+		}
+	}
+	
+	class OnAddToJournalClicked implements View.OnClickListener
+	{
+		@Override
+		public void onClick ( View v )
+		{
+			boolean success = ( SearchActivity.this.addToJournal () > 0 );
+			SearchActivity.this.setTextConfirm ( success ? TextConfirmGist.ADDED : TextConfirmGist.NOT_ADDED );
+
+			if ( SearchActivity.this.cameraPhotoName != null )
+			{
+				SearchActivity.this.linkPhotoWithSearchTerm ();
+			}
+
 		}
 	}
 
@@ -457,12 +432,12 @@ public class SearchActivity extends Activity
 		@Override
 		protected void onPreExecute ()
 		{
-			if(!NetworkUtils.isConnectedToNetwork ( SearchActivity.this ))
+			if ( !NetworkUtils.isConnectedToNetwork ( SearchActivity.this ) )
 			{
 				this.cancel ( true );
 			}
 		}
-		
+
 		@Override
 		protected Boolean doInBackground ( String... params )
 		{
@@ -474,21 +449,9 @@ public class SearchActivity extends Activity
 					String imageName = params[0];
 					String foodName = params[1];
 
-					Log.i ( TAG, "Linking " + foodName + " with " + imageName );
+					Log.e ( TAG, "Linking " + foodName + " with " + imageName );
 
-					String json = HttpClient.get ( WebServiceUrlFactory.update ( imageName, foodName ) );
-
-					Log.i ( TAG, json );
-
-					Response response = ResponseFactory.createResponseForUpdateRequest ( json );
-					if ( response != null )
-					{
-						success = response.isSuccessful ();
-					}
-				}
-				catch ( ParseException e )
-				{
-					Log.e ( TAG, e.getMessage () );
+					success = CAWebService.update ( imageName, foodName );
 				}
 				catch ( IOException e )
 				{

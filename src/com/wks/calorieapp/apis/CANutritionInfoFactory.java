@@ -1,10 +1,11 @@
-package com.wks.calorieapp.entities;
+package com.wks.calorieapp.apis;
 
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
-public class NutritionInfoFactory
+
+public class CANutritionInfoFactory
 {
 	private static final String KEY_ID = "id";
 	private static final String KEY_FAT = "fat";
@@ -24,13 +25,13 @@ public class NutritionInfoFactory
 		long id = (Long) jsonObj.get ( KEY_ID );
 		String name = ( String ) jsonObj.get ( KEY_NAME );
 		String type = ( String ) jsonObj.get ( KEY_TYPE );
-		float fat = ( ( Double ) jsonObj.get ( KEY_FAT ) )
+		float fat = ( ( Number ) jsonObj.get ( KEY_FAT ) )
 				.floatValue ();
-		float carbs = ( ( Double ) jsonObj.get ( KEY_CARBS ) )
+		float carbs = ( ( Number ) jsonObj.get ( KEY_CARBS ) )
 				.floatValue ();
-		float proteins = ( ( Double ) jsonObj.get ( KEY_PROTEINS ) )
+		float proteins = ( ( Number ) jsonObj.get ( KEY_PROTEINS ) )
 				.floatValue ();
-		float calories = ( ( Double ) jsonObj.get ( KEY_CALORIES ) )
+		float calories = ( ( Number ) jsonObj.get ( KEY_CALORIES ) )
 				.floatValue ();
 
 		NutritionInfo nutrInfo = new NutritionInfo ();

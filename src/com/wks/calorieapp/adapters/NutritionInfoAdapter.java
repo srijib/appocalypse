@@ -7,7 +7,7 @@ import java.util.Map.Entry;
 import java.util.Observable;
 import java.util.Observer;
 
-import com.wks.calorieapp.entities.NutritionInfo;
+import com.wks.calorieapp.apis.NutritionInfo;
 import com.wks.calorieapp.models.SearchResultsModel;
 
 import android.content.Context;
@@ -21,7 +21,7 @@ import android.widget.TextView;
 public class NutritionInfoAdapter extends BaseExpandableListAdapter implements Observer
 {
 	private static final String FORMAT_CALORIE = "%.2f cal";
-	private List< ParentItem > foodNameList;
+	private List< CategoryItem > foodNameList;
 	private LayoutInflater inflater;
 
 	public NutritionInfoAdapter(Context context)
@@ -39,10 +39,10 @@ public class NutritionInfoAdapter extends BaseExpandableListAdapter implements O
 	{	
 		if(items == null) return;
 		Log.e("WKS","Setting Items" );
-		this.foodNameList = new ArrayList< ParentItem > ();
+		this.foodNameList = new ArrayList< CategoryItem > ();
 		for ( Entry< String, List< NutritionInfo >> e : items.entrySet () )
 		{
-			ParentItem food = new ParentItem ( e.getKey () );
+			CategoryItem food = new CategoryItem ( e.getKey () );
 			List< NutritionInfo > nutrinfoList = e.getValue ();
 
 			for ( NutritionInfo info : nutrinfoList )
@@ -53,8 +53,7 @@ public class NutritionInfoAdapter extends BaseExpandableListAdapter implements O
 		this.notifyDataSetChanged ();
 	}
 
-	@Override
-	public ParentItem getGroup ( int groupPosition )
+	public CategoryItem getGroup ( int groupPosition )
 	{
 		return foodNameList == null? null : foodNameList.get ( groupPosition );
 	}
@@ -81,19 +80,19 @@ public class NutritionInfoAdapter extends BaseExpandableListAdapter implements O
 		{
 			resultView = inflater.inflate ( com.wks.calorieapp.R.layout.expandable_row_parent, null );
 			holder = new ParentViewHolder ();
-			holder.textFoodName = ( TextView ) resultView.findViewById ( com.wks.calorieapp.R.id.expandable_row_parent_text_food_name );
+			holder.textFoodCategory = ( TextView ) resultView.findViewById ( com.wks.calorieapp.R.id.expandable_row_parent_text_food_name );
 			resultView.setTag ( holder );
 		}else
 		{
 			holder = ( ParentViewHolder ) resultView.getTag ();
 		}
 
-		ParentItem foodItem = getGroup ( groupPosition );
+		CategoryItem foodCategory = getGroup ( groupPosition );
 		// holder.textFoodName.setTypeface ( CalorieApplication.getFont (
 		// Font.CANTARELL_REGULAR ) );
-		if(foodItem != null)
+		if(foodCategory != null)
 		{
-			holder.textFoodName.setText ( foodItem == null? "null" : foodItem.getFoodName () );
+			holder.textFoodCategory.setText ( foodCategory == null? "null" : foodCategory.getFoodCategory () );
 		}
 		
 		return resultView;
@@ -121,18 +120,18 @@ public class NutritionInfoAdapter extends BaseExpandableListAdapter implements O
 	public View getChildView ( int groupPosition, int childPosition, boolean isLastChild, View convertView, ViewGroup parent )
 	{
 		View resultView = convertView;
-		NutritionInfoViewHolder holder;
+		ChildViewHolder holder;
 
 		if ( resultView == null )
 		{
-			holder = new NutritionInfoViewHolder ();
+			holder = new ChildViewHolder ();
 			resultView = inflater.inflate ( com.wks.calorieapp.R.layout.expandable_row_child, null );
 			holder.textFoodName = ( TextView ) resultView.findViewById ( com.wks.calorieapp.R.id.expandable_row_child_food_name );
 			holder.textCalories = ( TextView ) resultView.findViewById ( com.wks.calorieapp.R.id.expandable_row_child_calories );
 			resultView.setTag ( holder );
 		}else
 		{
-			holder = ( NutritionInfoViewHolder ) resultView.getTag ();
+			holder = ( ChildViewHolder ) resultView.getTag ();
 		}
 
 		NutritionInfo info = getChild ( groupPosition, childPosition );
@@ -159,34 +158,34 @@ public class NutritionInfoAdapter extends BaseExpandableListAdapter implements O
 
 	static class ParentViewHolder
 	{
-		TextView textFoodName;
+		TextView textFoodCategory;
 	}
 
-	static class NutritionInfoViewHolder
+	static class ChildViewHolder
 	{
 		TextView textFoodName;
 		TextView textCalories;
 	}
 
-	class ParentItem
+	public class CategoryItem
 	{
-		private String foodName;
+		private String foodCategory;
 		private List< NutritionInfo > nutritionInfoList;
 
-		public ParentItem ()
+		public CategoryItem ()
 		{
 			this ( "" );
 		}
 
-		public ParentItem ( String foodName )
+		public CategoryItem ( String foodCategory )
 		{
-			this.foodName = foodName;
+			this.foodCategory = foodCategory;
 			this.nutritionInfoList = new ArrayList< NutritionInfo > ();
 		}
 
-		public String getFoodName ()
+		public String getFoodCategory ()
 		{
-			return foodName;
+			return foodCategory;
 		}
 
 		public List< NutritionInfo > getNutritionInfoList ()

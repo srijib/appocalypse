@@ -1,4 +1,4 @@
-package com.wks.calorieapp.entities;
+package com.wks.calorieapp.apis;
 
 /**
  * TODO: I think the calculation of nutrients per 100g is incorrent. Double
@@ -7,7 +7,7 @@ package com.wks.calorieapp.entities;
  * @author Waqqas
  * 
  */
-public class NutritionInfo
+public class NutritionInfo 
 {
 	private long id;
 	private String name;

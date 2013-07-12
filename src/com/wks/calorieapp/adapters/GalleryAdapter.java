@@ -35,29 +35,8 @@ public class GalleryAdapter extends BaseAdapter
 	{
 		this.context = context;
 		
-		
-		Collections.sort ( pictureFilesList, new Comparator<File>(){
-
-			@Override
-			public int compare ( File thisFile, File otherFile )
-			{
-				return (int)(thisFile.lastModified () - otherFile.lastModified ());
-			}
-			
-		} );
 		this.pictureFilesList = pictureFilesList;
-		
-		/*
-		String[] projection = {MediaStore.Images.Thumbnails._ID};
-		this.cursor = context.getContentResolver ().query(
-				MediaStore.Images.Thumbnails.EXTERNAL_CONTENT_URI,
-				projection,
-				null,
-				null,
-				MediaStore.Images.Thumbnails.IMAGE_ID);
-		
-		this.columnIndex = this.cursor.getColumnIndexOrThrow ( MediaStore.Images.Thumbnails._ID );
-		*/
+	
 	}
 
 	@Override

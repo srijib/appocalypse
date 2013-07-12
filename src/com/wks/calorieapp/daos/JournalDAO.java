@@ -8,9 +8,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.wks.calorieapp.apis.NutritionInfo;
 import com.wks.calorieapp.entities.ImageEntry;
 import com.wks.calorieapp.entities.JournalEntry;
-import com.wks.calorieapp.entities.NutritionInfo;
 
 import android.content.ContentValues;
 import android.database.Cursor;

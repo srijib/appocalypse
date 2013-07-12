@@ -71,9 +71,9 @@ public class ProfileActivity extends Activity
 		this.setContentView ( this.mode == ViewMode.REGULAR ? R.layout.activity_profile : R.layout.activity_profile_welcome );
 
 		CalorieApplication app = ( CalorieApplication ) this.getApplication ();
-		Profile profile = app.getProfile ();
+		this.profile = app.getProfile ();
 
-		if ( profile == null ) profile = new Profile ();
+		if ( this.profile == null ) this.profile = new Profile ();
 		
 		this.setupActionBar ();
 		this.setupView ();
@@ -188,6 +188,7 @@ public class ProfileActivity extends Activity
 
 	private void bindView ()
 	{
+	
 		this.radioMale.setChecked ( profile.getSex ().equals ( Profile.Sex.MALE ) );
 		this.editAge.setText ( "" + profile.getAge () );
 		this.editWeight.setText ( "" + profile.getWeight () );

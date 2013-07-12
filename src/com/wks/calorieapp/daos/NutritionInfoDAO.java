@@ -3,7 +3,7 @@ package com.wks.calorieapp.daos;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.wks.calorieapp.entities.NutritionInfo;
+import com.wks.calorieapp.apis.NutritionInfo;
 
 import android.content.ContentValues;
 import android.database.Cursor;

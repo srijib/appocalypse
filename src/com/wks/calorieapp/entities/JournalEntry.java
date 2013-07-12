@@ -4,6 +4,8 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import com.wks.calorieapp.apis.NutritionInfo;
+
 public class JournalEntry
 {
 	public static final String DATE_FORMAT = "yyyy-MM-dd";

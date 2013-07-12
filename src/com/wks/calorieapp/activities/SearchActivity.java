@@ -11,12 +11,12 @@ import java.util.Observer;
 import com.wks.calorieapp.R;
 import com.wks.calorieapp.adapters.NutritionInfoAdapter;
 import com.wks.calorieapp.apis.CAWebService;
+import com.wks.calorieapp.apis.NutritionInfo;
 import com.wks.calorieapp.daos.DataAccessObject;
 import com.wks.calorieapp.daos.DatabaseManager;
 import com.wks.calorieapp.daos.JournalDAO;
 import com.wks.calorieapp.entities.ImageEntry;
 import com.wks.calorieapp.entities.JournalEntry;
-import com.wks.calorieapp.entities.NutritionInfo;
 import com.wks.calorieapp.models.SearchResultsModel;
 import com.wks.calorieapp.utils.ViewUtils;
 import com.wks.calorieapp.utils.NetworkUtils;
@@ -91,7 +91,7 @@ public class SearchActivity extends Activity implements Observer
 		}
 
 		this.searchResultsModel = new SearchResultsModel ();
-		
+
 		this.setupActionBar ();
 		this.setupView ();
 		this.setupListeners ();
@@ -161,10 +161,9 @@ public class SearchActivity extends Activity implements Observer
 		textConfirm = ( TextView ) this.findViewById ( R.id.search_text_confirm );
 		buttonAddToJournal = ( ImageButton ) this.findViewById ( R.id.search_button_add_to_journal );
 
-		
 		this.adapter = new NutritionInfoAdapter ( this );
 		this.listNutritionInfo.setAdapter ( adapter );
-		
+
 		this.searchResultsModel.addObserver ( this );
 		this.searchResultsModel.addObserver ( adapter );
 
@@ -251,16 +250,13 @@ public class SearchActivity extends Activity implements Observer
 
 	private void linkPhotoWithSearchTerm ()
 	{
-		if ( this.searchResultsModel.getSearchTerm () != null && !this.searchResultsModel.getSearchTerm ().isEmpty () )
+		if ( this.cameraPhotoName != null && this.searchResultsModel.getSearchTerm () != null && !this.searchResultsModel.getSearchTerm ().isEmpty () )
 		{
 			String [] params =
 			{
 					this.cameraPhotoName, this.searchResultsModel.getSearchTerm ()
 			};
-			new LinkImageWithFoodTask ().execute ( params );
-		}else
-		{
-			Log.e ( "SHIT", "search term:" + this.searchResultsModel.getSearchTerm () );
+			new LinkImageWithFoodTask ( this ).execute ( params );
 		}
 	}
 
@@ -286,7 +282,7 @@ public class SearchActivity extends Activity implements Observer
 		DatabaseManager manager = DatabaseManager.getInstance ( this );
 		SQLiteDatabase db = manager.open ();
 
-		DataAccessObject<JournalEntry> journalDao = new JournalDAO ( db );
+		DataAccessObject< JournalEntry > journalDao = new JournalDAO ( db );
 		long journalId = journalDao.create ( journal );
 
 		db.close ();
@@ -321,7 +317,6 @@ public class SearchActivity extends Activity implements Observer
 					SearchActivity.this.searchResultsModel.setSearchTerm ( foodName );
 					SearchActivity.this.setViewMode ( ViewMode.VIEW_LOADING );
 					new GetNutritionInfoTask ().execute ( foodName );
-					
 
 				}else
 				{
@@ -348,22 +343,22 @@ public class SearchActivity extends Activity implements Observer
 
 	}
 
-	class GetNutritionInfoTask extends AsyncTask< String, String, List<NutritionInfo> >
+	class GetNutritionInfoTask extends AsyncTask< String, String, List< NutritionInfo > >
 	{
 		private String foodName;
 
 		@Override
 		protected void onPreExecute ()
 		{
-			if(!NetworkUtils.isConnectedToNetwork ( SearchActivity.this ))
+			if ( !NetworkUtils.isConnectedToNetwork ( SearchActivity.this ) )
 			{
-				publishProgress("No Internet Connection.");
+				publishProgress ( "No Internet Connection." );
 				this.cancel ( true );
 			}
 		}
 
 		@Override
-		protected List<NutritionInfo> doInBackground ( String... params )
+		protected List< NutritionInfo > doInBackground ( String... params )
 		{
 			List< NutritionInfo > nutritionInfo = null;
 			try
@@ -393,9 +388,8 @@ public class SearchActivity extends Activity implements Observer
 			SearchActivity.this.textLoading.setText ( values[0] );
 		}
 
-
 		@Override
-		protected void onPostExecute ( List<NutritionInfo> response )
+		protected void onPostExecute ( List< NutritionInfo > response )
 		{
 			if ( response != null )
 			{
@@ -409,7 +403,7 @@ public class SearchActivity extends Activity implements Observer
 			}
 		}
 	}
-	
+
 	class OnAddToJournalClicked implements View.OnClickListener
 	{
 		@Override
@@ -418,53 +412,9 @@ public class SearchActivity extends Activity implements Observer
 			boolean success = ( SearchActivity.this.addToJournal () > 0 );
 			SearchActivity.this.setTextConfirm ( success ? TextConfirmGist.ADDED : TextConfirmGist.NOT_ADDED );
 
-			if ( SearchActivity.this.cameraPhotoName != null )
-			{
-				SearchActivity.this.linkPhotoWithSearchTerm ();
-			}
+			SearchActivity.this.linkPhotoWithSearchTerm ();
 
 		}
-	}
-
-	class LinkImageWithFoodTask extends AsyncTask< String, Void, Boolean >
-	{
-
-		@Override
-		protected void onPreExecute ()
-		{
-			if ( !NetworkUtils.isConnectedToNetwork ( SearchActivity.this ) )
-			{
-				this.cancel ( true );
-			}
-		}
-
-		@Override
-		protected Boolean doInBackground ( String... params )
-		{
-			boolean success = false;
-			if ( params.length >= 2 )
-			{
-				try
-				{
-					String imageName = params[0];
-					String foodName = params[1];
-
-					Log.e ( TAG, "Linking " + foodName + " with " + imageName );
-
-					success = CAWebService.update ( imageName, foodName );
-				}
-				catch ( IOException e )
-				{
-					Log.e ( TAG, e.getMessage () );
-				}
-
-			}else
-			{
-				Log.e ( TAG, "Insufficient Parameters." );
-			}
-			return success;
-		}
-
 	}
 
 }

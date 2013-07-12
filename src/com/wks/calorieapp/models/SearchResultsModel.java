@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Observable;
 
-import com.wks.calorieapp.entities.NutritionInfo;
+import com.wks.calorieapp.apis.NutritionInfo;
 
 public class SearchResultsModel extends Observable
 {

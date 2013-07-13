@@ -18,6 +18,9 @@ import android.util.Log;
 public class CARecognizeResponseFactory extends CAAbstractResponseFactory
 {
 
+	@SuppressWarnings ( {
+			"unused", "unchecked"
+	} )
 	public CARecognizeResponse createResponseFromJSON ( String json ) throws ParseException
 	{
 		JSONParser parser = new JSONParser();
@@ -50,9 +53,7 @@ public class CARecognizeResponseFactory extends CAAbstractResponseFactory
 					return new HashMap<String,JSONArray>();
 				}};
 				
-			Map<String,JSONArray> foodNameInfoMap = (Map<String,JSONArray>) parser.parse ( message );
-			
-			Log.e("RECOGNIZE - MAP","Map: "+foodNameInfoMap);
+			Map< String, JSONArray > foodNameInfoMap = ( Map< String, JSONArray > ) parser.parse ( message );
 			
 			Iterator< Entry< String, JSONArray >> iter = foodNameInfoMap.entrySet ().iterator ();
 			
@@ -76,14 +77,10 @@ public class CARecognizeResponseFactory extends CAAbstractResponseFactory
 					nutritionInfoList.add ( nutritionInfo );
 				}
 				
-				
+				if(foodName!= null && nutritionInfoList != null)
+					foodNutritionInfoMap.put ( foodName, nutritionInfoList );
 			}
-			
-			Log.e("RECOGNIZE - FOODNAME","foodname: "+foodName);
-			Log.e("RECOGNIZE - INFO","foodinfo: "+nutritionInfoList);
-			
-			if(foodName!= null && nutritionInfoList != null)
-				foodNutritionInfoMap.put ( foodName, nutritionInfoList );
+
 		}
 		
 		CARecognizeResponse response = new CARecognizeResponse(statusCode);

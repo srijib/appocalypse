@@ -8,8 +8,11 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
 import com.wks.calorieapp.R;
+import com.wks.calorieapp.utils.AndroidBitmap;
 import com.wks.calorieapp.utils.FileSystem;
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.drawable.Drawable;
 import android.hardware.Camera;
 import android.hardware.Camera.PictureCallback;
@@ -198,37 +201,10 @@ public class CameraActivity extends Activity
 			}
 
 			CameraActivity.this.fileName =  generateFileName ();
-			/*
-			Uri imagesDirUri = Uri.parse ( "file:///mnt/sdcard/Pictures/CalorieApp/"+getFileName());
 			
-			ContentValues values = new ContentValues();
-			values.put ( Images.Media.TITLE, getFileName() );
-			values.put ( Images.Media.MIME_TYPE, "image/jpeg" );
-			Uri imageUri = CameraActivity.this.getContentResolver ().insert ( imagesDirUri, values );
-			
-			OutputStream out= null;
-			try{
 				
-				out = CameraActivity.this.getContentResolver ().openOutputStream ( imageUri );
-				Bitmap bitmap = BitmapFactory.decodeByteArray ( data, 0, data.length );
-				bitmap.compress ( Bitmap.CompressFormat.JPEG, 70, out );
-			}catch(IOException e)
-			{
-				e.printStackTrace ();
-			}finally{
-				try
-				{
-					if(out != null)
-					out.close ();
-				}
-				catch ( IOException e )
-				{
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-			}
+				
 			
-			*/
 			
 			String picturesDir = FileSystem.getPicturesDirectory ( CameraActivity.this );
 
@@ -239,7 +215,9 @@ public class CameraActivity extends Activity
 			try
 			{
 				fos = new FileOutputStream ( imageFile );
-				fos.write ( data );
+				Bitmap bitmap = BitmapFactory.decodeByteArray ( data, 0, data.length );
+				bitmap = AndroidBitmap.rotate ( bitmap, 90 );
+				bitmap.compress ( Bitmap.CompressFormat.JPEG, 90, fos );
 				Toast.makeText ( CameraActivity.this, R.string.camera_image_saved + ": " + imageFile.getPath (), Toast.LENGTH_LONG ).show ();
 			}
 			catch ( FileNotFoundException e )

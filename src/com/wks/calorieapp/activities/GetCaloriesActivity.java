@@ -3,7 +3,6 @@ package com.wks.calorieapp.activities;
 import java.io.File;
 import java.io.IOException;
 import java.util.Calendar;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -47,8 +46,6 @@ public class GetCaloriesActivity extends Activity
 	private static final float MIN_SIMILARITY = 0.1F;
 
 	public static final String KEY_IMAGE = "image";
-	private static final int NUM_TRIES_GET_NUTR_INFO = 3;
-
 	private RelativeLayout viewLoading;
 	private RelativeLayout viewResults;
 	private ViewSwitcher viewSwitcher;
@@ -74,11 +71,9 @@ public class GetCaloriesActivity extends Activity
 	private ViewMode viewMode;
 	private String cameraPhotoName;
 	private NutritionInfoAdapter adapter;
-	
-	public String selectedFoodCategory;
-	private NutritionInfo selectedFood;
 
-	
+	//public String selectedFoodCategory;
+	private NutritionInfo selectedFood;
 
 	@Override
 	protected void onCreate ( Bundle savedInstanceState )
@@ -196,8 +191,6 @@ public class GetCaloriesActivity extends Activity
 		this.listNutritionInfo.setOnChildClickListener ( new OnListItemClicked () );
 		this.buttonAddToJournal.setOnClickListener ( new OnAddToJournalClicked () );
 	}
-	
-	
 
 	private void setListContents ( Map< String, List< NutritionInfo >> nutritionInfoDictionary )
 	{
@@ -275,23 +268,15 @@ public class GetCaloriesActivity extends Activity
 	private long addToJournal ()
 	{
 
-		if ( this.selectedFood == null )
-		{
-			Log.e ( "ADDTOJ", "Selected food is null" );
-			return -1;
-		}
+		if ( this.selectedFood == null ) return -1;
 
 		ImageEntry image = null;
 		if ( this.cameraPhotoName != null && !this.cameraPhotoName.isEmpty () )
 		{
 			image = new ImageEntry ();
 			image.setFileName ( this.cameraPhotoName );
+			
 		}
-		
-		if(image == null)
-			Log.e ( "ADDTOJ", "image: "+image.getFileName () );
-		else
-			Log.e("ADDTOJ","image : null");
 
 		Calendar cal = Calendar.getInstance ();
 
@@ -299,14 +284,10 @@ public class GetCaloriesActivity extends Activity
 		journal.setTimestamp ( cal.getTimeInMillis () );
 		journal.setNutritionInfo ( this.selectedFood );
 		journal.setImageEntry ( image );
-
+		Log.e(TAG,"GCA: "+journal.getImageEntry ());
+		
 		DatabaseManager manager = DatabaseManager.getInstance ( this );
 		SQLiteDatabase db = manager.open ();
-		
-		if(db == null)
-		{
-			Log.e("ADDTOJ","db : "+null);
-		}
 
 		JournalDAO journalDao = new JournalDAO ( db );
 		long journalId = journalDao.create ( journal );
@@ -315,16 +296,16 @@ public class GetCaloriesActivity extends Activity
 		return journalId;
 
 	}
-	
+
 	private void linkPhotoWithFoodCategory ()
 	{
-		if ( this.cameraPhotoName != null && this.selectedFoodCategory != null && !this.selectedFoodCategory.isEmpty ())
+		if ( this.cameraPhotoName != null && this.selectedFood != null/*this.selectedFoodCategory != null && !this.selectedFoodCategory.isEmpty () */)
 		{
 			String [] params =
 			{
-					this.cameraPhotoName, this.selectedFoodCategory
+					this.cameraPhotoName, this.selectedFood.getName ()
 			};
-			new LinkImageWithFoodTask (this).execute ( params );
+			new LinkImageWithFoodTask ( this ).execute ( params );
 		}
 	}
 
@@ -334,9 +315,9 @@ public class GetCaloriesActivity extends Activity
 		@Override
 		public boolean onChildClick ( ExpandableListView parent, View v, int groupPosition, int childPosition, long id )
 		{
-			GetCaloriesActivity.this.selectedFoodCategory = GetCaloriesActivity.this.adapter.getGroup ( groupPosition ).getFoodCategory ();
+			//GetCaloriesActivity.this.selectedFoodCategory = GetCaloriesActivity.this.adapter.getGroup ( groupPosition ).getFoodCategory ();
 			NutritionInfo info = GetCaloriesActivity.this.adapter.getChild ( groupPosition, childPosition );
-			
+
 			GetCaloriesActivity.this.selectedFood = info;
 			GetCaloriesActivity.this.setTextConfirm ( TextConfirmGist.CONFIRM_ADD );
 
@@ -353,10 +334,9 @@ public class GetCaloriesActivity extends Activity
 		{
 			boolean success = ( GetCaloriesActivity.this.addToJournal () > 0 );
 			GetCaloriesActivity.this.setTextConfirm ( success ? TextConfirmGist.ADDED : TextConfirmGist.NOT_ADDED );
-		
-			
+
 			GetCaloriesActivity.this.linkPhotoWithFoodCategory ();
-			
+
 		}
 	}
 

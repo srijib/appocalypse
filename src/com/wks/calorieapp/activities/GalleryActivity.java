@@ -38,7 +38,6 @@ public class GalleryActivity extends Activity
 		this.setupActionBar ();
 		this.setupView ();
 		this.setupListeners ();
-		//this.loadGallery();
 	}
 
 	@Override

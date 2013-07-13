@@ -60,6 +60,8 @@ public class JournalDAO implements DataAccessObject<JournalEntry>
 			}
 		}
 
+		Log.e(TAG,"jJournal DAO: "+journal.getImageEntry ());
+		
 		//if journal entry contains an image entry, add image entry
 		long imageId = -1;
 		if ( journal.getImageEntry () != null )
@@ -75,6 +77,8 @@ public class JournalDAO implements DataAccessObject<JournalEntry>
 			}
 
 		}
+
+		Log.e(TAG,"jJournal DAO: id"+imageId);
 		
 		long journalId = -1;
 		ContentValues values = new ContentValues ();
@@ -87,7 +91,8 @@ public class JournalDAO implements DataAccessObject<JournalEntry>
 			journalId = db.insert ( TABLE_JOURNALS, Column.IMAGE_ID.getName (), values ); 
 		}else
 		{
-			values.put ( Column.IMAGE_ID.getName (), journal.getImageEntry ().getId ());
+			
+			values.put ( Column.IMAGE_ID.getName (), imageId);
 			journalId = db.insert ( TABLE_JOURNALS, null, values );
 		}
 		

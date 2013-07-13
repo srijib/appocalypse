@@ -9,6 +9,9 @@
     android:id="@+id/expandable_row_parent_text_food_name"
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
+    android:maxLines="1"
+    android:ellipsize="none"
+    android:scrollHorizontally="false"
     android:layout_gravity="center"
     style="@style/ParentItem"
     ></TextView>

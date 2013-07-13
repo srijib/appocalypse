@@ -37,4 +37,10 @@ public class ImageEntry
 		if( fileName == null || fileName.isEmpty ()) throw new IllegalStateException("file name must not be empty");
 		this.fileName = fileName;
 	}
+	
+	@Override
+	public String toString ()
+	{
+		return String.format ( "[id: %d,fileName: %s]", this.id,this.fileName );
+	}
 }

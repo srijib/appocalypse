@@ -14,6 +14,7 @@ import com.wks.calorieapp.apis.CAWebService;
 import com.wks.calorieapp.apis.NutritionInfo;
 import com.wks.calorieapp.daos.DataAccessObject;
 import com.wks.calorieapp.daos.DatabaseManager;
+import com.wks.calorieapp.daos.ImageDAO;
 import com.wks.calorieapp.daos.JournalDAO;
 import com.wks.calorieapp.entities.ImageEntry;
 import com.wks.calorieapp.entities.JournalEntry;
@@ -96,6 +97,11 @@ public class SearchActivity extends Activity implements Observer
 		this.setupView ();
 		this.setupListeners ();
 
+		DatabaseManager manager = DatabaseManager.getInstance ( this );
+		SQLiteDatabase db = manager.open ();
+		ImageDAO images = new ImageDAO(db);
+		Log.e(TAG,images.read ().toString ());
+		db.close ();
 	}
 
 	@Override
@@ -250,11 +256,11 @@ public class SearchActivity extends Activity implements Observer
 
 	private void linkPhotoWithSearchTerm ()
 	{
-		if ( this.cameraPhotoName != null && this.searchResultsModel.getSearchTerm () != null && !this.searchResultsModel.getSearchTerm ().isEmpty () )
+		if ( this.cameraPhotoName != null && this.selectedFoodInfo != null )
 		{
 			String [] params =
 			{
-					this.cameraPhotoName, this.searchResultsModel.getSearchTerm ()
+					this.cameraPhotoName, this.selectedFoodInfo.getName ()
 			};
 			new LinkImageWithFoodTask ( this ).execute ( params );
 		}
@@ -270,6 +276,7 @@ public class SearchActivity extends Activity implements Observer
 		{
 			photo = new ImageEntry ();
 			photo.setFileName ( this.cameraPhotoName );
+			Log.e ( TAG, "Image Set: "+photo.getFileName ());
 		}
 
 		Calendar cal = Calendar.getInstance ();
@@ -397,9 +404,10 @@ public class SearchActivity extends Activity implements Observer
 				nutritionInfoDictionary.put ( this.foodName, response );
 
 				SearchActivity.this.searchResultsModel.setSearchResults ( nutritionInfoDictionary );
+
 			}else
 			{
-				SearchActivity.this.searchResultsModel.setSearchResults ( null );
+				this.publishProgress ( "No Results Found" );
 			}
 		}
 	}

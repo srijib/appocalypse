@@ -167,15 +167,10 @@ public class NutritionInfoAdapter extends BaseExpandableListAdapter implements O
 		TextView textCalories;
 	}
 
-	public class CategoryItem
+	private class CategoryItem
 	{
-		private String foodCategory;
+		private String foodCategory = "";
 		private List< NutritionInfo > nutritionInfoList;
-
-		public CategoryItem ()
-		{
-			this ( "" );
-		}
 
 		public CategoryItem ( String foodCategory )
 		{

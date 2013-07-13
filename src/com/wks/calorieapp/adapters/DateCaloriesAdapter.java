@@ -7,6 +7,7 @@ import java.util.Observer;
 
 import com.wks.calorieapp.entities.JournalEntry;
 import com.wks.calorieapp.models.DateCaloriesModel;
+import com.wks.calorieapp.utils.AndroidBitmap;
 import com.wks.calorieapp.utils.FileSystem;
 
 import com.wks.calorieapp.R;
@@ -97,6 +98,7 @@ public class DateCaloriesAdapter extends BaseAdapter implements Observer
 					File file = new File ( FileSystem.getPicturesDirectory ( context ) + entry.getImageEntry ().getFileName () );
 					if ( file.exists () )
 					{
+						
 						Bitmap photo = BitmapFactory.decodeFile ( file.getAbsolutePath () );
 						if ( photo != null ) holder.imageMeal.setImageBitmap ( photo );
 					}

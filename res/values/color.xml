@@ -19,6 +19,4 @@
 	<color name="brick_red">#b22222</color>
 	<color name="journal_calories_consumed_good">#F0FFF0</color>
 	<color name="journal_calories_consumed_bad">#FFC1C1</color>
-	<color name="date_calories_consumed_good">#308014</color>
-	<color name="date_calories_consumed_bad">#b22222</color>
 </resources>

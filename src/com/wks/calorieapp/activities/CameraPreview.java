@@ -13,30 +13,29 @@ import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.SurfaceHolder.Callback;
 import android.view.SurfaceView;
-import android.widget.Toast;
 
 /**
- * handles all preview aspects of the camera stream.
+ * Displays Camera Stream
  * 
  * @author Waqqas
  * 
  */
 public class CameraPreview extends SurfaceView implements Callback
 {
+	//DEBUGGING TAG
 	private static final String TAG = CameraPreview.class.getCanonicalName ();
 
+	//CONSTANTS
 	private static final int JPEG_QUALITY = 90;
 
-	//private static final int PICTURE_WIDTH = 300;
-
-	private Context context;// useless
+	//MEMBERS
 	private Camera camera = null;
 	private SurfaceHolder holder;
 
 	public CameraPreview ( Context context )
 	{
 		super ( context );
-		this.context = context;
+		
 		this.holder = this.getHolder ();
 		this.holder.addCallback ( this );
 
@@ -47,17 +46,12 @@ public class CameraPreview extends SurfaceView implements Callback
 	{
 		try
 		{
-			this.camera = Camera
-					.open ( getCameraId ( CameraInfo.CAMERA_FACING_BACK ) );
+			this.camera = Camera.open ( getCameraId ( CameraInfo.CAMERA_FACING_BACK ) );
 			this.camera.setPreviewDisplay ( holder );
-			if ( camera == null )
-				Toast.makeText ( context, "cam null", Toast.LENGTH_LONG )
-						.show ();
 		}
 		catch ( IOException e )
 		{
-			// TODO
-			Log.e ( TAG, "" + e );
+			Log.e ( TAG, "" + e.getMessage () );
 		}
 	}
 
@@ -65,22 +59,17 @@ public class CameraPreview extends SurfaceView implements Callback
 	public void surfaceChanged ( SurfaceHolder holder, int format, int width,
 			int height )
 	{
-		if ( holder.getSurface () == null )
-		{
-			Log.e ( TAG, "Camera surface holder is null" );
-			return;
-		}
-
 		try
 		{
 			if ( camera == null ) return;
 
 			Camera.Parameters parameters = camera.getParameters ();
-			// List< Size > sizes = parameters.getSupportedPreviewSizes ();
-			// Size previewSize = sizes.get ( sizes.size () - 1 );
 			parameters.setPreviewSize ( width, height );
 
+			//get possible picture sizes
 			List<Size> sizes = parameters.getSupportedPictureSizes ();
+			
+			//sort sizes in ascending order.
 			Collections.sort ( sizes, new Comparator<Size>(){
 
 				@Override
@@ -90,6 +79,8 @@ public class CameraPreview extends SurfaceView implements Callback
 				}
 				
 			} );
+			
+			//choose smallest picture size.
 			Size pictureSize = sizes.get ( 0 );
 
 			parameters.setPictureSize ( pictureSize.width, pictureSize.height );
@@ -101,8 +92,7 @@ public class CameraPreview extends SurfaceView implements Callback
 		}
 		catch ( IOException e )
 		{
-			// TODO
-			Log.e ( TAG, "" + e );
+			Log.e ( TAG, "" + e.getMessage () );
 		}
 
 	}
@@ -120,11 +110,20 @@ public class CameraPreview extends SurfaceView implements Callback
 
 	}
 
+	/**
+	 * 
+	 * @return device camera object
+	 */
 	public Camera getCamera ()
 	{
 		return this.camera;
 	}
 
+	/**Returns the id of the specified camera direction (FORWARD FACING, BACKFACING)
+	 * 
+	 * @param direction
+	 * @return
+	 */
 	private static int getCameraId ( int direction )
 	{
 		int numCameras = Camera.getNumberOfCameras ();

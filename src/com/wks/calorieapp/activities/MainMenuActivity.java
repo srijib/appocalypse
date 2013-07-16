@@ -1,7 +1,7 @@
 package com.wks.calorieapp.activities;
 
 import com.wks.calorieapp.R;
-import com.wks.calorieapp.adapters.HomeMenuAdapter;
+import com.wks.calorieapp.adapters.MainMenuAdapter;
 
 import android.app.ActionBar;
 import android.app.Activity;
@@ -11,19 +11,18 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
-import android.widget.Toast;
 
-public class HomeActivity extends Activity
+public class MainMenuActivity extends Activity
 {
 	
 	ListView listviewActivities;
-	HomeMenuAdapter adapter;
+	MainMenuAdapter adapter;
 	
 	@Override
 	protected void onCreate ( Bundle savedInstanceState )
 	{
 		super.onCreate ( savedInstanceState );
-		this.setContentView ( R.layout.activity_home );
+		this.setContentView ( R.layout.activity_main_menu );
 		
 		setupActionBar();
 		setupView();
@@ -41,7 +40,7 @@ public class HomeActivity extends Activity
 	private void setupView()
 	{
 		this.listviewActivities = (ListView) this.findViewById ( R.id.home_listview_activities );
-		this.adapter = new HomeMenuAdapter(this);
+		this.adapter = new MainMenuAdapter(this);
 		this.listviewActivities.setAdapter ( this.adapter);
 	}
 	
@@ -57,31 +56,31 @@ public class HomeActivity extends Activity
 		{
 			
 			
-			switch(HomeActivity.this.adapter.getItem ( position ))
+			switch(MainMenuActivity.this.adapter.getItem ( position ))
 			{
 			case CAMERA:
-				Intent cameraIntent = new Intent(HomeActivity.this, CameraActivity.class);
+				Intent cameraIntent = new Intent(MainMenuActivity.this, CameraActivity.class);
 				startActivity(cameraIntent);
 				return;
 			case SEARCH:
-				Intent searchIntent = new Intent(HomeActivity.this, SearchActivity.class);
+				Intent searchIntent = new Intent(MainMenuActivity.this, SearchActivity.class);
 				startActivity(searchIntent);
 				return;
 			case JOURNAL:
-				Intent journalIntent = new Intent(HomeActivity.this, JournalActivity.class);
+				Intent journalIntent = new Intent(MainMenuActivity.this, JournalActivity.class);
 				startActivity(journalIntent);
 				return;
 			case PROFILE:
-				Intent profileIntent = new Intent(HomeActivity.this,ProfileActivity.class);
+				Intent profileIntent = new Intent(MainMenuActivity.this,ProfileActivity.class);
 				startActivity(profileIntent);
 				return;
 			case GALLERY: 
-				Intent galleryIntent = new Intent(HomeActivity.this, GalleryActivity.class);
+				Intent galleryIntent = new Intent(MainMenuActivity.this, GalleryActivity.class);
 				startActivity ( galleryIntent );
 				return;
 				
 			default:
-				Toast.makeText(HomeActivity.this,"Not yet implemented.",Toast.LENGTH_LONG).show();
+				//do nothing.
 				return;
 			}
 		}

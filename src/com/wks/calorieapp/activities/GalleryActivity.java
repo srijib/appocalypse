@@ -1,52 +1,63 @@
 package com.wks.calorieapp.activities;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import com.wks.android.utils.FileSystem;
 import com.wks.calorieapp.R;
 import com.wks.calorieapp.adapters.GalleryAdapter;
-import com.wks.calorieapp.utils.FileSystem;
 
 import android.app.ActionBar;
 import android.app.Activity;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.GridView;
-import android.widget.Toast;
 
+/**Activity that displays pictures taken by the user in a gallery
+ * 
+ * @author Waqqas
+ *
+ */
 public class GalleryActivity extends Activity
 {
-	private static final String TAG = GalleryActivity.class.getCanonicalName ();
+	//DEBUGGING 
+	//private static final String TAG = GalleryActivity.class.getCanonicalName ();
 	
+	//UI Components
 	private GridView gridviewGallery;
 	private List< File > pictureFilesList;
 	private GalleryAdapter adapter;
 
+	
 	protected void onCreate ( Bundle savedInstanceState )
 	{
 		// TODO Auto-generated method stub
 		super.onCreate ( savedInstanceState );
 		this.setContentView ( R.layout.activity_gallery );
 
-		this.init ();
+		this.pictureFilesList = this.getPictureFiles ();
+		
 		this.setupActionBar ();
 		this.setupView ();
 		this.setupListeners ();
 	}
 
+	/**
+	 * - Pressing Up Item on ActionBar returns to home Activity
+	 */
 	@Override
 	public boolean onOptionsItemSelected ( MenuItem item )
 	{
 		switch ( item.getItemId () )
 		{
 		case android.R.id.home:
-			Intent homeIntent = new Intent ( this, HomeActivity.class );
+			Intent homeIntent = new Intent ( this, MainMenuActivity.class );
 			homeIntent.addFlags ( Intent.FLAG_ACTIVITY_CLEAR_TOP );
 			this.startActivity ( homeIntent );
 			return true;
@@ -56,20 +67,10 @@ public class GalleryActivity extends Activity
 		}
 	}
 
-	private void init ()
-	{
-		this.pictureFilesList = this.getPictureFiles ();
-		if(this.pictureFilesList == null)
-		{
-			Log.e ( TAG, "Images Directory does not exist." );
-			Toast.makeText ( this, this.getResources ().getString ( R.string.gallery_toast_pictures_dir_not_found ), Toast.LENGTH_LONG ).show();
-			this.finish ();
-			return;
-		}
-		
-		
-	}
 
+	/**
+	 * - Applies background to ActionBar
+	 */
 	private void setupActionBar ()
 	{
 		ActionBar actionBar = this.getActionBar ();
@@ -80,6 +81,9 @@ public class GalleryActivity extends Activity
 		actionBar.setDisplayHomeAsUpEnabled ( true );
 	}
 
+	/**
+	 * Instantiates UI elements
+	 */
 	private void setupView ()
 	{
 		this.adapter = new GalleryAdapter(this,this.pictureFilesList);
@@ -87,13 +91,20 @@ public class GalleryActivity extends Activity
 		this.gridviewGallery.setAdapter ( adapter );
 	}
 
+	/**
+	 * Adds Action Listeners
+	 */
 	private void setupListeners ()
 	{
 		this.gridviewGallery.setOnItemClickListener ( new OnPictureClicked() );
 	}
-
+	
+	/**
+	 * @return List of image files in applications' picture directory.
+	 */
 	private List< File > getPictureFiles ()
 	{
+		List<File> pictureFilesList = new ArrayList<File>();
 		File picturesDir = new File ( FileSystem.getPicturesDirectory ( this ) );
 		if ( picturesDir.exists () && picturesDir.isDirectory () )
 		{
@@ -101,14 +112,19 @@ public class GalleryActivity extends Activity
 			File [] pictureFiles = picturesDir.getAbsoluteFile ().listFiles ();
 
 			if ( pictureFiles != null ) 
-				return Arrays.asList ( pictureFiles );
+				pictureFilesList =  Arrays.asList ( pictureFiles );
 		}
 		
-		return null;
+		return pictureFilesList;
 	}
 	
-
-	
+	/**
+	 * - Callback when a picture is clicked in the listview.
+	 * - Photo name is sent to full screen activity, which shows the full image.
+	 * 
+	 * @author Waqqas
+	 *
+	 */
 	class OnPictureClicked implements AdapterView.OnItemClickListener
 	{
 
@@ -117,7 +133,7 @@ public class GalleryActivity extends Activity
 		{
 			File selectedFile = GalleryActivity.this.adapter.getItem ( position );
 			Intent fullScreenImageIntent = new Intent(GalleryActivity.this, FullScreenImageActivity.class);
-			fullScreenImageIntent.putExtra ( FullScreenImageActivity.KEY_IMAGE, selectedFile.getName () );
+			fullScreenImageIntent.putExtra ( FullScreenImageActivity.EXTRAS_PHOTO_NAME, selectedFile.getName () );
 			GalleryActivity.this.startActivity ( fullScreenImageIntent );
 			
 		}

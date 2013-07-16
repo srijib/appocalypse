@@ -75,7 +75,7 @@ public class JournalDAO implements DataAccessObject<JournalEntry>
 				db.endTransaction ();
 				return -1;
 			}
-
+			journal.getImageEntry ().setId ( imageId );
 		}
 
 		Log.e(TAG,"jJournal DAO: id"+imageId);
@@ -92,7 +92,7 @@ public class JournalDAO implements DataAccessObject<JournalEntry>
 		}else
 		{
 			
-			values.put ( Column.IMAGE_ID.getName (), imageId);
+			values.put ( Column.IMAGE_ID.getName (), journal.getImageEntry ().getId ());
 			journalId = db.insert ( TABLE_JOURNALS, null, values );
 		}
 		

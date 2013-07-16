@@ -1,10 +1,10 @@
-package com.wks.calorieapp.utils;
+package com.wks.android.utils;
 
 import android.content.Context;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.TextView;
 
-public class ViewUtils
+public class KeyboardUtils
 {
 	public static void hideKeyboard(TextView edit)
 	{

@@ -4,6 +4,7 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import com.wks.calorieapp.R;
 import com.wks.calorieapp.adapters.DaysOfWeekAdapter;
@@ -32,8 +33,10 @@ import android.widget.Toast;
 
 public class JournalActivity extends Activity
 {
+	//DEBUGGING TAG
 	public static final String TAG = JournalActivity.class.getCanonicalName ();
 
+	//CONSTANTS
 	public static final String FORMAT_DATE_HEADER = "MMMM yyyy";
 
 	public enum CalendarPeriod
@@ -41,9 +44,10 @@ public class JournalActivity extends Activity
 		TODAY, NEXT_WEEK, NEXT_MONTH, NEXT_YEAR, LAST_WEEK, LAST_MONTH, LAST_YEAR
 	};
 
+	//UI COMPONENTS
 	private TextView textDateHeader;
-	private GridView gridDaysOfWeek;
-	private GridView gridCalendar;
+	private GridView gridviewDaysOfWeek;
+	private GridView gridviewCalendar;
 	private ImageButton buttonLastMonth;
 	private ImageButton buttonLastYear;
 	private ImageButton buttonToday;
@@ -51,6 +55,7 @@ public class JournalActivity extends Activity
 	private ImageButton buttonNextYear;
 	private ImageButton [] buttonsDateControl;
 
+	//MEMBERS
 	private Profile profile;
 	private JournalModel model;
 	private JournalAdapter adapter;
@@ -68,7 +73,7 @@ public class JournalActivity extends Activity
 			this.finish ();
 		}
 	
-		this.model = new JournalModel(this);
+		this.model = new JournalModel();
 		
 		this.setupActionBar ();
 		this.setupView ();
@@ -89,7 +94,7 @@ public class JournalActivity extends Activity
 		switch ( item.getItemId () )
 		{
 		case android.R.id.home:
-			Intent homeIntent = new Intent ( this, HomeActivity.class );
+			Intent homeIntent = new Intent ( this, MainMenuActivity.class );
 			homeIntent.addFlags ( Intent.FLAG_ACTIVITY_CLEAR_TOP );
 			startActivity ( homeIntent );
 			return true;
@@ -113,8 +118,8 @@ public class JournalActivity extends Activity
 	private void setupView ()
 	{
 		textDateHeader = ( TextView ) this.findViewById ( R.id.journal_text_date_header );
-		gridDaysOfWeek = ( GridView ) this.findViewById ( R.id.journal_grid_days_of_week );
-		gridCalendar = ( GridView ) this.findViewById ( R.id.journal_grid_calendar );
+		gridviewDaysOfWeek = ( GridView ) this.findViewById ( R.id.journal_grid_days_of_week );
+		gridviewCalendar = ( GridView ) this.findViewById ( R.id.journal_grid_calendar );
 		buttonLastYear = ( ImageButton ) this.findViewById ( R.id.journal_button_last_year );
 		buttonLastMonth = ( ImageButton ) this.findViewById ( R.id.journal_button_last_month );
 		buttonToday = ( ImageButton ) this.findViewById ( R.id.journal_button_today );
@@ -126,27 +131,30 @@ public class JournalActivity extends Activity
 				buttonLastYear, buttonLastMonth, buttonToday, buttonNextMonth, buttonNextYear
 		};
 
-		this.gridDaysOfWeek.setAdapter ( new DaysOfWeekAdapter ( this ) );
+		this.gridviewDaysOfWeek.setAdapter ( new DaysOfWeekAdapter ( this ) );
 		
-		this.adapter = new JournalAdapter ( this,profile );
-		this.gridCalendar.setAdapter ( adapter );
+		this.adapter = new JournalAdapter ( this,Calendar.getInstance (),model);
+		this.gridviewCalendar.setAdapter ( adapter );
 		
-		this.model.addObserver ( adapter );
 
 	}
 
+	/**
+	 * Connects publishers to subscribers
+	 */
 	private void setupListeners ()
 	{
 		for ( ImageButton button : buttonsDateControl )
 			button.setOnClickListener ( new OnDateControlButtonClicked () );
 
-		this.gridCalendar.setOnItemClickListener ( new OnDateClicked () );
+		this.gridviewCalendar.setOnItemClickListener ( new OnDateClicked () );
 	}
 
 	private void updateCalendar ( Calendar newCalendar )
 	{
 		Map<Calendar,Float> calorieCalendar = this.getCaloriesForMonth(newCalendar);
-		this.model.setCalorieCalendar ( calorieCalendar );//updates calendar events
+		Map<Calendar,CalendarEvent> eventsCalendar = this.createEventsForCalendar ( calorieCalendar );
+		this.model.setCalorieCalendar ( eventsCalendar );//updates calendar events
 		this.adapter.setDate ( newCalendar );//updates calendar dates
 		this.updateDateHeader ( newCalendar.getTimeInMillis () );//updates calendar heading	
 	}
@@ -213,6 +221,27 @@ public class JournalActivity extends Activity
 		return calorieCalendar;
 	}
 
+	private Map<Calendar,CalendarEvent> createEventsForCalendar(Map<Calendar,Float> caloriesForMonth)
+	{
+		Map< Calendar, CalendarEvent > calorieCalendar = new HashMap< Calendar, CalendarEvent > ();
+
+		for ( Entry< Calendar, Float > caloriesForDate : caloriesForMonth.entrySet () )
+		{
+			float caloriesConsumed = caloriesForDate.getValue ();
+
+			CalendarEvent event = new CalendarEvent ();
+			event.setDescription ( String.format ( "%.0f cal", caloriesConsumed ) );
+
+			int extraCalories = ( int ) ( caloriesConsumed - this.profile.getRecommendedDailyCalories () );
+			event.setBackgroundColor ( this.getResources ().getColor (
+					extraCalories <= 0 ? R.color.journal_calories_consumed_good : R.color.journal_calories_consumed_bad ) );
+
+			calorieCalendar.put ( caloriesForDate.getKey (), event );
+
+		}
+		
+		return calorieCalendar;
+	}
 	
 	class OnDateControlButtonClicked implements View.OnClickListener
 	{
@@ -266,8 +295,8 @@ public class JournalActivity extends Activity
 				int date = JournalActivity.this.adapter.getDateAtPosition ( position );
 				cal.set ( Calendar.DAY_OF_MONTH, date );
 
-				Intent dateCaloriesIntent = new Intent ( JournalActivity.this, DateCaloriesActivity.class );
-				dateCaloriesIntent.putExtra ( DateCaloriesActivity.KEY_DATE, cal.getTimeInMillis () );
+				Intent dateCaloriesIntent = new Intent ( JournalActivity.this, JournalEntryActivity.class );
+				dateCaloriesIntent.putExtra ( JournalEntryActivity.EXTRAS_DATE, cal.getTimeInMillis () );
 				startActivity ( dateCaloriesIntent );
 			}
 		}

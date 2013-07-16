@@ -8,8 +8,10 @@ import java.util.Map;
 import java.util.Observable;
 import java.util.Observer;
 
+import com.wks.android.utils.KeyboardUtils;
+import com.wks.android.utils.NetworkUtils;
 import com.wks.calorieapp.R;
-import com.wks.calorieapp.adapters.NutritionInfoAdapter;
+import com.wks.calorieapp.adapters.SearchResultsAdapter;
 import com.wks.calorieapp.apis.CAWebService;
 import com.wks.calorieapp.apis.NutritionInfo;
 import com.wks.calorieapp.daos.DataAccessObject;
@@ -19,8 +21,6 @@ import com.wks.calorieapp.daos.JournalDAO;
 import com.wks.calorieapp.entities.ImageEntry;
 import com.wks.calorieapp.entities.JournalEntry;
 import com.wks.calorieapp.models.SearchResultsModel;
-import com.wks.calorieapp.utils.ViewUtils;
-import com.wks.calorieapp.utils.NetworkUtils;
 
 import android.app.ActionBar;
 import android.app.Activity;
@@ -49,7 +49,7 @@ public class SearchActivity extends Activity implements Observer
 {
 	private static final String TAG = SearchActivity.class.getCanonicalName ();
 
-	public static final String KEY_IMAGE = "image";
+	public static final String EXTRAS_PHOTO_NAME = "image";
 
 	private EditText editSearch;
 	private TextView textConfirm;
@@ -62,7 +62,7 @@ public class SearchActivity extends Activity implements Observer
 
 	private String cameraPhotoName;
 	private NutritionInfo selectedFoodInfo;
-	private NutritionInfoAdapter adapter;
+	private SearchResultsAdapter adapter;
 	private ExpandableListView listNutritionInfo;
 	private SearchResultsModel searchResultsModel;
 
@@ -87,7 +87,7 @@ public class SearchActivity extends Activity implements Observer
 		Bundle extras = this.getIntent ().getExtras ();
 		if ( extras != null )
 		{
-			this.cameraPhotoName = extras.getString ( KEY_IMAGE );
+			this.cameraPhotoName = extras.getString ( EXTRAS_PHOTO_NAME );
 			Log.e ( "YO!!!", "camera photo: " + this.cameraPhotoName );
 		}
 
@@ -118,7 +118,7 @@ public class SearchActivity extends Activity implements Observer
 		switch ( item.getItemId () )
 		{
 		case android.R.id.home:
-			Intent homeIntent = new Intent ( SearchActivity.this, HomeActivity.class );
+			Intent homeIntent = new Intent ( SearchActivity.this, MainMenuActivity.class );
 			homeIntent.addFlags ( Intent.FLAG_ACTIVITY_CLEAR_TOP );
 			startActivity ( homeIntent );
 			return true;
@@ -126,8 +126,8 @@ public class SearchActivity extends Activity implements Observer
 		case R.id.search_menu_done:
 			Calendar calendar = Calendar.getInstance ();
 
-			Intent dateCaloriesIntent = new Intent ( this, DateCaloriesActivity.class );
-			dateCaloriesIntent.putExtra ( DateCaloriesActivity.KEY_DATE, calendar.getTimeInMillis () );
+			Intent dateCaloriesIntent = new Intent ( this, JournalEntryActivity.class );
+			dateCaloriesIntent.putExtra ( JournalEntryActivity.EXTRAS_DATE, calendar.getTimeInMillis () );
 			startActivity ( dateCaloriesIntent );
 			return true;
 		default:
@@ -167,17 +167,15 @@ public class SearchActivity extends Activity implements Observer
 		textConfirm = ( TextView ) this.findViewById ( R.id.search_text_confirm );
 		buttonAddToJournal = ( ImageButton ) this.findViewById ( R.id.search_button_add_to_journal );
 
-		this.adapter = new NutritionInfoAdapter ( this );
+		this.adapter = new SearchResultsAdapter ( this,this.searchResultsModel );
 		this.listNutritionInfo.setAdapter ( adapter );
-
-		this.searchResultsModel.addObserver ( this );
-		this.searchResultsModel.addObserver ( adapter );
 
 		setViewMode ( ViewMode.VIEW_IDLE );
 	}
 
 	private void setupListeners ()
 	{
+		this.searchResultsModel.addObserver ( this );
 		this.editSearch.setOnKeyListener ( new OnEditSearchSubmitted () );
 		this.listNutritionInfo.setOnChildClickListener ( new OnListItemClicked () );
 		this.buttonAddToJournal.setOnClickListener ( new OnAddToJournalClicked () );
@@ -319,7 +317,7 @@ public class SearchActivity extends Activity implements Observer
 					SearchActivity.this.selectedFoodInfo = null;
 					SearchActivity.this.setTextConfirm ( TextConfirmGist.DEFAULT );
 
-					ViewUtils.hideKeyboard ( SearchActivity.this.editSearch );
+					KeyboardUtils.hideKeyboard ( SearchActivity.this.editSearch );
 
 					SearchActivity.this.searchResultsModel.setSearchTerm ( foodName );
 					SearchActivity.this.setViewMode ( ViewMode.VIEW_LOADING );

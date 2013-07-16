@@ -6,8 +6,8 @@ import android.content.Context;
 import android.os.AsyncTask;
 import android.util.Log;
 
+import com.wks.android.utils.NetworkUtils;
 import com.wks.calorieapp.apis.CAWebService;
-import com.wks.calorieapp.utils.NetworkUtils;
 
 public class LinkImageWithFoodTask extends AsyncTask< String, Void, Boolean >
 {

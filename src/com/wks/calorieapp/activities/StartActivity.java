@@ -4,10 +4,10 @@ import java.io.IOException;
 
 import org.json.simple.parser.ParseException;
 
+import com.wks.android.utils.FileUtils;
 import com.wks.calorieapp.entities.Profile;
 import com.wks.calorieapp.entities.ProfileException;
 import com.wks.calorieapp.entities.ProfileFactory;
-import com.wks.calorieapp.utils.FileUtils;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -32,7 +32,7 @@ public class StartActivity extends Activity
 			if ( this.loadProfile ( profileJson ) )
 			{
 
-				Intent homeIntent = new Intent ( this, HomeActivity.class );
+				Intent homeIntent = new Intent ( this, MainMenuActivity.class );
 				homeIntent.addFlags ( Intent.FLAG_ACTIVITY_CLEAR_TOP );
 				startActivity ( homeIntent );
 				return;

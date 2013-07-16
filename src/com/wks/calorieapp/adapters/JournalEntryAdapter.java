@@ -1,14 +1,13 @@
 package com.wks.calorieapp.adapters;
 
 import java.io.File;
-import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
 
+import com.wks.android.utils.BitmapUtils;
+import com.wks.android.utils.FileSystem;
 import com.wks.calorieapp.entities.JournalEntry;
-import com.wks.calorieapp.models.DateCaloriesModel;
-import com.wks.calorieapp.utils.AndroidBitmap;
-import com.wks.calorieapp.utils.FileSystem;
+import com.wks.calorieapp.models.JournalEntryModel;
 
 import com.wks.calorieapp.R;
 import android.content.Context;
@@ -22,42 +21,31 @@ import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-public class DateCaloriesAdapter extends BaseAdapter implements Observer
+public class JournalEntryAdapter extends BaseAdapter implements Observer
 {
-	private static final String TAG = DateCaloriesAdapter.class.getCanonicalName ();
+	private static final String TAG = JournalEntryAdapter.class.getCanonicalName ();
 
 	private Context context;
-	private List< JournalEntry > items;
+	private JournalEntryModel model;
 	private LayoutInflater inflater;
 
-	public DateCaloriesAdapter ( Context context )
+	public JournalEntryAdapter ( Context context, JournalEntryModel model )
 	{
 		this.context = context;
+		this.model = model;
 		this.inflater = LayoutInflater.from ( context );
-	}
-
-	public void setItems ( List< JournalEntry > items )
-	{
-		this.items = items;
-		this.notifyDataSetChanged ();
-	}
-
-	public void clear ()
-	{
-		this.items.clear ();
-		this.notifyDataSetChanged ();
 	}
 
 	@Override
 	public int getCount ()
 	{
-		return items == null ? 0 : items.size ();
+		return this.model.getJournalEntries ().size ();
 	}
 
 	@Override
 	public JournalEntry getItem ( int position )
 	{
-		return this.items == null ? null : items.get ( position );
+		return this.model.getJournalEntries ().get ( position );
 	}
 
 	@Override
@@ -87,7 +75,7 @@ public class DateCaloriesAdapter extends BaseAdapter implements Observer
 			holder = ( ViewHolder ) resultView.getTag ();
 		}
 
-		JournalEntry entry = this.items.get ( position );
+		JournalEntry entry = this.getItem ( position );
 		if ( entry != null )
 		{
 			try
@@ -100,6 +88,7 @@ public class DateCaloriesAdapter extends BaseAdapter implements Observer
 					{
 						
 						Bitmap photo = BitmapFactory.decodeFile ( file.getAbsolutePath () );
+						photo = BitmapUtils.rotate ( photo, 90 );
 						if ( photo != null ) holder.imageMeal.setImageBitmap ( photo );
 					}
 				}
@@ -120,9 +109,8 @@ public class DateCaloriesAdapter extends BaseAdapter implements Observer
 	@Override
 	public void update ( Observable observable, Object data )
 	{
-		DateCaloriesModel model = ( DateCaloriesModel ) data;
-		List< JournalEntry > mealEntries = model.getMealEntries ();
-		this.setItems ( mealEntries );
+		this.model = ( JournalEntryModel ) data;
+		this.notifyDataSetChanged ();
 	}
 
 	class ViewHolder

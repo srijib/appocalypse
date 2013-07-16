@@ -3,32 +3,41 @@
     android:layout_width="match_parent"
     android:layout_height="fill_parent"
     android:background="@color/very_light_gray"
+    android:gravity="center_horizontal"
+    
     android:orientation="vertical" >
 
     <TableLayout
-        android:layout_width="fill_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-       android:gravity="center"
+        android:layout_gravity="center"
+        android:padding="5dip"
+      	android:gravity="center"
         android:orientation="horizontal" >
 
-        <TableRow>
+        <TableRow
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center" >
 
             <TextView
                 android:id="@+id/profile_text_instructions"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_span="2"
-                android:maxLines="10"
-                android:scrollHorizontally="false"
                 android:ellipsize="none"
-                 android:padding="5dip"
+                android:maxLines="10"
+                android:gravity="center_horizontal"
+                android:padding="5dip"
+                android:scrollHorizontally="false"
                 android:text="@string/profile_layout_text_instructions" >
             </TextView>
         </TableRow>
 
         <TableRow
             android:layout_width="fill_parent"
-            android:layout_height="wrap_content" >
+            android:layout_height="wrap_content"
+            android:gravity="center" >
 
             <TextView
                 android:layout_width="fill_parent"
@@ -46,9 +55,10 @@
                 android:inputType="number" />
         </TableRow>
 
-        <TableRow
+       <TableRow
             android:layout_width="fill_parent"
-            android:layout_height="wrap_content" >
+            android:layout_height="wrap_content"
+            android:gravity="center" >
 
             <TextView
                 android:layout_width="fill_parent"
@@ -81,9 +91,10 @@
             </RadioGroup>
         </TableRow>
 
-        <TableRow
+       <TableRow
             android:layout_width="fill_parent"
-            android:layout_height="wrap_content" >
+            android:layout_height="wrap_content"
+            android:gravity="center" >
 
             <TextView
                 android:layout_width="fill_parent"
@@ -104,15 +115,16 @@
 
         <TableRow
             android:layout_width="fill_parent"
-            android:layout_height="wrap_content" >
-
+            android:layout_height="wrap_content"
+            android:gravity="center" >
+            
             <TextView
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:scrollHorizontally="false"
                 android:ellipsize="none"
                 android:maxLines="2"
+                android:scrollHorizontally="false"
                 android:text="@string/profile_layout_text_weight_loss_goal"
                 android:textStyle="bold" />
 
@@ -126,7 +138,8 @@
 
         <TableRow
             android:layout_width="fill_parent"
-            android:layout_height="wrap_content" >
+            android:layout_height="wrap_content"
+            android:gravity="center" >
 
             <TextView
                 android:layout_width="fill_parent"
@@ -147,7 +160,7 @@
         <TableRow
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:weightSum="10" >
+            android:gravity="center" >
 
             <TextView
                 android:layout_width="fill_parent"
@@ -167,18 +180,19 @@
 
         <TableRow
             android:layout_width="fill_parent"
-            android:layout_height="wrap_content" >
+            android:layout_height="wrap_content"
+            android:gravity="center" >
 
             <Button
                 android:id="@+id/profile_button_calculate_recommended_calories"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_span="2"
-                android:textSize="14dip"
                 android:layout_margin="10dip"
+                android:layout_span="2"
                 android:background="@drawable/green_button"
+                android:text="@string/profile_layout_button_get_recommended_calories"
                 android:textColor="@color/white"
-                android:text="@string/profile_layout_button_get_recommended_calories" />
+                android:textSize="14dip" />
         </TableRow>
     </TableLayout>
 

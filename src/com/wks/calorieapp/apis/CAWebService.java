@@ -11,7 +11,7 @@ import org.json.simple.parser.ParseException;
 
 import android.util.Log;
 
-import com.wks.calorieapp.utils.HttpClient;
+import com.wks.android.utils.HttpClient;
 
 public class CAWebService
 {
@@ -45,7 +45,7 @@ public class CAWebService
 	}
 
 	public static Map< String, List< NutritionInfo >> recognize ( String imageName, float minSimilarity, int maximumHits ) throws IOException
-	{
+	{	
 		Map< String, List< NutritionInfo >> result = new HashMap<String,List<NutritionInfo>>();
 		String url = WEBAPP_URL + SERVLET_RECOGNIZE + "/" + imageName + "/" + minSimilarity + "/" + maximumHits;
 		

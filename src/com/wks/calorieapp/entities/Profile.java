@@ -9,9 +9,11 @@ import android.util.Log;
 
 public class Profile implements JSONWriteable
 {	
-	private static final int MIN_ZERO = 0;
-	private static final int MAX_HEIGHT = 300;
-	private static final int MAX_WEIGHT = 700;
+
+	private static final int MIN_HEIGHT = 100;
+	private static final int MAX_HEIGHT = 250;
+	private static final int MIN_WEIGHT = 20;
+	private static final int MAX_WEIGHT = 100;
 	private static final int MAX_AGE = 100;
 	private static final int MIN_AGE = 13;
 	public static final float MIN_ACTIVITY_FACTOR = 1.200F;
@@ -24,10 +26,10 @@ public class Profile implements JSONWriteable
 
 	private Sex sex = Sex.MALE;
 	private int age = MIN_AGE;
-	private float height = MIN_ZERO;
-	private float weight = MIN_ZERO;
+	private float height = MIN_HEIGHT;
+	private float weight = MIN_WEIGHT;
 	private float activityFactor = MIN_ACTIVITY_FACTOR;
-	private int weightLossGoal = MIN_ZERO;
+	private int weightLossGoal = 0;
 	
 	public int getAge ()
 	{
@@ -36,7 +38,7 @@ public class Profile implements JSONWriteable
 
 	public void setAge ( int age ) throws ProfileException
 	{
-		if(age <= MIN_ZERO || age > MAX_AGE)
+		if(age < MIN_AGE || age > MAX_AGE)
 			throw new ProfileException("Age must be between "+MIN_AGE+" and "+MAX_AGE+".");
 		this.age = age;
 	}
@@ -48,8 +50,8 @@ public class Profile implements JSONWriteable
 
 	public void setHeight ( float height ) throws ProfileException
 	{
-		if(height <= MIN_ZERO || height > MAX_HEIGHT)
-			throw new ProfileException("Height must be between "+MIN_ZERO+" and "+MAX_HEIGHT+".");
+		if(height < MIN_HEIGHT || height > MAX_HEIGHT)
+			throw new ProfileException("Height must be between "+MIN_HEIGHT+" and "+MAX_HEIGHT+" cm.");
 		this.height = height;
 	
 		Log.e("profile","received height: "+height);
@@ -62,8 +64,8 @@ public class Profile implements JSONWriteable
 
 	public void setWeight ( float weight ) throws ProfileException
 	{
-		if(weight <= MIN_ZERO || weight > MAX_WEIGHT)
-			throw new ProfileException("Weight must be between "+MIN_ZERO+" and "+MAX_WEIGHT+".");
+		if(weight <= MIN_WEIGHT || weight > MAX_WEIGHT)
+			throw new ProfileException("Weight must be between "+MIN_WEIGHT+" and "+MAX_WEIGHT+" kg.");
 		this.weight = weight;
 	}
 

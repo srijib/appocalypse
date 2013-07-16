@@ -27,25 +27,28 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ViewSwitcher;
 
+import com.wks.android.utils.FileSystem;
+import com.wks.android.utils.NetworkUtils;
 import com.wks.calorieapp.R;
-import com.wks.calorieapp.adapters.NutritionInfoAdapter;
+import com.wks.calorieapp.adapters.SearchResultsAdapter;
 import com.wks.calorieapp.apis.CAWebService;
 import com.wks.calorieapp.apis.NutritionInfo;
 import com.wks.calorieapp.daos.DatabaseManager;
 import com.wks.calorieapp.daos.JournalDAO;
 import com.wks.calorieapp.entities.ImageEntry;
 import com.wks.calorieapp.entities.JournalEntry;
-import com.wks.calorieapp.utils.FileSystem;
-import com.wks.calorieapp.utils.NetworkUtils;
 
-public class GetCaloriesActivity extends Activity
+public class ResultsActivity extends Activity
 {
-	private static final String TAG = GetCaloriesActivity.class.getCanonicalName ();
+	//DEBUGGING TAG
+	private static final String TAG = ResultsActivity.class.getCanonicalName ();
 
+	//CONSTANTS
 	private static final int MAX_HITS = 10;
 	private static final float MIN_SIMILARITY = 0.1F;
-
-	public static final String KEY_IMAGE = "image";
+	public static final String EXTRAS_PHOTO_NAME = "image";
+	
+	//UI COMPONENTS
 	private RelativeLayout viewLoading;
 	private RelativeLayout viewResults;
 	private ViewSwitcher viewSwitcher;
@@ -63,14 +66,15 @@ public class GetCaloriesActivity extends Activity
 		VIEW_LOADING, VIEW_RESULTS;
 	}
 
-	private enum TextConfirmGist
+	private enum TextConfirmState
 	{
 		DEFAULT, CONFIRM_ADD, ADDED, NOT_ADDED;
 	}
 
+	//MEMBERS
 	private ViewMode viewMode;
-	private String cameraPhotoName;
-	private NutritionInfoAdapter adapter;
+	private String photoName;
+	private SearchResultsAdapter adapter;
 
 	//public String selectedFoodCategory;
 	private NutritionInfo selectedFood;
@@ -86,8 +90,10 @@ public class GetCaloriesActivity extends Activity
 		this.setupView ();
 		this.setupListeners ();
 
+		//Make REST Calls to get upload, identify and get nutrition
+		//information for food in photo.
 		getCaloriesTask = new GetCaloriesTask ();
-		getCaloriesTask.execute ( cameraPhotoName );
+		getCaloriesTask.execute ( photoName );
 	}
 
 	@Override
@@ -106,6 +112,9 @@ public class GetCaloriesActivity extends Activity
 		return true;
 	}
 
+	/**
+	 * - Shows 'Done' and 'No Match' Menu Items once results are being displayed.
+	 */
 	@Override
 	public boolean onPrepareOptionsMenu ( Menu menu )
 	{
@@ -125,18 +134,24 @@ public class GetCaloriesActivity extends Activity
 			this.finish ();
 			return true;
 
-		case R.id.get_calories_menu_done:
-			Calendar calendar = Calendar.getInstance ();
+		//If user clicks on done, redirect to journal entry activity
+		//to see all meals consumed today.
 
-			Intent dateCaloriesIntent = new Intent ( this, DateCaloriesActivity.class );
-			dateCaloriesIntent.putExtra ( DateCaloriesActivity.KEY_DATE, calendar.getTimeInMillis () );
-			startActivity ( dateCaloriesIntent );
+		case R.id.get_calories_menu_done:
+			//get todays daye
+			Calendar calendar = Calendar.getInstance ();
+			
+			Intent journalEntryIntent = new Intent ( this, JournalEntryActivity.class );
+			journalEntryIntent.putExtra ( JournalEntryActivity.EXTRAS_DATE, calendar.getTimeInMillis () );
+			startActivity ( journalEntryIntent );
 
 			return true;
 
+		//If results provided by REST WebService are incorrect
+		// redirect user to search activity so that he can search for food item.
 		case R.id.get_calories_menu_no_match:
 			Intent searchIntent = new Intent ( this, SearchActivity.class );
-			searchIntent.putExtra ( SearchActivity.KEY_IMAGE, this.cameraPhotoName );
+			searchIntent.putExtra ( SearchActivity.EXTRAS_PHOTO_NAME, this.photoName );
 			startActivity ( searchIntent );
 			return true;
 
@@ -151,7 +166,7 @@ public class GetCaloriesActivity extends Activity
 		Bundle extras = this.getIntent ().getExtras ();
 		if ( extras != null )
 		{
-			this.cameraPhotoName = extras.getString ( KEY_IMAGE );
+			this.photoName = extras.getString ( EXTRAS_PHOTO_NAME );
 		}else
 		{
 			Toast.makeText ( this, R.string.get_calories_error_image_not_found, Toast.LENGTH_LONG ).show ();
@@ -194,13 +209,18 @@ public class GetCaloriesActivity extends Activity
 
 	private void setListContents ( Map< String, List< NutritionInfo >> nutritionInfoDictionary )
 	{
+		/*
 		if ( nutritionInfoDictionary != null )
 		{
 			this.adapter = new NutritionInfoAdapter ( this, nutritionInfoDictionary );
 			this.listNutritionInfo.setAdapter ( adapter );
-		}
+		}*/
 	}
 
+	/**Switches between ViewModes performing accompanying UI changes.
+	 * 
+	 * @param view view mode
+	 */
 	private void setViewMode ( ViewMode view )
 	{
 		this.viewMode = view;
@@ -225,16 +245,23 @@ public class GetCaloriesActivity extends Activity
 		}
 	}
 
+	/*
+	 * Toggles visibilty of  loading progressbar and accompanying text.
+	 */
 	private void setLoadingProgressVisible ( boolean visible )
 	{
 		this.progressLoading.setVisibility ( visible ? View.VISIBLE : View.GONE );
 		this.textLoading.setVisibility ( visible ? View.VISIBLE : View.GONE );
 	}
 
-	private void setTextConfirm ( TextConfirmGist gist )
+	/**Sets the text in the textConfirm TextView depending on selectedFood state: ADDED. NOT ADDED, DEFAULT
+	 * 
+	 * @param state
+	 */
+	private void setTextConfirm ( TextConfirmState state )
 	{
 		String confirmMessage = "";
-		switch ( gist )
+		switch ( state )
 		{
 		case ADDED:
 			if ( this.selectedFood != null )
@@ -265,17 +292,21 @@ public class GetCaloriesActivity extends Activity
 		this.textConfirm.setText ( confirmMessage );
 	}
 
+	/**Adds journal Entry to db
+	 * 
+	 * @return id of journal entry
+	 */
 	private long addToJournal ()
 	{
-
+		
 		if ( this.selectedFood == null ) return -1;
 
+		//if image attached, create image entry for image
 		ImageEntry image = null;
-		if ( this.cameraPhotoName != null && !this.cameraPhotoName.isEmpty () )
+		if ( this.photoName != null && !this.photoName.isEmpty () )
 		{
 			image = new ImageEntry ();
-			image.setFileName ( this.cameraPhotoName );
-			
+			image.setFileName ( this.photoName );
 		}
 
 		Calendar cal = Calendar.getInstance ();
@@ -284,7 +315,6 @@ public class GetCaloriesActivity extends Activity
 		journal.setTimestamp ( cal.getTimeInMillis () );
 		journal.setNutritionInfo ( this.selectedFood );
 		journal.setImageEntry ( image );
-		Log.e(TAG,"GCA: "+journal.getImageEntry ());
 		
 		DatabaseManager manager = DatabaseManager.getInstance ( this );
 		SQLiteDatabase db = manager.open ();
@@ -297,49 +327,64 @@ public class GetCaloriesActivity extends Activity
 
 	}
 
+	/*
+	 * - REST Call so that server adds selected food item name as meta data for photo.
+	 */
 	private void linkPhotoWithFoodCategory ()
 	{
-		if ( this.cameraPhotoName != null && this.selectedFood != null/*this.selectedFoodCategory != null && !this.selectedFoodCategory.isEmpty () */)
+		if ( this.photoName != null && this.selectedFood != null/*this.selectedFoodCategory != null && !this.selectedFoodCategory.isEmpty () */)
 		{
 			String [] params =
 			{
-					this.cameraPhotoName, this.selectedFood.getName ()
+					this.photoName, this.selectedFood.getName ()
 			};
 			new LinkImageWithFoodTask ( this ).execute ( params );
 		}
 	}
 
+	/**Callback when a list item is clicked.
+	 * 
+	 * @author Waqqas
+	 *
+	 */
 	class OnListItemClicked implements ExpandableListView.OnChildClickListener
 	{
 
 		@Override
 		public boolean onChildClick ( ExpandableListView parent, View v, int groupPosition, int childPosition, long id )
 		{
-			//GetCaloriesActivity.this.selectedFoodCategory = GetCaloriesActivity.this.adapter.getGroup ( groupPosition ).getFoodCategory ();
-			NutritionInfo info = GetCaloriesActivity.this.adapter.getChild ( groupPosition, childPosition );
+			NutritionInfo info = ResultsActivity.this.adapter.getChild ( groupPosition, childPosition );
 
-			GetCaloriesActivity.this.selectedFood = info;
-			GetCaloriesActivity.this.setTextConfirm ( TextConfirmGist.CONFIRM_ADD );
+			ResultsActivity.this.selectedFood = info;
+			ResultsActivity.this.setTextConfirm ( TextConfirmState.CONFIRM_ADD );
 
 			return true;
 		}
 
 	}
 
+	/**
+	 * Callback when user clicks on 'Add To Journal' button
+	 */
 	class OnAddToJournalClicked implements View.OnClickListener
 	{
 
 		@Override
 		public void onClick ( View v )
 		{
-			boolean success = ( GetCaloriesActivity.this.addToJournal () > 0 );
-			GetCaloriesActivity.this.setTextConfirm ( success ? TextConfirmGist.ADDED : TextConfirmGist.NOT_ADDED );
+			boolean success = ( ResultsActivity.this.addToJournal () > 0 );
+			ResultsActivity.this.setTextConfirm ( success ? TextConfirmState.ADDED : TextConfirmState.NOT_ADDED );
 
-			GetCaloriesActivity.this.linkPhotoWithFoodCategory ();
+			ResultsActivity.this.linkPhotoWithFoodCategory ();
 
 		}
 	}
 
+	/**
+	 * - Performs REST Calls to upload photo, identify food and get nutrition info
+	 * @author Waqqas
+	 *
+	 */
 	class GetCaloriesTask extends AsyncTask< String, String, Map< String, List< NutritionInfo >> >
 	{
 		private String fileName;
@@ -347,7 +392,7 @@ public class GetCaloriesActivity extends Activity
 		@Override
 		protected void onPreExecute ()
 		{
-			if ( !NetworkUtils.isConnectedToNetwork ( GetCaloriesActivity.this ) )
+			if ( !NetworkUtils.isConnectedToNetwork ( ResultsActivity.this ) )
 			{
 				publishProgress ( "No Internet Connection." );
 				this.cancel ( true );
@@ -365,17 +410,19 @@ public class GetCaloriesActivity extends Activity
 					// there should be atleast one list.
 					if ( !entry.getValue ().isEmpty () )
 					{
-						GetCaloriesActivity.this.setListContents ( response );
-						GetCaloriesActivity.this.setViewMode ( ViewMode.VIEW_RESULTS );
+						ResultsActivity.this.setListContents ( response );
+						ResultsActivity.this.setViewMode ( ViewMode.VIEW_RESULTS );
 						return;
 					}
 				}
 
 			}
 
-			Toast.makeText ( GetCaloriesActivity.this, "No Matches Found", Toast.LENGTH_LONG ).show ();
-			Intent searchFoodIntent = new Intent ( GetCaloriesActivity.this, SearchActivity.class );
-			searchFoodIntent.putExtra ( SearchActivity.KEY_IMAGE, cameraPhotoName );
+			//If no response, start searchActivity so that the user can manually search for the item.
+			
+			Toast.makeText ( ResultsActivity.this, "No Matches Found", Toast.LENGTH_LONG ).show ();
+			Intent searchFoodIntent = new Intent ( ResultsActivity.this, SearchActivity.class );
+			searchFoodIntent.putExtra ( SearchActivity.EXTRAS_PHOTO_NAME, photoName );
 			startActivity ( searchFoodIntent );
 
 		}
@@ -383,7 +430,7 @@ public class GetCaloriesActivity extends Activity
 		@Override
 		protected Map< String, List< NutritionInfo >> doInBackground ( String... params )
 		{
-			String picturesDir = FileSystem.getPicturesDirectory ( GetCaloriesActivity.this );
+			String picturesDir = FileSystem.getPicturesDirectory ( ResultsActivity.this );
 			this.fileName = params[0];
 			File imageFile = new File ( picturesDir + this.fileName );
 
@@ -417,7 +464,7 @@ public class GetCaloriesActivity extends Activity
 		@Override
 		protected void onProgressUpdate ( String... values )
 		{
-			GetCaloriesActivity.this.textLoading.setText ( values[0] );
+			ResultsActivity.this.textLoading.setText ( values[0] );
 		}
 
 	}

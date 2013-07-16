@@ -1,4 +1,4 @@
-package com.wks.calorieapp.utils;
+package com.wks.android.utils;
 
 import java.io.BufferedReader;
 import java.io.FileInputStream;

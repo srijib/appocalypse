@@ -2,12 +2,12 @@ package com.wks.calorieapp.activities;
 
 import java.io.IOException;
 
+import com.wks.android.utils.FileUtils;
 import com.wks.calorieapp.R;
 import com.wks.calorieapp.adapters.ActivityLifestyleAdapter;
 import com.wks.calorieapp.entities.Profile;
 import com.wks.calorieapp.entities.Profile.Sex;
 import com.wks.calorieapp.entities.ProfileException;
-import com.wks.calorieapp.utils.FileUtils;
 
 import android.app.ActionBar;
 import android.app.Activity;
@@ -102,7 +102,7 @@ public class ProfileActivity extends Activity
 		switch ( item.getItemId () )
 		{
 		case android.R.id.home:
-			Intent homeIntent = new Intent ( this, HomeActivity.class );
+			Intent homeIntent = new Intent ( this, MainMenuActivity.class );
 			homeIntent.addFlags ( Intent.FLAG_ACTIVITY_CLEAR_TOP );
 			startActivity ( homeIntent );
 			return true;
@@ -119,7 +119,7 @@ public class ProfileActivity extends Activity
 				CalorieApplication app = ( CalorieApplication ) this.getApplication ();
 				app.setProfile ( profile );
 
-				Intent homeIntent2 = new Intent ( this, HomeActivity.class );
+				Intent homeIntent2 = new Intent ( this, MainMenuActivity.class );
 				homeIntent2.addFlags ( Intent.FLAG_ACTIVITY_CLEAR_TOP );
 				this.startActivity ( homeIntent2 );
 				return true;

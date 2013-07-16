@@ -18,21 +18,20 @@ import android.view.ViewGroup;
 import android.widget.BaseExpandableListAdapter;
 import android.widget.TextView;
 
-public class NutritionInfoAdapter extends BaseExpandableListAdapter implements Observer
+public class SearchResultsAdapter extends BaseExpandableListAdapter implements Observer
 {
 	private static final String FORMAT_CALORIE = "%.2f cal";
 	private List< CategoryItem > foodNameList;
 	private LayoutInflater inflater;
-
-	public NutritionInfoAdapter(Context context)
-	{
-		this ( context, null );
-	}
+	private SearchResultsModel model;
 	
-	public NutritionInfoAdapter ( Context context, Map< String, List< NutritionInfo>> items )
+	
+	public SearchResultsAdapter ( Context context,  SearchResultsModel model )
 	{
 		this.inflater = LayoutInflater.from ( context );
-		this.setItems ( items );
+		this.model = model;
+		this.model.addObserver ( this );
+		this.setItems ( model.getSearchResults () );
 	}
 	
 	public void setItems(Map<String,List<NutritionInfo>> items)

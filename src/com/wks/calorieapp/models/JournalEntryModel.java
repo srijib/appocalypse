@@ -6,18 +6,14 @@ import java.util.Observable;
 
 import com.wks.calorieapp.entities.JournalEntry;
 
-import android.content.Context;
-
-public class DateCaloriesModel extends Observable
+public class JournalEntryModel extends Observable
 {
 
 	private List< JournalEntry > mealEntries;
 
-	public DateCaloriesModel ( Context context )
+	public JournalEntryModel ()
 	{
-
 		this.mealEntries = new ArrayList< JournalEntry > ();
-
 	}
 
 	public void setMealEntries ( List< JournalEntry > mealEntries )
@@ -26,12 +22,10 @@ public class DateCaloriesModel extends Observable
 		this.setChanged ();
 		this.notifyObservers ( this );
 	}
-	
-	public List< JournalEntry > getMealEntries ()
+
+	public List< JournalEntry > getJournalEntries ()
 	{
 		return mealEntries;
 	}
 
-	
-	
 }

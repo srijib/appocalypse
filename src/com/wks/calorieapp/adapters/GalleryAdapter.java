@@ -3,7 +3,7 @@ package com.wks.calorieapp.adapters;
 import java.io.File;
 import java.util.List;
 
-import com.wks.calorieapp.utils.AndroidBitmap;
+import com.wks.android.utils.BitmapUtils;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -69,8 +69,8 @@ public class GalleryAdapter extends BaseAdapter
 
 		File file = this.getItem ( position );
 
-		Bitmap bitmap = AndroidBitmap.getThumbnailFromFile ( context, file, imageSize, imageSize );
-		bitmap = AndroidBitmap.rotate ( bitmap, 90 );
+		Bitmap bitmap = BitmapUtils.getThumbnailFromFile ( context, file, imageSize, imageSize );
+		bitmap = BitmapUtils.rotate ( bitmap, 90 );
 		if ( bitmap != null )
 		{
 			resultView.setImageBitmap ( bitmap );

@@ -13,13 +13,13 @@ import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-public class HomeMenuAdapter extends BaseAdapter
+public class MainMenuAdapter extends BaseAdapter
 {
 	private Context context;
 	private List< Activity > items;
 	private LayoutInflater inflater;
 
-	public HomeMenuAdapter ( Context context )
+	public MainMenuAdapter ( Context context )
 	{
 		this.context = context;
 		this.inflater = LayoutInflater.from ( context );
@@ -56,7 +56,7 @@ public class HomeMenuAdapter extends BaseAdapter
 
 		if ( resultView == null )
 		{
-			resultView = inflater.inflate ( R.layout.activity_home_list_item, null );
+			resultView = inflater.inflate ( R.layout.activity_main_menu_list_item, null );
 
 			holder = new ViewHolder ();
 			holder.image = ( ImageView ) resultView.findViewById ( R.id.list_item_image );

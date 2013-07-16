@@ -10,7 +10,6 @@ import java.util.Observer;
 
 import com.wks.calorieapp.R;
 import com.wks.calorieapp.entities.CalendarEvent;
-import com.wks.calorieapp.entities.Profile;
 import com.wks.calorieapp.models.JournalModel;
 
 import android.content.Context;
@@ -31,56 +30,45 @@ public class JournalAdapter extends BaseAdapter implements Observer
 	private static final int WEEKS_PER_MONTH = 6;// do not change
 	private static final String DATE_FORMAT = "yyyy-MM-dd";
 
-
 	private Context context;
-	private Profile profile;
+	private JournalModel journalModel;
 	private Calendar calendar;
 	private int height;
 	private Map< String, CalendarEvent > events;
 	private SimpleDateFormat formatter;
 
-	public JournalAdapter ( Context context,Profile profile )
-	{
-		this ( context, profile,null, null );
-	}
-
-	public JournalAdapter ( Context context,Profile profile, Calendar calendar )
-	{
-		this ( context, profile, calendar, null );
-	}
-
-	public JournalAdapter ( Context context,Profile profile, Calendar calendar, Map< Calendar, CalendarEvent > events )
+	public JournalAdapter ( Context context, Calendar calendar, JournalModel model )
 	{
 		if ( context == null ) throw new IllegalStateException ( "Application context must not be null" );
-		if ( profile == null)  throw new IllegalStateException (  "Profile must not ne null");
-		
+		if ( model == null ) throw new IllegalStateException ( "Model must not be null" );
+
 		this.context = context;
-		this.profile = profile;
-		
+		this.journalModel = model;
+		this.journalModel.addObserver ( this );
 
 		this.calendar = calendar == null ? Calendar.getInstance () : ( Calendar ) calendar.clone ();
-		this.formatter = new SimpleDateFormat(DATE_FORMAT);
-		
+		this.formatter = new SimpleDateFormat ( DATE_FORMAT );
+
 		DisplayMetrics metrics = new DisplayMetrics ();
 		WindowManager manager = ( WindowManager ) context.getSystemService ( Context.WINDOW_SERVICE );
 		manager.getDefaultDisplay ().getMetrics ( metrics );
 		this.height = metrics.heightPixels / WEEKS_PER_MONTH;
 
-		this.setItems ( events );
+		this.setItems ( this.journalModel.getCalorieCalendar () );
 	}
 
 	public void setItems ( Map< Calendar, CalendarEvent > events )
 	{
-	
+
 		if ( events != null )
 		{
 			this.events = new HashMap< String, CalendarEvent > ();
-			
+
 			for ( Entry< Calendar, CalendarEvent > entry : events.entrySet () )
 			{
 				String date = formatter.format ( entry.getKey ().getTimeInMillis () );
 				this.events.put ( date, entry.getValue () );
-				
+
 			}
 
 			this.notifyDataSetChanged ();
@@ -117,7 +105,7 @@ public class JournalAdapter extends BaseAdapter implements Observer
 			Calendar cal = ( Calendar ) this.calendar.clone ();
 			cal.set ( Calendar.DAY_OF_MONTH, date );
 			String currentDate = formatter.format ( cal.getTimeInMillis () );
-			
+
 			return this.events.get ( currentDate );
 
 		}
@@ -142,9 +130,9 @@ public class JournalAdapter extends BaseAdapter implements Observer
 		{
 			inflater = LayoutInflater.from ( context );
 			resultView = inflater.inflate ( R.layout.activity_journal_calendar_cell, null );
-			
-			holder = new ViewHolder(resultView);
-			
+
+			holder = new ViewHolder ( resultView );
+
 			resultView.setMinimumHeight ( this.height );
 			resultView.setTag ( holder );
 		}else
@@ -153,7 +141,7 @@ public class JournalAdapter extends BaseAdapter implements Observer
 		}
 
 		holder.clear ();
-		
+
 		int date = this.getDateAtPosition ( position );
 		if ( date != -1 )
 		{
@@ -164,7 +152,7 @@ public class JournalAdapter extends BaseAdapter implements Observer
 				Calendar currentDay = ( Calendar ) this.calendar.clone ();
 				currentDay.set ( Calendar.DAY_OF_MONTH, date );
 				String eventDay = formatter.format ( currentDay.getTimeInMillis () );
-				
+
 				CalendarEvent event = events.get ( eventDay );
 				if ( event != null )
 				{
@@ -220,92 +208,67 @@ public class JournalAdapter extends BaseAdapter implements Observer
 		return i;
 	}
 
-	
 	public long getDate ()
 	{
 		return this.calendar.getTimeInMillis ();
 	}
-	
-	//update calendar dates
+
+	// update calendar dates
 	public void setDate ( Calendar calendar )
 	{
 		this.calendar = ( Calendar ) calendar.clone ();
 		this.notifyDataSetChanged ();
 	}
 
-	//update calendar events
+	// update calendar events
 	@Override
 	public void update ( Observable observable, Object data )
 	{
-		JournalModel model = (JournalModel) data;
-		Map<Calendar,Float> calorieCalendar = model.getCalorieCalendar ();
-		
-		if(calorieCalendar != null)
+		JournalModel model = ( JournalModel ) data;
+		Map< Calendar, CalendarEvent > calorieCalendar = model.getCalorieCalendar ();
+
+		if ( calorieCalendar != null )
 		{
-			Map<Calendar,CalendarEvent> calendarEvents = createEventsForCalendar(calorieCalendar);
-			
-			this.setItems ( calendarEvents );
+			this.setItems ( calorieCalendar );
 			this.notifyDataSetChanged ();
 		}
-		
+
 	}
 
-	private Map<Calendar,CalendarEvent> createEventsForCalendar(Map<Calendar,Float> caloriesForMonth)
-	{
-		Map< Calendar, CalendarEvent > calorieCalendar = new HashMap< Calendar, CalendarEvent > ();
-
-		for ( Entry< Calendar, Float > caloriesForDate : caloriesForMonth.entrySet () )
-		{
-			float caloriesConsumed = caloriesForDate.getValue ();
-
-			CalendarEvent event = new CalendarEvent ();
-			event.setDescription ( String.format ( "%.0f cal", caloriesConsumed ) );
-
-			int extraCalories = ( int ) ( caloriesConsumed - this.profile.getRecommendedDailyCalories () );
-			event.setBackgroundColor ( context.getResources ().getColor (
-					extraCalories <= 0 ? R.color.journal_calories_consumed_good : R.color.journal_calories_consumed_bad ) );
-
-			calorieCalendar.put ( caloriesForDate.getKey (), event );
-
-		}
-		
-		return calorieCalendar;
-	}
-	
 	private static class ViewHolder
 	{
 		private LinearLayout cellCalendar;
 		private TextView textDate;
 		private ImageView image;
 		private TextView textDescription;
-		
-		public ViewHolder(View view)
+
+		public ViewHolder ( View view )
 		{
 			this.cellCalendar = ( LinearLayout ) view.findViewById ( R.id.calendar_cell_layout );
 			this.textDate = ( TextView ) view.findViewById ( R.id.calendar_cell_date );
 			this.image = ( ImageView ) view.findViewById ( R.id.calendar_cell_image );
 			this.textDescription = ( TextView ) view.findViewById ( R.id.calendar_cell_description );
-			
+
 		}
-		
-		public void clear()
+
+		public void clear ()
 		{
 			this.cellCalendar.setBackgroundColor ( 0 );
 			this.textDate.setText ( "" );
 			this.image.setImageDrawable ( null );
 			this.textDescription.setText ( "" );
 		}
-		
-		public void setTextDate(String date)
+
+		public void setTextDate ( String date )
 		{
 			this.textDate.setText ( date );
 		}
-		
-		public void setCalendarEvent(CalendarEvent event)
+
+		public void setCalendarEvent ( CalendarEvent event )
 		{
 			this.image.setImageDrawable ( event.getDrawable () );
 			this.textDescription.setText ( event.getDescription () );
-			this.cellCalendar.setBackgroundColor ( event.getBackgroundColor() );
+			this.cellCalendar.setBackgroundColor ( event.getBackgroundColor () );
 		}
 	}
 

@@ -1,4 +1,4 @@
-package com.wks.calorieapp.utils;
+package com.wks.android.utils;
 
 //http://developer.android.com/training/displaying-bitmaps/load-bitmap.html
 
@@ -8,7 +8,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
 
-public class AndroidBitmap
+public class BitmapUtils
 {
 	public static Bitmap getThumbnailFromFile(Context context, File file, int thumbnailWidth, int thumbnailHeight)
 	{

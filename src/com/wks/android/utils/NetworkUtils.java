@@ -1,4 +1,4 @@
-package com.wks.calorieapp.utils;
+package com.wks.android.utils;
 
 import android.content.Context;
 import android.net.ConnectivityManager;

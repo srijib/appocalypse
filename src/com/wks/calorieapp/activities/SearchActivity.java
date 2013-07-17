@@ -16,7 +16,6 @@ import com.wks.calorieapp.apis.CAWebService;
 import com.wks.calorieapp.apis.NutritionInfo;
 import com.wks.calorieapp.daos.DataAccessObject;
 import com.wks.calorieapp.daos.DatabaseManager;
-import com.wks.calorieapp.daos.ImageDAO;
 import com.wks.calorieapp.daos.JournalDAO;
 import com.wks.calorieapp.entities.ImageEntry;
 import com.wks.calorieapp.entities.JournalEntry;
@@ -47,10 +46,13 @@ import android.widget.ViewSwitcher;
 
 public class SearchActivity extends Activity implements Observer
 {
+	//DEBUGGING
 	private static final String TAG = SearchActivity.class.getCanonicalName ();
 
+	//EXTRAS
 	public static final String EXTRAS_PHOTO_NAME = "image";
 
+	//UI Elements
 	private EditText editSearch;
 	private TextView textConfirm;
 	private ImageButton buttonAddToJournal;
@@ -59,24 +61,26 @@ public class SearchActivity extends Activity implements Observer
 	private RelativeLayout viewResults;
 	private TextView textLoading;
 	private ProgressBar progressLoading;
+	private ExpandableListView listNutritionInfo;
 
+	//Members
 	private String cameraPhotoName;
 	private NutritionInfo selectedFoodInfo;
 	private SearchResultsAdapter adapter;
-	private ExpandableListView listNutritionInfo;
 	private SearchResultsModel searchResultsModel;
-
+	private ViewMode viewMode;
+	
 	private enum ViewMode
 	{
 		VIEW_IDLE, VIEW_LOADING, VIEW_RESULTS
 	};
 
-	private enum TextConfirmGist
+	private enum TextConfirmState
 	{
 		DEFAULT, CONFIRM_ADD, ADDED, NOT_ADDED;
 	}
 
-	private ViewMode viewMode;
+	
 
 	@Override
 	protected void onCreate ( Bundle savedInstanceState )
@@ -88,7 +92,7 @@ public class SearchActivity extends Activity implements Observer
 		if ( extras != null )
 		{
 			this.cameraPhotoName = extras.getString ( EXTRAS_PHOTO_NAME );
-			Log.e ( "YO!!!", "camera photo: " + this.cameraPhotoName );
+			Log.i(TAG,"CameraPhotoName: "+this.cameraPhotoName);
 		}
 
 		this.searchResultsModel = new SearchResultsModel ();
@@ -97,11 +101,6 @@ public class SearchActivity extends Activity implements Observer
 		this.setupView ();
 		this.setupListeners ();
 
-		DatabaseManager manager = DatabaseManager.getInstance ( this );
-		SQLiteDatabase db = manager.open ();
-		ImageDAO images = new ImageDAO(db);
-		Log.e(TAG,images.read ().toString ());
-		db.close ();
 	}
 
 	@Override
@@ -218,10 +217,10 @@ public class SearchActivity extends Activity implements Observer
 	}
 
 	// TODO Refactor <- It's android and
-	private void setTextConfirm ( TextConfirmGist gist )
+	private void setTextConfirm ( TextConfirmState state )
 	{
 		String confirmMessage = "";
-		switch ( gist )
+		switch ( state )
 		{
 		case ADDED:
 			if ( this.selectedFoodInfo != null )
@@ -251,19 +250,7 @@ public class SearchActivity extends Activity implements Observer
 
 		this.textConfirm.setText ( confirmMessage );
 	}
-
-	private void linkPhotoWithSearchTerm ()
-	{
-		if ( this.cameraPhotoName != null && this.selectedFoodInfo != null )
-		{
-			String [] params =
-			{
-					this.cameraPhotoName, this.selectedFoodInfo.getName ()
-			};
-			new LinkImageWithFoodTask ( this ).execute ( params );
-		}
-	}
-
+	
 	private long addToJournal ()
 	{
 
@@ -295,6 +282,32 @@ public class SearchActivity extends Activity implements Observer
 
 	}
 
+	private void linkPhotoWithGenericFoodName ()
+	{
+		String genericFoodName = estimateGenericFoodNameFromSearchTerm();
+		if ( this.cameraPhotoName != null)
+		{
+			String [] params =
+			{
+					this.cameraPhotoName, genericFoodName
+			};
+			new LinkImageWithFoodTask ( this ).execute ( params );
+		}
+	}
+
+	private String estimateGenericFoodNameFromSearchTerm()
+	{
+		String searchTerm = this.searchResultsModel.getSearchTerm ();
+		String selectedFood = this.selectedFoodInfo.getName ();
+		int beginning = selectedFood.toLowerCase ().indexOf ( searchTerm.toLowerCase () );
+		int end = selectedFood.indexOf ( " ", beginning );
+		if(beginning != -1 && end != -1)
+		{
+			return  selectedFood.substring ( beginning,end );
+		}else
+			return selectedFood;
+	}
+	
 	@Override
 	public void update ( Observable arg0, Object arg1 )
 	{
@@ -315,7 +328,7 @@ public class SearchActivity extends Activity implements Observer
 				{
 					// clear previous data
 					SearchActivity.this.selectedFoodInfo = null;
-					SearchActivity.this.setTextConfirm ( TextConfirmGist.DEFAULT );
+					SearchActivity.this.setTextConfirm ( TextConfirmState.DEFAULT );
 
 					KeyboardUtils.hideKeyboard ( SearchActivity.this.editSearch );
 
@@ -341,7 +354,7 @@ public class SearchActivity extends Activity implements Observer
 			NutritionInfo info = SearchActivity.this.adapter.getChild ( groupPosition, childPosition );
 
 			SearchActivity.this.selectedFoodInfo = info;
-			SearchActivity.this.setTextConfirm ( TextConfirmGist.CONFIRM_ADD );
+			SearchActivity.this.setTextConfirm ( TextConfirmState.CONFIRM_ADD );
 
 			return true;
 		}
@@ -416,9 +429,9 @@ public class SearchActivity extends Activity implements Observer
 		public void onClick ( View v )
 		{
 			boolean success = ( SearchActivity.this.addToJournal () > 0 );
-			SearchActivity.this.setTextConfirm ( success ? TextConfirmGist.ADDED : TextConfirmGist.NOT_ADDED );
+			SearchActivity.this.setTextConfirm ( success ? TextConfirmState.ADDED : TextConfirmState.NOT_ADDED );
 
-			SearchActivity.this.linkPhotoWithSearchTerm ();
+			SearchActivity.this.linkPhotoWithGenericFoodName ();
 
 		}
 	}

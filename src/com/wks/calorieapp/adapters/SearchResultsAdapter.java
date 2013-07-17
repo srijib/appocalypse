@@ -21,7 +21,7 @@ import android.widget.TextView;
 public class SearchResultsAdapter extends BaseExpandableListAdapter implements Observer
 {
 	private static final String FORMAT_CALORIE = "%.2f cal";
-	private List< CategoryItem > foodNameList;
+	private List< GenericFoodItem > genericFoodList;
 	private LayoutInflater inflater;
 	private SearchResultsModel model;
 	
@@ -38,23 +38,23 @@ public class SearchResultsAdapter extends BaseExpandableListAdapter implements O
 	{	
 		if(items == null) return;
 		Log.e("WKS","Setting Items" );
-		this.foodNameList = new ArrayList< CategoryItem > ();
+		this.genericFoodList = new ArrayList< GenericFoodItem > ();
 		for ( Entry< String, List< NutritionInfo >> e : items.entrySet () )
 		{
-			CategoryItem food = new CategoryItem ( e.getKey () );
+			GenericFoodItem food = new GenericFoodItem ( e.getKey () );
 			List< NutritionInfo > nutrinfoList = e.getValue ();
 
 			for ( NutritionInfo info : nutrinfoList )
 				food.getNutritionInfoList ().add ( info );
 
-			this.foodNameList.add ( food );
+			this.genericFoodList.add ( food );
 		}
 		this.notifyDataSetChanged ();
 	}
 
-	public CategoryItem getGroup ( int groupPosition )
+	public GenericFoodItem getGroup ( int groupPosition )
 	{
-		return foodNameList == null? null : foodNameList.get ( groupPosition );
+		return genericFoodList == null? null : genericFoodList.get ( groupPosition );
 	}
 
 	@Override
@@ -66,7 +66,7 @@ public class SearchResultsAdapter extends BaseExpandableListAdapter implements O
 	@Override
 	public int getGroupCount ()
 	{
-		return foodNameList == null? 0 : foodNameList.size ();
+		return genericFoodList == null? 0 : genericFoodList.size ();
 	}
 
 	@Override
@@ -86,12 +86,12 @@ public class SearchResultsAdapter extends BaseExpandableListAdapter implements O
 			holder = ( ParentViewHolder ) resultView.getTag ();
 		}
 
-		CategoryItem foodCategory = getGroup ( groupPosition );
+		GenericFoodItem foodCategory = getGroup ( groupPosition );
 		// holder.textFoodName.setTypeface ( CalorieApplication.getFont (
 		// Font.CANTARELL_REGULAR ) );
 		if(foodCategory != null)
 		{
-			holder.textFoodCategory.setText ( foodCategory == null? "null" : foodCategory.getFoodCategory () );
+			holder.textFoodCategory.setText ( foodCategory == null? "null" : foodCategory.getGenericFoodName () );
 		}
 		
 		return resultView;
@@ -100,7 +100,7 @@ public class SearchResultsAdapter extends BaseExpandableListAdapter implements O
 	@Override
 	public NutritionInfo getChild ( int groupPosition, int childPosition )
 	{
-		return foodNameList == null? null : foodNameList.get ( groupPosition ).getNutritionInfoList ().get ( childPosition );
+		return genericFoodList == null? null : genericFoodList.get ( groupPosition ).getNutritionInfoList ().get ( childPosition );
 	}
 
 	@Override
@@ -112,7 +112,7 @@ public class SearchResultsAdapter extends BaseExpandableListAdapter implements O
 	@Override
 	public int getChildrenCount ( int groupPosition )
 	{
-		return foodNameList == null? 0 : foodNameList.get ( groupPosition ).getNutritionInfoList ().size ();
+		return genericFoodList == null? 0 : genericFoodList.get ( groupPosition ).getNutritionInfoList ().size ();
 	}
 
 	@Override
@@ -166,20 +166,20 @@ public class SearchResultsAdapter extends BaseExpandableListAdapter implements O
 		TextView textCalories;
 	}
 
-	private class CategoryItem
+	public class GenericFoodItem
 	{
-		private String foodCategory = "";
+		private String genericFoodName = "";
 		private List< NutritionInfo > nutritionInfoList;
 
-		public CategoryItem ( String foodCategory )
+		public GenericFoodItem ( String genericFoodName )
 		{
-			this.foodCategory = foodCategory;
+			this.genericFoodName = genericFoodName;
 			this.nutritionInfoList = new ArrayList< NutritionInfo > ();
 		}
 
-		public String getFoodCategory ()
+		public String getGenericFoodName ()
 		{
-			return foodCategory;
+			return genericFoodName;
 		}
 
 		public List< NutritionInfo > getNutritionInfoList ()

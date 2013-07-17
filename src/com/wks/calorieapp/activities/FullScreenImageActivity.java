@@ -1,23 +1,12 @@
 package com.wks.calorieapp.activities;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-
 import com.wks.android.utils.BitmapUtils;
-import com.wks.android.utils.DisplayUtils;
 import com.wks.android.utils.FileSystem;
 import com.wks.calorieapp.R;
-import com.wks.calorieapp.adapters.IdentifyResultsAdapter;
-import com.wks.calorieapp.apis.NutritionInfo;
 import com.wks.calorieapp.models.IdentifyResultsModel;
 
-import android.animation.AnimatorInflater;
-import android.animation.AnimatorSet;
 import android.app.ActionBar;
-import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -26,15 +15,11 @@ import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.View;
-import android.view.ViewGroup.LayoutParams;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.ShareActionProvider;
 import android.widget.TextView;
@@ -58,7 +43,7 @@ public class FullScreenImageActivity extends IdentifyTaskActivity
 	// private ListView listviewResults;
 	// private RelativeLayout.LayoutParams params;
 
-	private String photoName;
+	//private String photoName;
 
 	// private IdentifyResultsAdapter identifyResultsAdapter;
 	// private IdentifyResultsModel identifyResultsModel;
@@ -74,14 +59,14 @@ public class FullScreenImageActivity extends IdentifyTaskActivity
 		Bundle extras = this.getIntent ().getExtras ();
 		if ( extras != null && extras.getString ( EXTRAS_PHOTO_NAME ) != null )
 		{
-			this.photoName = extras.getString ( EXTRAS_PHOTO_NAME );
+			super.photoName = extras.getString ( EXTRAS_PHOTO_NAME );
 		}else
 		{
 			Toast.makeText ( this, R.string.full_screen_image_not_found, Toast.LENGTH_LONG ).show ();
 			this.finish ();
 		}
 
-		this.identifyResultsModel = new IdentifyResultsModel ();
+		super.identifyResultsModel = new IdentifyResultsModel ();
 
 		this.setupActionBar ();
 		this.setupView ();
@@ -151,11 +136,11 @@ public class FullScreenImageActivity extends IdentifyTaskActivity
 	private void setupView ()
 	{
 		this.layout = ( RelativeLayout ) this.findViewById ( R.id.full_screen_layout );
-
 		this.imageView = ( ImageView ) this.findViewById ( R.id.full_screen_imageview );
-		this.layoutProgress = ( LinearLayout ) this.findViewById ( R.id.full_screen_layout_progress );
-		this.textProgress = ( TextView ) this.findViewById ( R.id.full_screen_text_progress );
-
+		
+		super.layoutProgress = ( LinearLayout ) this.findViewById ( R.id.full_screen_layout_progress );
+		super.textProgress = ( TextView ) this.findViewById ( R.id.full_screen_text_progress );
+		/*
 		LayoutInflater inflater = LayoutInflater.from ( this );
 		this.viewResults = inflater.inflate ( R.layout.identify_list_results, null );
 		this.listviewResults = ( ListView ) this.viewResults.findViewById ( R.id.identify_listview_results );
@@ -165,13 +150,13 @@ public class FullScreenImageActivity extends IdentifyTaskActivity
 
 		this.params = new RelativeLayout.LayoutParams ( DisplayUtils.getScreenWidth ( this ) / 3, LayoutParams.WRAP_CONTENT );
 		this.params.addRule ( RelativeLayout.CENTER_IN_PARENT );
+		*/
 	}
 
 	protected void setViewMode ( ViewMode mode )
 	{
 		super.setViewMode (mode);
-		
-		this.viewMode = mode;
+
 		this.invalidateOptionsMenu ();
 	}
 
@@ -190,7 +175,7 @@ public class FullScreenImageActivity extends IdentifyTaskActivity
 	{
 		String [] params =
 		{
-			this.photoName
+			super.photoName
 		};
 		new LoadPhotoTask ().execute ( params );
 	}
@@ -247,14 +232,14 @@ public class FullScreenImageActivity extends IdentifyTaskActivity
 	}
 
 	// IdentifyTaskInvoker
-
+	
 	private void doIdentifyTask ()
 	{
-		this.setViewMode ( ViewMode.LOADING );
+		super.setViewMode ( ViewMode.LOADING );
 		new IdentifyTask ( this ).execute ( this.photoName );
 	}
 
-
+/*
 	@Override
 	public void onProgressUpdate ( String [] values )
 	{
@@ -294,5 +279,5 @@ public class FullScreenImageActivity extends IdentifyTaskActivity
 	public void onCancelled ()
 	{
 		this.setViewMode ( ViewMode.IDLE );
-	}
+	}*/
 }

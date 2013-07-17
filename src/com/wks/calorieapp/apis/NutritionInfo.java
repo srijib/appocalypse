@@ -7,8 +7,9 @@ package com.wks.calorieapp.apis;
  * @author Waqqas
  * 
  */
-public class NutritionInfo 
+public class NutritionInfo
 {
+	
 	private long id;
 	private String name;
 	private String type;
@@ -23,7 +24,6 @@ public class NutritionInfo
 
 	}
 
-	
 	public long getId ()
 	{
 		return id;
@@ -93,18 +93,13 @@ public class NutritionInfo
 	{
 		this.gramProteinsPer100g = proteinsPer100g;
 	}
-	/*
-	public void setDescription ( String description )
-	{
-		this.description = description;
-		parseDescription ();
-	}
 
-	public String getDescription ()
-	{
-		return description;
-	}
-	*/
+	/*
+	 * public void setDescription ( String description ) { this.description =
+	 * description; parseDescription (); }
+	 * 
+	 * public String getDescription () { return description; }
+	 */
 	public String getUrl ()
 	{
 		return url;
@@ -114,11 +109,13 @@ public class NutritionInfo
 	{
 		this.url = url;
 	}
-	
+
 	@Override
 	public String toString ()
 	{
 		return String.format ( "[id: %d,name: %s,calories: %f]",
 				id, name, kiloCaloriesPer100g);
+
 	}
+
 }

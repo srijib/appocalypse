@@ -1,6 +1,7 @@
 package com.wks.calorieapp.activities;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -12,6 +13,8 @@ import android.content.Intent;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
@@ -24,6 +27,7 @@ import com.wks.calorieapp.R;
 import com.wks.calorieapp.adapters.IdentifyResultsAdapter;
 import com.wks.calorieapp.apis.NutritionInfo;
 import com.wks.calorieapp.models.IdentifyResultsModel;
+import com.wks.calorieapp.models.SearchResultsModel;
 
 public class IdentifyTaskActivity extends Activity implements IdentifyTaskInvoker
 {
@@ -35,7 +39,10 @@ public class IdentifyTaskActivity extends Activity implements IdentifyTaskInvoke
 
 	protected View viewResults;
 	protected ListView listviewResults;
+	protected Button buttonNoMatch;
+	
 	protected RelativeLayout.LayoutParams params;
+	private SearchResultsModel searchResultsModel;
 	protected IdentifyResultsModel identifyResultsModel;
 	protected IdentifyResultsAdapter identifyResultsAdpater;
 
@@ -44,11 +51,12 @@ public class IdentifyTaskActivity extends Activity implements IdentifyTaskInvoke
 		IDLE, LOADING, RESULTS
 	};
 
-	@SuppressWarnings ( "unused" )
+
 	protected ViewMode viewMode = ViewMode.IDLE;
 
 	protected void setViewMode ( ViewMode mode )
 	{
+		this.viewMode = mode;
 		this.layoutProgress.setVisibility ( mode == ViewMode.LOADING ? View.VISIBLE : View.GONE );
 	}
 
@@ -73,10 +81,15 @@ public class IdentifyTaskActivity extends Activity implements IdentifyTaskInvoke
 	{
 		LayoutInflater inflater = LayoutInflater.from ( this );
 		this.viewResults = inflater.inflate ( R.layout.identify_list_results, null );
+		this.buttonNoMatch = (Button) this.viewResults.findViewById ( R.id.identify_button_no_match );
 		this.listviewResults = ( ListView ) this.viewResults.findViewById ( R.id.identify_listview_results );
-
+		
 		this.identifyResultsAdpater = new IdentifyResultsAdapter ( this, this.identifyResultsModel );
 		this.listviewResults.setAdapter ( this.identifyResultsAdpater );
+		
+		this.buttonNoMatch.setOnClickListener ( new OnButtonNoMatchClicked() );
+		this.listviewResults.setOnItemClickListener ( new OnListViewResultsItemClicked() );
+		
 
 		this.params = new RelativeLayout.LayoutParams ( DisplayUtils.getScreenWidth ( this ) / 3, LayoutParams.WRAP_CONTENT );
 		this.params.addRule ( RelativeLayout.CENTER_IN_PARENT );
@@ -101,6 +114,9 @@ public class IdentifyTaskActivity extends Activity implements IdentifyTaskInvoke
 				// there should be atleast one list.
 				if ( !entry.getValue ().isEmpty () )
 				{
+					this.searchResultsModel = new SearchResultsModel();
+					this.searchResultsModel.setSearchResults ( response );
+					
 					this.identifyResultsModel.setPossibleMatchesList ( new ArrayList< String > ( response.keySet () ) );
 					this.showResults ();
 					return;
@@ -113,9 +129,7 @@ public class IdentifyTaskActivity extends Activity implements IdentifyTaskInvoke
 		// search for the item.
 
 		Toast.makeText ( this, "No Matches Found", Toast.LENGTH_LONG ).show ();
-		Intent searchFoodIntent = new Intent ( this, SearchActivity.class );
-		searchFoodIntent.putExtra ( SearchActivity.EXTRAS_PHOTO_NAME, photoName );
-		startActivity ( searchFoodIntent );
+		this.startSearchActivity();
 	}
 
 	@Override
@@ -132,4 +146,39 @@ public class IdentifyTaskActivity extends Activity implements IdentifyTaskInvoke
 
 	}
 
+	private void startSearchActivity()
+	{
+		Intent searchFoodIntent = new Intent ( this, SearchActivity.class );
+		searchFoodIntent.putExtra ( SearchActivity.EXTRAS_PHOTO_NAME, photoName );
+		startActivity ( searchFoodIntent );
+	}
+	
+	class OnListViewResultsItemClicked implements AdapterView.OnItemClickListener
+	{
+
+		@Override
+		public void onItemClick ( AdapterView< ? > parent, View view, int position, long id )
+		{
+			String selectedFoodName = IdentifyTaskActivity.this.identifyResultsAdpater.getItem ( position );
+			Map<String,List<NutritionInfo>> selectedFoodInfo = new HashMap<String,List<NutritionInfo>>();
+			selectedFoodInfo.put ( selectedFoodName, IdentifyTaskActivity.this.searchResultsModel.getSearchResults ().get ( selectedFoodName ) );
+			
+			((CalorieApplication ) IdentifyTaskActivity.this.getApplication ()).setIdentifyResults ( selectedFoodInfo );
+			
+			Intent resultsIntent = new Intent(IdentifyTaskActivity.this,ResultsActivity.class);
+			
+			resultsIntent.putExtra ( ResultsActivity.EXTRAS_PHOTO_NAME,  photoName);
+			startActivity(resultsIntent);
+		}
+		
+	}
+	
+	class OnButtonNoMatchClicked implements View.OnClickListener
+	{
+		@Override
+		public void onClick ( View v )
+		{
+			IdentifyTaskActivity.this.startSearchActivity ();
+		}	
+	}
 }

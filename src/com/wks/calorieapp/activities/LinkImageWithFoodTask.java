@@ -1,6 +1,7 @@
 package com.wks.calorieapp.activities;
 
 import java.io.IOException;
+import java.net.URLEncoder;
 
 import android.content.Context;
 import android.os.AsyncTask;
@@ -38,7 +39,7 @@ public class LinkImageWithFoodTask extends AsyncTask< String, Void, Boolean >
 			try
 			{
 				String imageName = params[0];
-				String foodName = params[1];
+				String foodName = URLEncoder.encode ( params[1], "UTF-8" );
 
 				Log.e ( TAG, "Linking " + foodName + " with " + imageName );
 

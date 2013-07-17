@@ -7,7 +7,6 @@ import java.util.Observable;
 
 import com.wks.calorieapp.entities.CalendarEvent;
 
-import android.content.Context;
 
 public class JournalModel extends Observable
 {

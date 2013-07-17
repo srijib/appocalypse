@@ -5,18 +5,10 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-
 import com.wks.android.utils.BitmapUtils;
-import com.wks.android.utils.DisplayUtils;
 import com.wks.android.utils.FileSystem;
 import com.wks.calorieapp.R;
-import com.wks.calorieapp.adapters.IdentifyResultsAdapter;
-import com.wks.calorieapp.apis.NutritionInfo;
 import com.wks.calorieapp.models.IdentifyResultsModel;
 
 import android.graphics.Bitmap;
@@ -26,23 +18,16 @@ import android.hardware.Camera;
 import android.hardware.Camera.PictureCallback;
 import android.os.Bundle;
 import android.os.Environment;
-import android.animation.AnimatorInflater;
-import android.animation.AnimatorSet;
 import android.app.ActionBar;
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.telephony.TelephonyManager;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup.LayoutParams;
-import android.widget.AdapterView;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
-import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -78,7 +63,7 @@ public class CameraActivity extends IdentifyTaskActivity
 		IDLE, LOADING, RESULTS
 	};*/
 
-	@SuppressWarnings ( "unused" )
+	
 	//private ViewMode viewMode = ViewMode.IDLE;
 	//private String photoName = "";
 	//private IdentifyResultsModel identifyResultsModel;
@@ -90,7 +75,7 @@ public class CameraActivity extends IdentifyTaskActivity
 		super.onCreate ( savedInstanceState );
 		this.setContentView ( R.layout.activity_camera );
 
-		this.identifyResultsModel = new IdentifyResultsModel ();
+		super.identifyResultsModel = new IdentifyResultsModel ();
 
 		this.setupActionBar ();
 		this.setupView ();
@@ -160,8 +145,9 @@ public class CameraActivity extends IdentifyTaskActivity
 		this.layout = ( RelativeLayout ) this.findViewById ( R.id.camera_layout );
 		this.framelayoutCameraPreview = ( FrameLayout ) this.findViewById ( R.id.camera_framelayout_preview );
 		this.buttonTakePicture = ( ImageButton ) this.findViewById ( R.id.camera_button_take_picture );
-		this.layoutProgress = ( LinearLayout ) this.findViewById ( R.id.camera_layout_progress );
-		this.textProgress = ( TextView ) this.findViewById ( R.id.camera_text_progress );
+		
+		super.layoutProgress = ( LinearLayout ) this.findViewById ( R.id.camera_layout_progress );
+		super.textProgress = ( TextView ) this.findViewById ( R.id.camera_text_progress );
 
 		/*
 		LayoutInflater inflater = LayoutInflater.from ( this );
@@ -186,7 +172,7 @@ public class CameraActivity extends IdentifyTaskActivity
 	private void setupListeners ()
 	{
 		this.buttonTakePicture.setOnClickListener ( new OnButtonTakePictureClicked () );
-		this.listviewResults.setOnItemClickListener ( new OnListViewResultsItemClicked () );
+		//this.listviewResults.setOnItemClickListener ( new OnListViewResultsItemClicked () );
 	}
 
 	/**
@@ -198,7 +184,6 @@ public class CameraActivity extends IdentifyTaskActivity
 	protected void setViewMode ( ViewMode mode )
 	{
 		super.setViewMode ( mode );
-		this.viewMode = mode;
 		
 		if(mode==ViewMode.IDLE)
 		{
@@ -239,7 +224,7 @@ public class CameraActivity extends IdentifyTaskActivity
 
 	private void savePhoto ( byte [] data )
 	{
-		this.photoName = generateFileName ();
+		super.photoName = generateFileName ();
 
 		// Save photo in application's pictures directory.
 		String picturesDir = FileSystem.getPicturesDirectory ( CameraActivity.this );
@@ -289,7 +274,7 @@ public class CameraActivity extends IdentifyTaskActivity
 		set.start ();
 	}
 	 */
-	
+	/*
 	class OnListViewResultsItemClicked implements AdapterView.OnItemClickListener
 	{
 		@Override
@@ -298,7 +283,7 @@ public class CameraActivity extends IdentifyTaskActivity
 			Toast.makeText ( CameraActivity.this, "to be implemented", Toast.LENGTH_LONG ).show ();
 		}
 	}
-
+*/
 	/**
 	 * OnClickListener for when the take picture button is clicked.
 	 * 

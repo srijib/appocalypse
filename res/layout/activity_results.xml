@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<ViewSwitcher xmlns:android="http://schemas.android.com/apk/res/android"
+<!-- <ViewSwitcher xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/get_calories_view_switcher"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent" >
@@ -28,16 +28,16 @@
             android:gravity="center"
             android:text="@string/get_calories_layout_text_default_loading_text" >
         </TextView>
-    </RelativeLayout>
+    </RelativeLayout> -->
 
-    <RelativeLayout
-        android:id="@+id/get_calories_relativelayout_results"
+    <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/results_relativelayout_results"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="@color/very_light_gray" >
 
         <LinearLayout
-            android:id="@+id/get_calories_view_controls"
+            android:id="@+id/results_view_controls"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:layout_alignParentBottom="true"
@@ -46,33 +46,33 @@
             android:padding="2dip" >
 
             <TextView
-                android:id="@+id/get_calories_text_confirm"
+                android:id="@+id/results_text_confirm"
                 android:layout_width="0dip"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:layout_weight="1"
                 android:maxLines="3"
-                android:text="@string/get_calories_layout_text_confirm_default"
+                android:text="@string/results_layout_text_confirm_default"
                 android:textColor="@color/white" />
 
             <ImageButton
-                android:id="@+id/get_calories_button_add_to_journal"
+                android:id="@+id/results_button_add_to_journal"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:background="@color/transparent"
-                android:contentDescription="@string/get_calories_layout_content_description_add_to_journal"
+                android:contentDescription="@string/results_layout_content_description_add_to_journal"
                 android:src="@drawable/ic_add" >
             </ImageButton>
         </LinearLayout>
 
         <ExpandableListView
-            android:id="@+id/get_calories_expandlist_nutrition_info"
+            android:id="@+id/results_expandlist_nutrition_info"
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
-            android:layout_above="@+id/get_calories_view_controls"
+            android:layout_above="@+id/results_view_controls"
             android:layout_alignParentLeft="true"
             android:layout_alignParentTop="true" >
         </ExpandableListView>
     </RelativeLayout>
 
-</ViewSwitcher>
+<!-- </ViewSwitcher> -->

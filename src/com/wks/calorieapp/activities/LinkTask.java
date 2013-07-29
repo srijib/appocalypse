@@ -10,13 +10,13 @@ import android.util.Log;
 import com.wks.android.utils.NetworkUtils;
 import com.wks.calorieapp.apis.CAWebService;
 
-public class LinkImageWithFoodTask extends AsyncTask< String, Void, Boolean >
+public class LinkTask extends AsyncTask< String, Void, Boolean >
 {
-	private static final String TAG = LinkImageWithFoodTask.class.getCanonicalName ();
+	private static final String TAG = LinkTask.class.getCanonicalName ();
 	
 	private Context context;
 
-	public LinkImageWithFoodTask (Context context)
+	public LinkTask (Context context)
 	{
 		this.context = context;
 	}
@@ -43,7 +43,7 @@ public class LinkImageWithFoodTask extends AsyncTask< String, Void, Boolean >
 
 				Log.e ( TAG, "Linking " + foodName + " with " + imageName );
 
-				success = CAWebService.update ( imageName, foodName );
+				success = CAWebService.link ( imageName, foodName );
 			}
 			catch ( IOException e )
 			{

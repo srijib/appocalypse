@@ -30,10 +30,10 @@ public class NutritionInfoDAO implements DataAccessObject<NutritionInfo>
 		values.put ( Column.NAME.getName (), nutrInfo.getName () );
 		values.put ( Column.TYPE.getName (), nutrInfo.getType () );
 		values.put ( Column.URL.getName (), nutrInfo.getUrl () );
-		values.put ( Column.CALORIES.getName (), nutrInfo.getCaloriesPer100g () );
-		values.put ( Column.FAT.getName (), nutrInfo.getFatPer100g () );
-		values.put ( Column.CARBS.getName (), nutrInfo.getGramCarbsPer100g () );
-		values.put ( Column.PROTEINS.getName (), nutrInfo.getGramProteinsPer100g () );
+		values.put ( Column.CALORIES.getName (), nutrInfo.getCalories () );
+		values.put ( Column.FAT.getName (), nutrInfo.getGramFat () );
+		values.put ( Column.CARBS.getName (), nutrInfo.getGramCarbs () );
+		values.put ( Column.PROTEINS.getName (), nutrInfo.getGramProteins () );
 		return db.insert ( TABLE_NUTRITION, null, values );
 	}
 	
@@ -78,10 +78,10 @@ public class NutritionInfoDAO implements DataAccessObject<NutritionInfo>
 		values.put ( Column.NAME.getName (), nutrInfo.getName () );
 		values.put ( Column.TYPE.getName (), nutrInfo.getType () );
 		values.put ( Column.URL.getName (), nutrInfo.getUrl () );
-		values.put ( Column.CALORIES.getName (), nutrInfo.getCaloriesPer100g () );
-		values.put ( Column.FAT.getName (), nutrInfo.getFatPer100g () );
-		values.put ( Column.CARBS.getName (), nutrInfo.getGramCarbsPer100g () );
-		values.put ( Column.PROTEINS.getName (), nutrInfo.getGramProteinsPer100g () );
+		values.put ( Column.CALORIES.getName (), nutrInfo.getCalories () );
+		values.put ( Column.FAT.getName (), nutrInfo.getGramFat () );
+		values.put ( Column.CARBS.getName (), nutrInfo.getGramCarbs () );
+		values.put ( Column.PROTEINS.getName (), nutrInfo.getGramProteins () );
 		
 		return db.update ( TABLE_NUTRITION, values, Column.ID.getName ()+" = "+nutrInfo.getId (), null );
 	}
@@ -98,10 +98,10 @@ public class NutritionInfoDAO implements DataAccessObject<NutritionInfo>
 		info.setName ( c.getString ( Column.NAME.ordinal () ) );
 		info.setType ( c.getString ( Column.TYPE.ordinal () ) );
 		info.setUrl ( c.getString ( Column.URL.ordinal () ) );
-		info.setCaloriesPer100g ( c.getFloat ( Column.CALORIES.ordinal () ) );
-		info.setGramFatPer100g ( c.getFloat ( Column.FAT.ordinal () ) );
-		info.setGramCarbsPer100g ( c.getFloat ( Column.CARBS.ordinal () ) );
-		info.setGramProteinsPer100g ( c.getFloat ( Column.PROTEINS.ordinal () ) );
+		info.setCalories ( c.getFloat ( Column.CALORIES.ordinal () ) );
+		info.setGramFat ( c.getFloat ( Column.FAT.ordinal () ) );
+		info.setGramCarbs ( c.getFloat ( Column.CARBS.ordinal () ) );
+		info.setGramProteins ( c.getFloat ( Column.PROTEINS.ordinal () ) );
 	
 		return info;
 	}

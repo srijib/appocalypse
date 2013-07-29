@@ -17,7 +17,7 @@ class IdentifyTask extends AsyncTask< String, String, Map< String, List< Nutriti
 {
 	private static final String TAG = IdentifyTask.class.getCanonicalName ();
 	private static final int MAX_HITS = 10;
-	private static final float MIN_SIMILARITY = 0.1F;
+	private static final float MIN_SIMILARITY = 0.3F;//before, it was 0.1
 	
 	private Context context;
 	private IdentifyTaskInvoker invoker;

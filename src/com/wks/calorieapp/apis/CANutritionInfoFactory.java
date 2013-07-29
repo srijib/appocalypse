@@ -5,7 +5,7 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
 
-public class CANutritionInfoFactory
+public class CANutritionInfoFactory extends CAAbstractResponseFactory
 {
 	private static final String KEY_ID = "id";
 	private static final String KEY_FAT = "fat";
@@ -15,7 +15,7 @@ public class CANutritionInfoFactory
 	private static final String KEY_TYPE = "type";
 	private static final String KEY_PROTEINS = "proteins";
 	
-	public static NutritionInfo createNutritionInfoFromJson(String json) throws ParseException
+	public NutritionInfo createResponseFromJSON ( String json ) throws ParseException
 	{
 		JSONParser parser = new JSONParser();
 		Object object = parser.parse ( json );
@@ -38,12 +38,14 @@ public class CANutritionInfoFactory
 		nutrInfo.setId ( id );
 		nutrInfo.setName ( name );
 		nutrInfo.setType ( type );
-		nutrInfo.setGramFatPer100g ( fat );
-		nutrInfo.setGramCarbsPer100g ( carbs );
-		nutrInfo.setCaloriesPer100g ( calories );
-		nutrInfo.setGramProteinsPer100g ( proteins );
+		nutrInfo.setGramFat ( fat );
+		nutrInfo.setGramCarbs ( carbs );
+		nutrInfo.setCalories ( calories );
+		nutrInfo.setGramProteins ( proteins );
 		
 		return nutrInfo;
 	}
+
+	
 
 }

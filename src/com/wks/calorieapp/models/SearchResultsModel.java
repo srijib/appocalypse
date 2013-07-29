@@ -38,8 +38,4 @@ public class SearchResultsModel extends Observable
 		this.setChanged ();
 		this.notifyObservers (this);
 	}
-	
-	
-
-	
 }

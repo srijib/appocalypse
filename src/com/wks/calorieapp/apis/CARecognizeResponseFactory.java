@@ -31,7 +31,7 @@ public class CARecognizeResponseFactory extends CAAbstractResponseFactory
 		
 		Log.e("RECOGNIZE - STATUSCODE","StatusCode: "+statusCode);
 		
-		if(statusCode == StatusCode.OK.getCode())
+		if(statusCode == 0)
 		{	
 			
 			foodNutritionInfoMap = new HashMap<String,List<NutritionInfo>>();
@@ -73,7 +73,8 @@ public class CARecognizeResponseFactory extends CAAbstractResponseFactory
 				while(iterator.hasNext ())
 				{
 					JSONObject nutritionInfoJson = iterator.next ();
-					NutritionInfo nutritionInfo = CANutritionInfoFactory.createNutritionInfoFromJson ( nutritionInfoJson.toJSONString () );
+					CAAbstractResponseFactory factory = new CANutritionInfoFactory();
+					NutritionInfo nutritionInfo = ( NutritionInfo ) factory.createResponseFromJSON ( nutritionInfoJson.toJSONString () );
 					nutritionInfoList.add ( nutritionInfo );
 				}
 				

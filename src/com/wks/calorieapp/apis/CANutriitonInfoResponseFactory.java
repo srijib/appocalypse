@@ -9,14 +9,14 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
-public class CASearchResponseFactory extends CAAbstractResponseFactory
+public class CANutriitonInfoResponseFactory extends CAAbstractResponseFactory
 {
 
 	List< NutritionInfo > nutritionInfoList;
 
 	@SuppressWarnings ( "unchecked" )
 	@Override
-	public CASearchResponse createResponseFromJSON ( String json ) throws ParseException
+	public CANutritionInfoResponse createResponseFromJSON ( String json ) throws ParseException
 	{
 		JSONParser parser = new JSONParser ();
 		JSONObject searchJson = ( JSONObject ) parser.parse ( json );
@@ -24,7 +24,7 @@ public class CASearchResponseFactory extends CAAbstractResponseFactory
 		long code = ( ( Number ) searchJson.get ( CAAbstractResponse.KEY_CODE ) ).longValue ();
 
 		List< NutritionInfo > nutritionInfoList = null;
-		if ( code == StatusCode.OK.getCode () )
+		if ( code == 0 )
 		{
 			nutritionInfoList = new ArrayList< NutritionInfo > ();
 
@@ -33,12 +33,13 @@ public class CASearchResponseFactory extends CAAbstractResponseFactory
 			while ( iterator.hasNext () )
 			{
 				JSONObject foodJson = iterator.next ();
-				NutritionInfo foodInfo = CANutritionInfoFactory.createNutritionInfoFromJson ( foodJson.toJSONString () );
+				CAAbstractResponseFactory factory = new CANutritionInfoFactory();
+				NutritionInfo foodInfo = ( NutritionInfo ) factory.createResponseFromJSON( foodJson.toJSONString () );
 				nutritionInfoList.add ( foodInfo );
 			}
 		}
 
-		CASearchResponse response = new CASearchResponse ( code );
+		CANutritionInfoResponse response = new CANutritionInfoResponse ( code );
 		response.setNutritionInfo ( nutritionInfoList );
 		return response;
 	}

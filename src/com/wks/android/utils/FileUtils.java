@@ -6,21 +6,26 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.nio.charset.Charset;
 
 import android.content.Context;
 import android.util.Log;
 
 public class FileUtils
 {
-	public static void writeToFile ( Context context, String filename, String text, int mode ) throws IOException
+	public static void writeToFile(Context context, String fileName, String text, int mode) throws IOException
+	{
+		writeToFile(context,fileName,text.getBytes ( Charset.forName ( "UTF-8" ) ),mode);
+	}
+	
+	public static void writeToFile ( Context context, String filename, byte[] text, int mode ) throws IOException
 	{
 		FileOutputStream fos = null;
 		try
 		{
 			fos = context.openFileOutput ( filename, mode );
-			fos.write ( text.getBytes ( "UTF-8" ) );
+			fos.write ( text );
 
-			Log.e ( "WRITTEN", text );
 		}
 		catch ( FileNotFoundException e )
 		{
@@ -46,8 +51,18 @@ public class FileUtils
 		}
 	}
 
-	public static String readFromFile ( Context context, String fileName ) throws IOException
+	
+	public static byte[] readFromFile ( Context context, String fileName ) throws IOException
 	{
+	
+		FileInputStream fis = context.openFileInput ( fileName );
+		byte[] bytes = new byte[fis.available ()];
+		fis.read ( bytes );
+		fis.close ();
+		
+		return bytes;
+		
+		/*
 		FileInputStream fis = null;
 		InputStreamReader isr = null;
 		BufferedReader reader = null;
@@ -89,6 +104,6 @@ public class FileUtils
 			}
 		}
 		Log.e ( "READ", content.toString () );
-		return content.toString ();
+		return content.toString ();*/
 	}
 }

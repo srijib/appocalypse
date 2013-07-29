@@ -250,14 +250,12 @@ public class ResultsActivity extends Activity
 			{
 					this.photoName, this.genericFoodName
 			};
-			new LinkImageWithFoodTask ( this ).execute ( params );
+			new LinkTask ( this ).execute ( params );
 		}
 	}
 
 	/**Callback when a list item is clicked.
 	 * 
-	 * @author Waqqas
-	 *
 	 */
 	class OnListItemClicked implements ExpandableListView.OnChildClickListener
 	{
@@ -265,11 +263,11 @@ public class ResultsActivity extends Activity
 		@Override
 		public boolean onChildClick ( ExpandableListView parent, View v, int groupPosition, int childPosition, long id )
 		{
-			NutritionInfo info = ResultsActivity.this.adapter.getChild ( groupPosition, childPosition );
+			NutritionInfo selectedItem = adapter.getChild ( groupPosition, childPosition );
 
-			ResultsActivity.this.genericFoodName = ResultsActivity.this.adapter.getGroup ( groupPosition ).getGenericFoodName ();
-			ResultsActivity.this.selectedFood = info;
-			ResultsActivity.this.setTextConfirm ( TextConfirmState.CONFIRM_ADD );
+			genericFoodName = adapter.getGroup ( groupPosition ).getGenericFoodName ();
+			selectedFood = selectedItem;
+			setTextConfirm ( TextConfirmState.CONFIRM_ADD );
 
 			return true;
 		}

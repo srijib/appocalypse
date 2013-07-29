@@ -193,7 +193,7 @@ public class JournalEntryActivity extends Activity implements Observer
 		float totalCaloriesConsumed = 0;
 		for ( JournalEntry entry : this.model.getJournalEntries () )
 		{
-			totalCaloriesConsumed += entry.getNutritionInfo ().getCaloriesPer100g ();
+			totalCaloriesConsumed += entry.getNutritionInfo ().getCalories ();
 		}
 
 		return totalCaloriesConsumed;

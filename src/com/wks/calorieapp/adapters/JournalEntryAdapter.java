@@ -94,7 +94,7 @@ public class JournalEntryAdapter extends BaseAdapter implements Observer
 				}
 
 				holder.textMealName.setText ( entry.getNutritionInfo ().getName () );
-				holder.textMealCalories.setText ( String.format ( "%.1f cal", entry.getNutritionInfo ().getCaloriesPer100g () ) );
+				holder.textMealCalories.setText ( String.format ( "%.1f cal", entry.getNutritionInfo ().getCalories () ) );
 			}
 			catch ( NullPointerException npe )
 			{

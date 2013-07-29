@@ -3,11 +3,11 @@ package com.wks.calorieapp.apis;
 import java.util.List;
 
 
-public class CASearchResponse extends CAAbstractResponse
+public class CANutritionInfoResponse extends CAAbstractResponse
 {
 	List<NutritionInfo> nutritionInfo;
 	
-	public CASearchResponse ( long code )
+	public CANutritionInfoResponse ( long code )
 	{
 		super ( code );
 		// TODO Auto-generated constructor stub

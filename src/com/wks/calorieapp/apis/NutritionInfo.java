@@ -1,27 +1,20 @@
 package com.wks.calorieapp.apis;
 
-/**
- * TODO: I think the calculation of nutrients per 100g is incorrent. Double
- * check results.
- * 
- * @author Waqqas
- * 
- */
-public class NutritionInfo
+public class NutritionInfo extends CAAbstractResponse
 {
 	
 	private long id;
 	private String name;
 	private String type;
 	private String url;
-	private float kiloCaloriesPer100g = 0;
-	private float gramFatPer100g = 0;
-	private float gramCarbsPer100g = 0;
-	private float gramProteinsPer100g = 0;
+	private float calories = 0;
+	private float gramFat = 0;
+	private float gramCarbs = 0;
+	private float gramProteins = 0;
 
 	public NutritionInfo ()
 	{
-
+		super(-1);
 	}
 
 	public long getId ()
@@ -54,52 +47,46 @@ public class NutritionInfo
 		this.type = type;
 	}
 
-	public float getCaloriesPer100g ()
+	public float getCalories ()
 	{
-		return kiloCaloriesPer100g;
+		return calories;
 	}
 
-	public void setCaloriesPer100g ( float caloriesPer100g )
+	public void setCalories ( float calories )
 	{
-		this.kiloCaloriesPer100g = caloriesPer100g;
+		this.calories = calories;
 	}
 
-	public float getFatPer100g ()
+	public float getGramFat ()
 	{
-		return gramFatPer100g;
+		return gramFat;
 	}
 
-	public void setGramFatPer100g ( float fatPer100g )
+	public void setGramFat ( float gramFat )
 	{
-		this.gramFatPer100g = fatPer100g;
+		this.gramFat = gramFat;
 	}
 
-	public float getGramCarbsPer100g ()
+	public float getGramCarbs ()
 	{
-		return gramCarbsPer100g;
+		return gramCarbs;
 	}
 
-	public void setGramCarbsPer100g ( float carbsPer100g )
+	public void setGramCarbs ( float gramCarbs )
 	{
-		this.gramCarbsPer100g = carbsPer100g;
+		this.gramCarbs = gramCarbs;
 	}
 
-	public float getGramProteinsPer100g ()
+	public float getGramProteins ()
 	{
-		return gramProteinsPer100g;
+		return gramProteins;
 	}
 
-	public void setGramProteinsPer100g ( float proteinsPer100g )
+	public void setGramProteins ( float gramProteins )
 	{
-		this.gramProteinsPer100g = proteinsPer100g;
+		this.gramProteins = gramProteins;
 	}
-
-	/*
-	 * public void setDescription ( String description ) { this.description =
-	 * description; parseDescription (); }
-	 * 
-	 * public String getDescription () { return description; }
-	 */
+	
 	public String getUrl ()
 	{
 		return url;
@@ -114,7 +101,7 @@ public class NutritionInfo
 	public String toString ()
 	{
 		return String.format ( "[id: %d,name: %s,calories: %f]",
-				id, name, kiloCaloriesPer100g);
+				id, name, calories);
 
 	}
 

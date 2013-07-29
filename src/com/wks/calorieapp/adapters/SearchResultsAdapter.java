@@ -138,7 +138,7 @@ public class SearchResultsAdapter extends BaseExpandableListAdapter implements O
 		if(info != null)
 		{
 			holder.textFoodName.setText ( info.getName () );
-			holder.textCalories.setText ( String.format ( FORMAT_CALORIE, info.getCaloriesPer100g () ) );
+			holder.textCalories.setText ( String.format ( FORMAT_CALORIE, info.getCalories () ) );
 		}
 		return resultView;
 	}

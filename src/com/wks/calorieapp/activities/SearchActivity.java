@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Observable;
 import java.util.Observer;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import com.wks.android.utils.KeyboardUtils;
 import com.wks.android.utils.NetworkUtils;
@@ -64,8 +66,8 @@ public class SearchActivity extends Activity implements Observer
 	private ExpandableListView listNutritionInfo;
 
 	//Members
-	private String cameraPhotoName;
-	private NutritionInfo selectedFoodInfo;
+	private String photoName;
+	private NutritionInfo selectedItem;
 	private SearchResultsAdapter adapter;
 	private SearchResultsModel searchResultsModel;
 	private ViewMode viewMode;
@@ -91,8 +93,8 @@ public class SearchActivity extends Activity implements Observer
 		Bundle extras = this.getIntent ().getExtras ();
 		if ( extras != null )
 		{
-			this.cameraPhotoName = extras.getString ( EXTRAS_PHOTO_NAME );
-			Log.i(TAG,"CameraPhotoName: "+this.cameraPhotoName);
+			this.photoName = extras.getString ( EXTRAS_PHOTO_NAME );
+			Log.i(TAG,"CameraPhotoName: "+this.photoName);
 		}
 
 		this.searchResultsModel = new SearchResultsModel ();
@@ -117,9 +119,7 @@ public class SearchActivity extends Activity implements Observer
 		switch ( item.getItemId () )
 		{
 		case android.R.id.home:
-			Intent homeIntent = new Intent ( SearchActivity.this, MainMenuActivity.class );
-			homeIntent.addFlags ( Intent.FLAG_ACTIVITY_CLEAR_TOP );
-			startActivity ( homeIntent );
+			this.finish ();
 			return true;
 
 		case R.id.search_menu_done:
@@ -223,24 +223,24 @@ public class SearchActivity extends Activity implements Observer
 		switch ( state )
 		{
 		case ADDED:
-			if ( this.selectedFoodInfo != null )
+			if ( this.selectedItem != null )
 			{
 				String confirmTemplate = this.getString ( R.string.search_layout_text_confirm_template_added );
-				confirmMessage = String.format ( confirmTemplate, this.selectedFoodInfo.getName () );
+				confirmMessage = String.format ( confirmTemplate, this.selectedItem.getName () );
 			}
 			break;
 		case NOT_ADDED:
-			if ( this.selectedFoodInfo != null )
+			if ( this.selectedItem != null )
 			{
 				String confirmTemplate = this.getString ( R.string.search_layout_text_confirm_template_not_added );
-				confirmMessage = String.format ( confirmTemplate, this.selectedFoodInfo.getName () );
+				confirmMessage = String.format ( confirmTemplate, this.selectedItem.getName () );
 			}
 			break;
 		case CONFIRM_ADD:
-			if ( this.selectedFoodInfo != null )
+			if ( this.selectedItem != null )
 			{
 				String confirmTemplate = this.getString ( R.string.search_layout_text_confirm_template_confirm_add );
-				confirmMessage = String.format ( confirmTemplate, this.selectedFoodInfo.getName () );
+				confirmMessage = String.format ( confirmTemplate, this.selectedItem.getName () );
 			}
 			break;
 		default:
@@ -254,13 +254,13 @@ public class SearchActivity extends Activity implements Observer
 	private long addToJournal ()
 	{
 
-		if ( this.selectedFoodInfo == null ) return -1;
+		if ( this.selectedItem == null ) return -1;
 
 		ImageEntry photo = null;
-		if ( this.cameraPhotoName != null && !this.cameraPhotoName.isEmpty () )
+		if ( this.photoName != null && !this.photoName.isEmpty () )
 		{
 			photo = new ImageEntry ();
-			photo.setFileName ( this.cameraPhotoName );
+			photo.setFileName ( this.photoName );
 			Log.e ( TAG, "Image Set: "+photo.getFileName ());
 		}
 
@@ -268,7 +268,7 @@ public class SearchActivity extends Activity implements Observer
 
 		JournalEntry journal = new JournalEntry ();
 		journal.setTimestamp ( cal.getTimeInMillis () );
-		journal.setNutritionInfo ( this.selectedFoodInfo );
+		journal.setNutritionInfo ( this.selectedItem );
 		journal.setImageEntry ( photo );
 
 		DatabaseManager manager = DatabaseManager.getInstance ( this );
@@ -282,30 +282,46 @@ public class SearchActivity extends Activity implements Observer
 
 	}
 
+	/**Initiates Link Task and links the picture name with the search term.
+	 * 
+	 */
 	private void linkPhotoWithGenericFoodName ()
 	{
 		String genericFoodName = estimateGenericFoodNameFromSearchTerm();
-		if ( this.cameraPhotoName != null)
+		if ( this.photoName != null)
 		{
 			String [] params =
 			{
-					this.cameraPhotoName, genericFoodName
+					this.photoName, genericFoodName
 			};
-			new LinkImageWithFoodTask ( this ).execute ( params );
+			new LinkTask ( this ).execute ( params );
 		}
 	}
 
 	private String estimateGenericFoodNameFromSearchTerm()
 	{
+		
 		String searchTerm = this.searchResultsModel.getSearchTerm ();
-		String selectedFood = this.selectedFoodInfo.getName ();
-		int beginning = selectedFood.toLowerCase ().indexOf ( searchTerm.toLowerCase () );
-		int end = selectedFood.indexOf ( " ", beginning );
-		if(beginning != -1 && end != -1)
+		String selectedFood = this.selectedItem.getName ();
+		
+		
+		//Each part of the food name that contains the search term 
+		//should be added to final name
+		//e.g. Search Term: Ch
+		// Result: Cheddar Cheese Chips
+		// Generic Name: Cheddar Cheese Chips
+		//BAD!
+		
+		String sPattern =  "(?i)\\b("+searchTerm+"(?:.+?)?)\\b";
+		Pattern pattern = Pattern.compile ( sPattern );
+		Matcher matcher = pattern.matcher ( selectedFood );
+		String result = "";
+		while(matcher.find ())
 		{
-			return  selectedFood.substring ( beginning,end );
-		}else
-			return selectedFood;
+				result+= matcher.group ( ) + " ";
+		}
+				
+		return result.isEmpty ()?selectedFood:result;
 	}
 	
 	@Override
@@ -327,7 +343,7 @@ public class SearchActivity extends Activity implements Observer
 				if ( foodName != null && !foodName.isEmpty () )
 				{
 					// clear previous data
-					SearchActivity.this.selectedFoodInfo = null;
+					SearchActivity.this.selectedItem = null;
 					SearchActivity.this.setTextConfirm ( TextConfirmState.DEFAULT );
 
 					KeyboardUtils.hideKeyboard ( SearchActivity.this.editSearch );
@@ -353,7 +369,7 @@ public class SearchActivity extends Activity implements Observer
 		{
 			NutritionInfo info = SearchActivity.this.adapter.getChild ( groupPosition, childPosition );
 
-			SearchActivity.this.selectedFoodInfo = info;
+			SearchActivity.this.selectedItem = info;
 			SearchActivity.this.setTextConfirm ( TextConfirmState.CONFIRM_ADD );
 
 			return true;

@@ -1,14 +1,6 @@
 package com.wks.calorieapp.activities;
 
-import java.io.IOException;
-
-import org.json.simple.parser.ParseException;
-
-import com.wks.android.utils.FileUtils;
 import com.wks.calorieapp.entities.Profile;
-import com.wks.calorieapp.entities.ProfileException;
-import com.wks.calorieapp.entities.ProfileFactory;
-
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
@@ -23,30 +15,25 @@ public class StartActivity extends Activity
 	{
 		super.onCreate ( savedInstanceState );
 		
-		Log.e ( TAG, "BEGIN" );
-		String profileJson = this.loadProfileJson ();
-
-		if ( profileJson != null && !profileJson.isEmpty () )
+		
+		
+		CalorieApplication app = (CalorieApplication) this.getApplication ();
+		Profile profile = app.getProfile ();
+		if (profile != null)
 		{
-
-			if ( this.loadProfile ( profileJson ) )
-			{
-
-				Intent homeIntent = new Intent ( this, MainMenuActivity.class );
-				homeIntent.addFlags ( Intent.FLAG_ACTIVITY_CLEAR_TOP );
-				startActivity ( homeIntent );
-				return;
-			}
+			Log.i(TAG,"Profile found. Loading Main Menu");
+			Intent homeIntent = new Intent ( this, MainMenuActivity.class );
+			homeIntent.addFlags ( Intent.FLAG_ACTIVITY_CLEAR_TOP );
+			startActivity ( homeIntent );
+		}else
+		{
+			Log.i(TAG,"Profile found. Loading Welcome Screen");
+			Intent welcomeIntent = new Intent ( this, ProfileActivity.class );
+			welcomeIntent.addFlags ( Intent.FLAG_ACTIVITY_CLEAR_TOP );
+			welcomeIntent.putExtra ( ProfileActivity.EXTRAS_VIEW_MODE, ProfileActivity.ViewMode.WELCOME.toString () );
+			startActivity ( welcomeIntent );
 		}
 
-		// assume first launch. Direct user to profile activity with welcome
-		// view.
-
-		Intent welcomeIntent = new Intent ( this, ProfileActivity.class );
-		welcomeIntent.addFlags ( Intent.FLAG_ACTIVITY_CLEAR_TOP );
-		welcomeIntent.putExtra ( ProfileActivity.KEY_VIEW_MODE, ProfileActivity.ViewMode.WELCOME.toString () );
-		startActivity ( welcomeIntent );
-		return;
 	}
 
 	@Override
@@ -56,47 +43,4 @@ public class StartActivity extends Activity
 		this.finish ();
 	}
 
-	private String loadProfileJson ()
-	{
-		String profileJson = null;
-
-		try
-		{
-			profileJson = FileUtils.readFromFile ( this, CalorieApplication.FILENAME_PROFILE_JSON);
-
-		}
-		catch ( IOException e )
-		{
-			Log.e ( TAG, e.getMessage () );
-		}
-
-		return profileJson;
-	}
-
-	private boolean loadProfile ( String profileJson )
-	{
-		try
-		{
-		
-			Profile profile = ProfileFactory.createProfileFromJson ( profileJson );
-			if(profile!=null)
-			{
-				CalorieApplication app = ( CalorieApplication ) this.getApplication ();
-				app.setProfile ( profile );
-				return true;
-			}
-			
-			
-		}
-		catch ( ProfileException e )
-		{
-			Log.e ( TAG, "" + e.getMessage () );
-
-		}
-		catch ( ParseException e )
-		{
-			Log.e ( TAG, "" + e.getMessage () );
-		}
-		return false;
-	}
 }

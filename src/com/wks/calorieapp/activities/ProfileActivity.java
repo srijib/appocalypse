@@ -2,6 +2,7 @@ package com.wks.calorieapp.activities;
 
 import java.io.IOException;
 
+import com.wks.android.utils.EncryptUtils;
 import com.wks.android.utils.FileUtils;
 import com.wks.calorieapp.R;
 import com.wks.calorieapp.adapters.ActivityLifestyleAdapter;
@@ -32,8 +33,8 @@ import android.widget.Toast;
 public class ProfileActivity extends Activity
 {
 	// private static final String TAG = ProfileActivity.class.getCanonicalName
-	
-	public static final String KEY_VIEW_MODE = "mode";
+
+	public static final String EXTRAS_VIEW_MODE = "mode";
 
 	private RadioGroup radiogroupSex;
 	private RadioButton radioMale;
@@ -48,9 +49,13 @@ public class ProfileActivity extends Activity
 
 	private Button buttonCalculateRecommendedCalories;
 
-	public enum ViewMode{REGULAR, WELCOME};
+	public enum ViewMode
+	{
+		REGULAR, WELCOME
+	};
+
 	private ViewMode mode;
-	
+
 	private Profile profile;
 	private float selectedActivityFactor;// TODO refactor and get rid of this.
 
@@ -65,7 +70,7 @@ public class ProfileActivity extends Activity
 
 		if ( extras != null )
 		{
-			this.mode = ViewMode.valueOf ( extras.getString ( KEY_VIEW_MODE ) );
+			this.mode = ViewMode.valueOf ( extras.getString ( EXTRAS_VIEW_MODE ) );
 		}
 
 		this.setContentView ( this.mode == ViewMode.REGULAR ? R.layout.activity_profile : R.layout.activity_profile_welcome );
@@ -74,7 +79,7 @@ public class ProfileActivity extends Activity
 		this.profile = app.getProfile ();
 
 		if ( this.profile == null ) this.profile = new Profile ();
-		
+
 		this.setupActionBar ();
 		this.setupView ();
 		this.setupListeners ();
@@ -109,34 +114,17 @@ public class ProfileActivity extends Activity
 
 		case R.id.profile_menu_done:
 
-			try
-			{
-				Profile profile = this.createProfile ();
-
-				if ( profile == null ) return false;
-
-				FileUtils.writeToFile ( this, CalorieApplication.FILENAME_PROFILE_JSON, profile.toJSON (), Context.MODE_PRIVATE );
-				CalorieApplication app = ( CalorieApplication ) this.getApplication ();
-				app.setProfile ( profile );
-
-				Intent homeIntent2 = new Intent ( this, MainMenuActivity.class );
-				homeIntent2.addFlags ( Intent.FLAG_ACTIVITY_CLEAR_TOP );
-				this.startActivity ( homeIntent2 );
-				return true;
-			}
-			catch ( IOException e )
-			{
-				// do nothing.
-			}
-
+			this.saveProfile();
+			
+			Intent homeIntent2 = new Intent ( this, MainMenuActivity.class );
+			homeIntent2.addFlags ( Intent.FLAG_ACTIVITY_CLEAR_TOP );
+			this.startActivity ( homeIntent2 );
 			return true;
 
 		default:
 			return super.onOptionsItemSelected ( item );
 		}
 	}
-
-
 
 	private void setupActionBar ()
 	{
@@ -188,7 +176,7 @@ public class ProfileActivity extends Activity
 
 	private void bindView ()
 	{
-	
+
 		this.radioMale.setChecked ( profile.getSex ().equals ( Profile.Sex.MALE ) );
 		this.editAge.setText ( "" + profile.getAge () );
 		this.editWeight.setText ( "" + profile.getWeight () );
@@ -204,6 +192,22 @@ public class ProfileActivity extends Activity
 	{
 		this.buttonCalculateRecommendedCalories.setText ( this.getResources ().getString (
 				R.string.profile_layout_button_get_recommended_calories_update ) );
+	}
+	
+	/**
+	 * Saves changes to user profile
+	 */
+	private void saveProfile()
+	{
+		//create Profile object from user input
+		Profile profile = this.createProfile ();
+
+		if ( profile != null ) 
+		{
+			//save 
+			CalorieApplication app = ( CalorieApplication ) this.getApplication ();
+			app.saveProfile ( profile );
+		}		
 	}
 
 	private Profile createProfile ()

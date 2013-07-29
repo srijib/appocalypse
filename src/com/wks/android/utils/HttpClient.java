@@ -9,6 +9,9 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Map.Entry;
 
 public class HttpClient
 {
@@ -125,5 +128,22 @@ public class HttpClient
 
 		return response;
 
+	}
+
+	public static String appendGetParameters ( String url, Map< String, String > params )
+	{
+		String urlWithParameters = url;
+		if(params.size ()!=0)
+		{
+			urlWithParameters += "?";
+			Iterator< Entry< String, String >> paramIterator = params.entrySet ().iterator ();
+			while(paramIterator.hasNext ())
+			{
+				Entry<String,String> parameter = paramIterator.next ();
+				urlWithParameters += parameter.getKey ()+"="+parameter.getValue ();
+				if(paramIterator.hasNext ()) urlWithParameters += "&";
+			}
+		}
+		return urlWithParameters;
 	}
 }

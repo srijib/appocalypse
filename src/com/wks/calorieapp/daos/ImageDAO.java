@@ -20,6 +20,7 @@ public class ImageDAO implements DataAccessObject<ImageEntry>
 	public ImageDAO ( SQLiteDatabase db )
 	{
 		this.db = db;
+		
 	}
 
 

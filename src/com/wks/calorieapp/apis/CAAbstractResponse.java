@@ -23,6 +23,6 @@ public abstract class CAAbstractResponse
 	
 	public final boolean isSuccessful()
 	{
-		return this.code == StatusCode.OK.getCode ();
+		return this.code == 0;
 	}
 }

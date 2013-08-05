@@ -29,8 +29,7 @@ import com.wks.calorieapp.models.SearchResultsModel;
 public class ResultsActivity extends Activity
 {
 	//DEBUGGING TAG
-	@SuppressWarnings ( "unused" )
-	private static final String TAG = ResultsActivity.class.getCanonicalName ();
+	//private static final String TAG = ResultsActivity.class.getCanonicalName ();
 
 	//CONSTANTS
 	public static final String EXTRAS_PHOTO_NAME = "image";
@@ -87,7 +86,6 @@ public class ResultsActivity extends Activity
 	protected void onPause ()
 	{
 		super.onPause ();
-		//getCaloriesTask.cancel ( true );
 		this.finish ();
 	}
 
@@ -142,8 +140,11 @@ public class ResultsActivity extends Activity
 	{
 		ActionBar actionBar = this.getActionBar ();
 
-		Drawable d = this.getResources ().getDrawable ( R.drawable.bg_actionbar );
-		actionBar.setBackgroundDrawable ( d );
+		Drawable backgroundActionBar = getResources ().getDrawable ( R.drawable.bg_actionbar );
+		Drawable iconActionBar = getResources().getDrawable ( R.drawable.ic_actionbar );
+		
+		actionBar.setBackgroundDrawable ( backgroundActionBar );
+		actionBar.setIcon ( iconActionBar );
 
 		actionBar.setDisplayHomeAsUpEnabled ( true );
 	}

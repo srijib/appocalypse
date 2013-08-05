@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="title_activity_journal">Calorie Journal</string>
     <string name="journal_layout_content_description_last_year">Previous Year</string>
     <string name="journal_layout_content_description_last_month">Previous Month</string>
     <string name="journal_layout_content_description_today">Today</string>

@@ -3,7 +3,7 @@
 
     <item
         android:id="@+id/results_menu_no_match"
-        android:icon="@drawable/ic_cancel"
+        android:icon="@drawable/ic_action_cancel"
         android:showAsAction="always"
         android:title="@string/results_menu_no_match">
     </item>

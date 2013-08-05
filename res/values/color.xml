@@ -4,6 +4,7 @@
     <color name="white">#ffffff</color>
     <color name="transparent_white">#88ffffff</color>
     <color name="honeydew_green">#F0FFF0</color>
+    <color name="dark_green">#2e8b57</color>
     <color name="sap_green">#308014</color>
     <color name="sea_green">#3cb371</color>
     <color name="black_medium">#2c2c2c</color>

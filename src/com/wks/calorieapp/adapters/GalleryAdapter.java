@@ -70,14 +70,13 @@ public class GalleryAdapter extends BaseAdapter
 		File file = this.getItem ( position );
 
 		Bitmap bitmap = BitmapUtils.getThumbnailFromFile ( context, file, imageSize, imageSize );
-		bitmap = BitmapUtils.rotate ( bitmap, 90 );
+		
 		if ( bitmap != null )
 		{
 			resultView.setImageBitmap ( bitmap );
 		}else
 		{
-			// TODO
-
+			
 		}
 
 		return resultView;

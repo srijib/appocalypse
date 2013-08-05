@@ -26,22 +26,5 @@ public class ProfileFactory
 		
 		return profile;
 	}
-	/*
-	public static Profile createProfileFromCSV(String profileCSV) throws NumberFormatException, ProfileException
-	{
-		Profile profile = null;
-		String[] tokens = profileCSV.split ( "," );
-		if(tokens.length == 6)
-		{
-			profile = new Profile();
-			profile.setSex ( Profile.Sex.valueOf ( tokens[0] ) );
-			profile.setAge ( Integer.parseInt ( tokens[1] ) );
-			profile.setHeight ( Float.parseFloat ( tokens[2] ) );
-			profile.setWeight ( Float.parseFloat ( tokens[3] ) );
-			profile.setActivityFactor ( Float.parseFloat ( tokens[4] ) );
-			profile.setWeightLossGoal ( Integer.parseInt ( tokens[5] ) );
-		}
-		
-		return profile;
-	}*/
+
 }

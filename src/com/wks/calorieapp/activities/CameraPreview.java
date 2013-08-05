@@ -26,7 +26,9 @@ public class CameraPreview extends SurfaceView implements Callback
 	private static final String TAG = CameraPreview.class.getCanonicalName ();
 
 	//CONSTANTS
-	private static final int JPEG_QUALITY = 90;
+	private static final int JPEG_QUALITY = 100;
+	//The camera feed will be displayed in portrait mode:
+	private static final int DISPLAY_ORIENTATION = 90;
 
 	//MEMBERS
 	private Camera camera = null;
@@ -86,7 +88,7 @@ public class CameraPreview extends SurfaceView implements Callback
 			parameters.setPictureSize ( pictureSize.width, pictureSize.height );
 			parameters.setJpegQuality ( JPEG_QUALITY );
 			camera.setParameters ( parameters );
-			camera.setDisplayOrientation ( 90 );
+			camera.setDisplayOrientation ( DISPLAY_ORIENTATION );
 			camera.setPreviewDisplay ( holder );
 			camera.startPreview ();
 		}

@@ -87,8 +87,7 @@ public class SearchResultsAdapter extends BaseExpandableListAdapter implements O
 		}
 
 		GenericFoodItem foodCategory = getGroup ( groupPosition );
-		// holder.textFoodName.setTypeface ( CalorieApplication.getFont (
-		// Font.CANTARELL_REGULAR ) );
+		
 		if(foodCategory != null)
 		{
 			holder.textFoodCategory.setText ( foodCategory == null? "null" : foodCategory.getGenericFoodName () );

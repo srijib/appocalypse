@@ -114,8 +114,11 @@ public class JournalEntryActivity extends Activity implements Observer
 
 		actionBar.setDisplayHomeAsUpEnabled ( true );
 
-		Drawable d = this.getResources ().getDrawable ( R.drawable.bg_actionbar );
-		actionBar.setBackgroundDrawable ( d );
+		Drawable backgroundActionBar = getResources ().getDrawable ( R.drawable.bg_actionbar );
+		Drawable iconActionBar = getResources().getDrawable ( R.drawable.ic_actionbar );
+		
+		actionBar.setBackgroundDrawable ( backgroundActionBar );
+		actionBar.setIcon ( iconActionBar );
 
 		SimpleDateFormat formatter = new SimpleDateFormat ( DATE_FORMAT_ACTION_BAR );
 		actionBar.setTitle ( formatter.format ( this.calendar.getTimeInMillis () ) );

@@ -33,7 +33,7 @@
             android:visibility="visible" >
         </ImageButton>
 
-        <LinearLayout
+        <!-- <LinearLayout
             android:id="@+id/camera_layout_progress"
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
@@ -55,7 +55,7 @@
             android:gravity="center"
             android:padding="10dip"
             android:textColor="@color/white" />
-        </LinearLayout>
+        </LinearLayout> -->
 
         
     </LinearLayout>

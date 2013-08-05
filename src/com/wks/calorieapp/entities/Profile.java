@@ -124,6 +124,8 @@ public class Profile implements JSONWriteable
 		return String.format ( "[age: %d,sex: %s,height: %f,weight: %f,weightLossGoal: %d,activityFactor: %f]", this.age, this.sex.toString (),this.height,this.weight,this.weightLossGoal,this.activityFactor );
 	}
 
+	//-------------------JSONWritable----------------//
+	
 	public static final String KEY_AGE = "age";
 	public static final String KEY_SEX = "sex";
 	public static final String KEY_HEIGHT = "height";
@@ -131,7 +133,7 @@ public class Profile implements JSONWriteable
 	public static final String KEY_ACTIVITY_FACTOR = "activity_factor";
 	public static final String KEY_WEIGHT_LOSS_GOAL = "weight_loss_goal";
 	
-	//-------------------JSONWritable----------------//
+	
 	@SuppressWarnings ( "unchecked" )
 	@Override
 	public String toJSON ()

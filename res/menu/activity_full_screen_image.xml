@@ -10,5 +10,10 @@
     <item android:id="@+id/full_screen_image_menu_get_calories"
         android:title="@string/full_screen_image_menu_get_calories"
         android:showAsAction="ifRoom"
-        android:icon="@drawable/ic_get_calories"></item>
+        android:icon="@drawable/ic_action_get_calories"></item>
+
+	<item android:id="@+id/full_screen_image_menu_delete"
+	    android:title="@string/full_screen_image_menu_delete"
+	    android:showAsAction="ifRoom"
+	    android:icon="@drawable/ic_action_delete"></item>
 </menu>

@@ -9,7 +9,7 @@ public class FileSystem
 {
 	public static String getPicturesDirectory(Context context)
 	{
-		String appName = context.getString ( com.wks.calorieapp.R.string.app_name );
+		String appName =  "CalorieApp";
 		File picturesDir = new File( Environment.getExternalStoragePublicDirectory ( Environment.DIRECTORY_PICTURES ), appName);
 		if(!picturesDir.exists ())
 			if(!picturesDir.mkdirs ())

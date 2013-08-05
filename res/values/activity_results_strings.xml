@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="title_activity_results">Nutrition Information</string>
     <string name="results_error_image_not_found">Photo Not Found.</string>
 	<string name="results_error_no_internet_connection">No Internet Connection.</string>
 	<string name="results_error_operation_failed">No Information Available.</string>

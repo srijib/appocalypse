@@ -1,9 +1,6 @@
 package com.wks.calorieapp.activities;
 
-import java.io.IOException;
-
-import com.wks.android.utils.EncryptUtils;
-import com.wks.android.utils.FileUtils;
+import com.wks.android.utils.TypefaceUtils;
 import com.wks.calorieapp.R;
 import com.wks.calorieapp.adapters.ActivityLifestyleAdapter;
 import com.wks.calorieapp.entities.Profile;
@@ -12,7 +9,6 @@ import com.wks.calorieapp.entities.ProfileException;
 
 import android.app.ActionBar;
 import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
@@ -28,6 +24,7 @@ import android.widget.EditText;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.Toast;
 
 public class ProfileActivity extends Activity
@@ -39,6 +36,8 @@ public class ProfileActivity extends Activity
 	private RadioGroup radiogroupSex;
 	private RadioButton radioMale;
 
+	private TextView textProfileLogo;
+	
 	private ActivityLifestyleAdapter activityLifestyleAdapter;
 	private Spinner spinnerActivityLifestyle;
 
@@ -57,7 +56,7 @@ public class ProfileActivity extends Activity
 	private ViewMode mode;
 
 	private Profile profile;
-	private float selectedActivityFactor;// TODO refactor and get rid of this.
+	private float selectedActivityFactor;
 
 	@Override
 	protected void onCreate ( Bundle savedInstanceState )
@@ -137,12 +136,21 @@ public class ProfileActivity extends Activity
 
 		actionBar.setDisplayHomeAsUpEnabled ( this.mode == ViewMode.REGULAR );
 
-		Drawable d = this.getResources ().getDrawable ( R.drawable.bg_actionbar );
-		actionBar.setBackgroundDrawable ( d );
+		Drawable backgroundActionBar = getResources ().getDrawable ( R.drawable.bg_actionbar );
+		Drawable iconActionBar = getResources().getDrawable ( R.drawable.ic_actionbar );
+		
+		actionBar.setBackgroundDrawable ( backgroundActionBar );
+		actionBar.setIcon ( iconActionBar );
 	}
 
 	private void setupView ()
 	{
+		if(this.mode == ViewMode.WELCOME)
+		{
+			textProfileLogo = (TextView) this.findViewById ( R.id.profile_text_logo );
+			TypefaceUtils.setFont ( textProfileLogo, "Hattori_Hanzo.otf" );
+		}
+		
 
 		this.radiogroupSex = ( RadioGroup ) this.findViewById ( R.id.profile_radiogroup_sex );
 		this.radioMale = ( RadioButton ) this.findViewById ( R.id.profile_radio_male );
@@ -158,6 +166,7 @@ public class ProfileActivity extends Activity
 
 		this.buttonCalculateRecommendedCalories = ( Button ) this.findViewById ( R.id.profile_button_calculate_recommended_calories );
 		this.bindView ();
+
 	}
 
 	private void setupListeners ()

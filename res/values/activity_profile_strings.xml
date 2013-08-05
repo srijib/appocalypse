@@ -1,11 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="title_activity_profile">Profile</string>
+	<string name="title_activity_profile_welcome">Welcome!</string>
     <string name="profile_menu_done"></string>
     <string name="profile_layout_text_instructions">Enter your age, height, weight and activity lifestyle to calculate your recommended calorie intake.</string>
     <string name="profile_layout_text_sex">Sex</string>
 	<string name="profile_layout_radio_male">Male</string> 
 	<string name="profile_layout_radio_female">Female</string> 
-	<string name="profile_layout_text_activity_lifestyle">Activity</string>
+	<string name="profile_layout_text_activity_lifestyle">Exercise</string>
 	<string name="profile_layout_text_height">Height(cm)</string>
 	<string name="profile_layout_text_weight">Weight(kg)</string>
 	<string name="profile_layout_text_age">Age</string>
@@ -14,5 +16,5 @@
 	<string name="profile_layout_button_get_recommended_calories_update">Update</string>
 	<string name="profile_template_recommended_calories">Recommended: %.1f calories/day</string>
 	<string name="profile_error_data_missing">Please fill in all fields.</string>
-	<string name="profile_layout_text_welcome">Welcome to Nutri-o-metry! To begin, you must first set-up your profile. Enter your details below and then click done!</string>
+	<string name="profile_layout_text_welcome">Welcome to CaloriCam! To begin, you must first set-up your profile. Enter your details below and then click done!</string>
 </resources>

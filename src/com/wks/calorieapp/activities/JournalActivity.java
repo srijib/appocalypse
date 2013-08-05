@@ -109,8 +109,11 @@ public class JournalActivity extends Activity
 	{
 		ActionBar actionBar = this.getActionBar ();
 
-		Drawable drawable = this.getResources ().getDrawable ( R.drawable.bg_actionbar );
-		actionBar.setBackgroundDrawable ( drawable );
+		Drawable backgroundActionBar = getResources ().getDrawable ( R.drawable.bg_actionbar );
+		Drawable iconActionBar = getResources().getDrawable ( R.drawable.ic_actionbar );
+		
+		actionBar.setBackgroundDrawable ( backgroundActionBar );
+		actionBar.setIcon ( iconActionBar );
 
 		actionBar.setDisplayHomeAsUpEnabled ( true );
 	}

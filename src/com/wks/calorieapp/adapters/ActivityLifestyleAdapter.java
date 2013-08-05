@@ -12,14 +12,12 @@ public class ActivityLifestyleAdapter extends BaseAdapter
 {
 	private static final int PADDING = 5;
 	public Context context;
-	//I won't use a hashmap because it's difficult to iterate through it in same order.
-	//cant put them in string array cuz of null pointer exception
-	//i really really hate android. this is the last android project i ever do!!!
+
 	public String[] entries = {
-			"Little or No Exercise",
-			"Exercise 1 - 3 days/week",
-			"Exercise 3 - 5 days/week",
-			"Exercise 6 - 7 days/week",
+			"No Exercise",
+			"1 - 3 days/week",
+			"3 - 5 days/week",
+			"6 - 7 days/week",
 			"Daily Intense Exercise"};
 	public float[] values = {1.200F, 1.375F, 1.550F, 1.725F,1.900F};
  	

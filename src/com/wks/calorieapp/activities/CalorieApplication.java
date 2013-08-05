@@ -18,7 +18,6 @@ import com.wks.calorieapp.entities.ProfileFactory;
 
 import android.app.Application;
 import android.content.Context;
-import android.content.Intent;
 import android.util.Log;
 
 public class CalorieApplication extends Application
@@ -104,8 +103,7 @@ public class CalorieApplication extends Application
 		}
 	}
 	
-	//I am sick fo androdi and I don't care how messy the code is anymore
-	// i am not even going to bother refactoing this
+	//This is bad, I know ;(
 	public Map<String,List<NutritionInfo>> getIdentifyResults()
 	{
 		return identifyResults;

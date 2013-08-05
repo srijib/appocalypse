@@ -145,8 +145,11 @@ public class SearchActivity extends Activity implements Observer
 	{
 		ActionBar actionBar = this.getActionBar ();
 
-		Drawable d = this.getResources ().getDrawable ( R.drawable.bg_actionbar );
-		actionBar.setBackgroundDrawable ( d );
+		Drawable backgroundActionBar = getResources ().getDrawable ( R.drawable.bg_actionbar );
+		Drawable iconActionBar = getResources().getDrawable ( R.drawable.ic_actionbar );
+		
+		actionBar.setBackgroundDrawable ( backgroundActionBar );
+		actionBar.setIcon ( iconActionBar );
 
 		actionBar.setDisplayHomeAsUpEnabled ( true );
 	}
@@ -216,7 +219,6 @@ public class SearchActivity extends Activity implements Observer
 		this.textLoading.setVisibility ( visible ? View.VISIBLE : View.GONE );
 	}
 
-	// TODO Refactor <- It's android and
 	private void setTextConfirm ( TextConfirmState state )
 	{
 		String confirmMessage = "";

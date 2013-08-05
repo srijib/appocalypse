@@ -27,12 +27,10 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
-import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
-import android.widget.TextView;
 import android.widget.Toast;
 
-public class CameraActivity extends IdentifyTaskActivity 
+public class CameraActivity extends IdentifyTaskActivity
 {
 	// DEBUGGING TAG
 	private static final String TAG = CameraActivity.class.getCanonicalName ();
@@ -43,31 +41,10 @@ public class CameraActivity extends IdentifyTaskActivity
 	private static final SimpleDateFormat timestampFormatter = new SimpleDateFormat ( TIMESTAMP_FORMAT );
 
 	// UI ELEMENTS
-	//private RelativeLayout layout;
 	private FrameLayout framelayoutCameraPreview;
 	private ImageButton buttonTakePicture;
 
-	//private LinearLayout layoutProgress;
-	//private TextView textProgress;
-
 	private CameraPreview preview;
-
-	//private View viewResults;
-	//private ListView listviewResults;
-	//private RelativeLayout.LayoutParams paramsListViewResults;
-
-	// MEMBERS
-	/*
-	public enum ViewMode
-	{
-		IDLE, LOADING, RESULTS
-	};*/
-
-	
-	//private ViewMode viewMode = ViewMode.IDLE;
-	//private String photoName = "";
-	//private IdentifyResultsModel identifyResultsModel;
-	//private IdentifyResultsAdapter adapter;
 
 	@Override
 	public void onCreate ( Bundle savedInstanceState )
@@ -79,23 +56,19 @@ public class CameraActivity extends IdentifyTaskActivity
 
 		this.setupActionBar ();
 		this.setupView ();
-		this.setupListeners ();
-	}
 
-	/*
-	 * @Override public boolean onCreateOptionsMenu ( Menu menu ) { MenuInflater
-	 * inflater = this.getMenuInflater (); inflater.inflate (
-	 * R.menu.activity_camera, menu ); return true; }
-	 * 
-	 * //Make OK and Try again menu items visible after the picture has been
-	 * taken.
-	 * 
-	 * @Override public boolean onPrepareOptionsMenu ( Menu menu ) {
-	 * menu.findItem ( R.id.camera_menu_ok ).setVisible ( this.viewMode.equals (
-	 * ViewMode.POSTVIEW )); menu.findItem ( R.id.camera_menu_cancel
-	 * ).setVisible ( this.viewMode.equals ( ViewMode.POSTVIEW ) ); return true;
-	 * }
-	 */
+		/*
+		 * The super setView method creates an overlay of list results. In order
+		 * to create the overlay, the child layout must be created first. Hence,
+		 * the setupView() of the child activity is called before the seupView()
+		 * of the parent activity.
+		 */
+
+		super.setupView ();
+		this.setupListeners ();
+
+		this.setViewMode ( ViewMode.IDLE );
+	}
 
 	public boolean onOptionsItemSelected ( MenuItem item )
 	{
@@ -132,7 +105,10 @@ public class CameraActivity extends IdentifyTaskActivity
 		ActionBar actionBar = getActionBar ();
 
 		Drawable backgroundActionBar = getResources ().getDrawable ( R.drawable.bg_actionbar );
+		Drawable iconActionBar = getResources ().getDrawable ( R.drawable.ic_actionbar );
+
 		actionBar.setBackgroundDrawable ( backgroundActionBar );
+		actionBar.setIcon ( iconActionBar );
 
 		actionBar.setDisplayHomeAsUpEnabled ( true );
 	}
@@ -140,30 +116,14 @@ public class CameraActivity extends IdentifyTaskActivity
 	/**
 	 * - Initialisez UI components - Sets default View mode to preview.
 	 */
-	private void setupView ()
+	protected void setupView ()
 	{
-		this.layout = ( RelativeLayout ) this.findViewById ( R.id.camera_layout );
+		super.layout = ( RelativeLayout ) this.findViewById ( R.id.camera_layout );
 		this.framelayoutCameraPreview = ( FrameLayout ) this.findViewById ( R.id.camera_framelayout_preview );
 		this.buttonTakePicture = ( ImageButton ) this.findViewById ( R.id.camera_button_take_picture );
-		
-		super.layoutProgress = ( LinearLayout ) this.findViewById ( R.id.camera_layout_progress );
-		super.textProgress = ( TextView ) this.findViewById ( R.id.camera_text_progress );
 
-		/*
-		LayoutInflater inflater = LayoutInflater.from ( this );
-		this.viewResults = inflater.inflate ( R.layout.identify_list_results, null );
-		this.listviewResults = ( ListView ) this.viewResults.findViewById ( R.id.identify_listview_results );
-
-		this.identifyResultsAdpater = new IdentifyResultsAdapter ( this, this.identifyResultsModel );
-		this.listviewResults.setAdapter ( this.identifyResultsAdpater );
-
-		this.params = new RelativeLayout.LayoutParams ( DisplayUtils.getScreenWidth ( this ) / 3, LayoutParams.WRAP_CONTENT );
-		this.params.addRule ( RelativeLayout.CENTER_IN_PARENT );
-		*/
 		this.preview = new CameraPreview ( this );
 		this.framelayoutCameraPreview.addView ( preview );
-
-		this.setViewMode ( ViewMode.IDLE );
 	}
 
 	/**
@@ -172,29 +132,27 @@ public class CameraActivity extends IdentifyTaskActivity
 	private void setupListeners ()
 	{
 		this.buttonTakePicture.setOnClickListener ( new OnButtonTakePictureClicked () );
-		//this.listviewResults.setOnItemClickListener ( new OnListViewResultsItemClicked () );
 	}
 
 	/**
 	 * Switches between view modes and performs accompanying UI changes.
 	 * 
 	 * @param mode
-	 *            View Mode {@link: ViewMode}
+	 *            viewMode
+	 * 
 	 */
 	protected void setViewMode ( ViewMode mode )
 	{
 		super.setViewMode ( mode );
-		
-		if(mode==ViewMode.IDLE)
+
+		if ( mode == ViewMode.IDLE )
 		{
-			if(this.preview != null)
-				this.preview.refreshPreview ();
+			if ( this.preview != null ) this.preview.refreshPreview ();
 		}
-	
+
 		this.invalidateOptionsMenu ();
 		this.buttonTakePicture.setVisibility ( mode == ViewMode.IDLE ? View.VISIBLE : View.GONE );
-		
-	
+
 	}
 
 	/**
@@ -236,6 +194,13 @@ public class CameraActivity extends IdentifyTaskActivity
 		{
 			fos = new FileOutputStream ( imageFile );
 			Bitmap bitmap = BitmapFactory.decodeByteArray ( data, 0, data.length );
+
+			/**
+			 * Version 1.0: The application takes photos in portrait mode while
+			 * the Android platform saves the photos in landscape mode. The
+			 * bitmap must be rotated from portrait to landscape so that it
+			 * complies with Android default photo orientation.
+			 */
 			bitmap = BitmapUtils.rotate ( bitmap, 90 );
 
 			// convert to JPEG
@@ -264,26 +229,6 @@ public class CameraActivity extends IdentifyTaskActivity
 		}
 	}
 
-	/*
-	private void showResults ()
-	{
-		this.setViewMode ( ViewMode.RESULTS );
-		AnimatorSet set = ( AnimatorSet ) AnimatorInflater.loadAnimator ( this, R.animator.fade );
-		set.setTarget ( this.viewResults );
-		this.layout.addView ( this.viewResults, this.params );
-		set.start ();
-	}
-	 */
-	/*
-	class OnListViewResultsItemClicked implements AdapterView.OnItemClickListener
-	{
-		@Override
-		public void onItemClick ( AdapterView< ? > parent, View view, int position, long id )
-		{
-			Toast.makeText ( CameraActivity.this, "to be implemented", Toast.LENGTH_LONG ).show ();
-		}
-	}
-*/
 	/**
 	 * OnClickListener for when the take picture button is clicked.
 	 * 
@@ -298,11 +243,16 @@ public class CameraActivity extends IdentifyTaskActivity
 		{
 			Camera camera = preview.getCamera ();
 
-			if ( camera != null )
+			if ( camera != null ) 
 			{
-				CameraActivity.this.setViewMode ( ViewMode.LOADING );
+				/**
+				 * Version 1.0:
+				 * Photo is saved, 
+				 * Identify Task is executed.
+				 */
 				camera.takePicture ( null, null, new OnPictureTaken () );
 			}
+			
 
 		}
 
@@ -327,64 +277,13 @@ public class CameraActivity extends IdentifyTaskActivity
 				return;
 			}
 
-			if ( preview != null ) preview.refreshPreview ();
 			CameraActivity.this.savePhoto ( data );
-			new IdentifyTask (CameraActivity.this).execute ( CameraActivity.this.photoName );
+
+			CameraActivity.this.setViewMode ( ViewMode.LOADING );
+			identifyTask = new IdentifyTask ( CameraActivity.this );
+			identifyTask.execute ( CameraActivity.this.photoName );
 		}
 
 	}
 
-	// Identify Task Invoker
-	
-	/*
-	 * @Override
-	public void onPreExecute ()
-	{
-		// TODO Auto-generated method stub
-
-	}
-
-	 
-	@Override
-	public void onPostExecute ( Map< String, List< NutritionInfo >> response )
-	{
-		// this.progressDialog.dismiss ();
-		if ( response != null )
-		{
-			// a really stupid way of checking that the result is not empty.
-			for ( Entry< String, List< NutritionInfo >> entry : response.entrySet () )
-			{
-				// there should be atleast one list.
-				if ( !entry.getValue ().isEmpty () )
-				{
-					this.identifyResultsModel.setPossibleMatchesList ( new ArrayList< String > ( response.keySet () ) );
-					this.showResults ();
-					return;
-				}
-			}
-
-		}
-
-		// If no response, start searchActivity so that the user can manually
-		// search for the item.
-
-		Toast.makeText ( this, "No Matches Found", Toast.LENGTH_LONG ).show ();
-		Intent searchFoodIntent = new Intent ( this, SearchActivity.class );
-		searchFoodIntent.putExtra ( SearchActivity.EXTRAS_PHOTO_NAME, photoName );
-		startActivity ( searchFoodIntent );
-
-	}
-
-	@Override
-	public void onCancelled ()
-	{
-		this.setViewMode ( ViewMode.IDLE );
-	}
-
-	@Override
-	public void onProgressUpdate ( String [] values )
-	{
-		this.textProgress.setText ( values[0] );
-	}
-*/
 }

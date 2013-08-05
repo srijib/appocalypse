@@ -25,13 +25,14 @@ public class IdentifyResultsAdapter extends BaseAdapter
 	@Override
 	public int getCount ()
 	{
-		return this.model.getPossibleMatchesList ().size ();
+		return this.model == null? 0 : this.model.getPossibleMatchesList ().size ();
 	}
 
 	@Override
 	public String getItem ( int position )
 	{
-		return this.model.getPossibleMatchesList ().get ( position );
+		
+		return this.model == null? null : this.model.getPossibleMatchesList ().get ( position );
 	}
 
 	@Override

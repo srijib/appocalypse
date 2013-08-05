@@ -40,8 +40,6 @@ public class GalleryActivity extends Activity
 		// TODO Auto-generated method stub
 		super.onCreate ( savedInstanceState );
 		this.setContentView ( R.layout.activity_gallery );
-
-		this.pictureFilesList = this.getPictureFiles ();
 		
 		this.setupActionBar ();
 		this.setupView ();
@@ -75,8 +73,11 @@ public class GalleryActivity extends Activity
 	{
 		ActionBar actionBar = this.getActionBar ();
 
-		Drawable d = this.getResources ().getDrawable ( R.drawable.bg_actionbar );
-		actionBar.setBackgroundDrawable ( d );
+		Drawable backgroundActionBar = getResources ().getDrawable ( R.drawable.bg_actionbar );
+		Drawable iconActionBar = getResources().getDrawable ( R.drawable.ic_actionbar );
+		
+		actionBar.setBackgroundDrawable ( backgroundActionBar );
+		actionBar.setIcon ( iconActionBar );
 
 		actionBar.setDisplayHomeAsUpEnabled ( true );
 	}
@@ -86,6 +87,8 @@ public class GalleryActivity extends Activity
 	 */
 	private void setupView ()
 	{
+		this.pictureFilesList = this.getPictureFiles ();
+		
 		this.adapter = new GalleryAdapter(this,this.pictureFilesList);
 		this.gridviewGallery = ( GridView ) this.findViewById ( R.id.gallery_grid_gallery );
 		this.gridviewGallery.setAdapter ( adapter );

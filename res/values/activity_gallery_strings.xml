@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="title_activity_gallery">Gallery</string>
     <string name="gallery_toast_pictures_dir_not_found ">Photos Folder Not Found.</string>
 	<string name="gallery_progress_dialog_title">Gallery</string>
 	<string name="gallery_progress_dialog_default">Waiting</string>

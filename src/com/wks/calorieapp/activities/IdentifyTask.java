@@ -17,7 +17,7 @@ class IdentifyTask extends AsyncTask< String, String, Map< String, List< Nutriti
 {
 	private static final String TAG = IdentifyTask.class.getCanonicalName ();
 	private static final int MAX_HITS = 10;
-	private static final float MIN_SIMILARITY = 0.3F;//before, it was 0.1
+	private static final float MIN_SIMILARITY = 0.3F;//Reminder: Original value was 0.1
 	
 	private Context context;
 	private IdentifyTaskInvoker invoker;
@@ -94,7 +94,6 @@ class IdentifyTask extends AsyncTask< String, String, Map< String, List< Nutriti
 	{
 		Log.i(TAG,"Cancelled");
 		this.invoker.onCancelled ();
-		//this.progressDialog.dismiss ();
 	}
 
 }

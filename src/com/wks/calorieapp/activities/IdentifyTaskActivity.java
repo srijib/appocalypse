@@ -6,11 +6,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import android.animation.AnimatorInflater;
-import android.animation.AnimatorSet;
 import android.app.Activity;
 import android.content.Intent;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.AdapterView;
@@ -34,53 +31,48 @@ public class IdentifyTaskActivity extends Activity implements IdentifyTaskInvoke
 	protected RelativeLayout layout;
 	protected String photoName = "";
 	
+	protected RelativeLayout.LayoutParams paramsLayoutProgress;
 	protected LinearLayout layoutProgress;
 	protected TextView textProgress;
 
+	protected RelativeLayout.LayoutParams paramsViewResults;
 	protected View viewResults;
 	protected ListView listviewResults;
 	protected Button buttonNoMatch;
 	
-	protected RelativeLayout.LayoutParams params;
 	private SearchResultsModel searchResultsModel;
+	
+	protected IdentifyTask identifyTask;
 	protected IdentifyResultsModel identifyResultsModel;
 	protected IdentifyResultsAdapter identifyResultsAdpater;
+	
 
 	public enum ViewMode
 	{
 		IDLE, LOADING, RESULTS
 	};
 
-
 	protected ViewMode viewMode = ViewMode.IDLE;
 
-	protected void setViewMode ( ViewMode mode )
+	@Override
+	protected void onPause ()
 	{
-		this.viewMode = mode;
-		this.layoutProgress.setVisibility ( mode == ViewMode.LOADING ? View.VISIBLE : View.GONE );
-	}
-
-	protected void showResults ()
-	{
-
-		this.setViewMode ( ViewMode.RESULTS );
-		this.setupDynamicResultsView();
-		AnimatorSet set = ( AnimatorSet ) AnimatorInflater.loadAnimator ( this, R.animator.fade );
-		set.setTarget ( this.viewResults );
-		
-		if(this.layout == null)
+		super.onPause ();
+		if(this.identifyTask != null)
 		{
-			Log.e("fuckers","layout is null");
+			this.identifyTask.cancel ( true );
 		}
-		
-		this.layout.addView ( this.viewResults, this.params );
-		set.start ();
+
 	}
 	
-	private void setupDynamicResultsView()
+	
+	protected void setupView()
 	{
 		LayoutInflater inflater = LayoutInflater.from ( this );
+		//Inflate results list and progress view
+		this.layoutProgress = (LinearLayout) inflater.inflate ( R.layout.identify_layout_loading, null );
 		this.viewResults = inflater.inflate ( R.layout.identify_list_results, null );
+		
 		this.buttonNoMatch = (Button) this.viewResults.findViewById ( R.id.identify_button_no_match );
 		this.listviewResults = ( ListView ) this.viewResults.findViewById ( R.id.identify_listview_results );
 		
@@ -90,10 +82,41 @@ public class IdentifyTaskActivity extends Activity implements IdentifyTaskInvoke
 		this.buttonNoMatch.setOnClickListener ( new OnButtonNoMatchClicked() );
 		this.listviewResults.setOnItemClickListener ( new OnListViewResultsItemClicked() );
 		
+		this.textProgress = (TextView) this.layoutProgress.findViewById ( R.id.identify_text_progress );
 
-		this.params = new RelativeLayout.LayoutParams ( DisplayUtils.getScreenWidth ( this ) / 3, LayoutParams.WRAP_CONTENT );
-		this.params.addRule ( RelativeLayout.CENTER_IN_PARENT );
+		this.paramsViewResults = new RelativeLayout.LayoutParams ( DisplayUtils.getScreenWidth ( this ) / 3, LayoutParams.WRAP_CONTENT );
+		this.paramsViewResults.addRule ( RelativeLayout.CENTER_IN_PARENT );
+	
+		this.paramsLayoutProgress = new RelativeLayout.LayoutParams(LayoutParams.MATCH_PARENT,LayoutParams.WRAP_CONTENT);
+		this.paramsLayoutProgress.addRule ( RelativeLayout.ALIGN_PARENT_BOTTOM,RelativeLayout.TRUE );
+	
+		this.viewResults.setVisibility ( View.GONE );
+		this.layoutProgress.setVisibility ( View.GONE );
+		
+		this.layout.addView ( this.viewResults, this.paramsViewResults );
+		this.layout.addView ( this.layoutProgress, this.paramsLayoutProgress );
 	}
+	
+	protected void setViewMode ( ViewMode mode )
+	{
+		this.viewMode = mode;
+		if(this.layoutProgress != null) this.layoutProgress.setVisibility ( mode == ViewMode.LOADING ? View.VISIBLE : View.GONE );
+		if(this.viewResults != null) this.viewResults.setVisibility ( mode == ViewMode.RESULTS? View.VISIBLE : View.GONE );
+	}
+
+	protected void showResults ()
+	{
+
+		this.setViewMode ( ViewMode.RESULTS );
+		//this.setupDynamicResultsView();
+		//AnimatorSet set = ( AnimatorSet ) AnimatorInflater.loadAnimator ( this, R.animator.fade );
+		//set.setTarget ( this.viewResults );
+
+		
+		//this.layout.addView ( this.viewResults, this.paramsViewResults );
+		//set.start ();
+	}
+	
 
 	@Override
 	public void onPreExecute ()
@@ -129,7 +152,9 @@ public class IdentifyTaskActivity extends Activity implements IdentifyTaskInvoke
 		// search for the item.
 
 		Toast.makeText ( this, "No Matches Found", Toast.LENGTH_LONG ).show ();
-		this.startSearchActivity();
+		Intent searchFoodIntent = new Intent ( this, SearchActivity.class );
+		searchFoodIntent.putExtra ( SearchActivity.EXTRAS_PHOTO_NAME, photoName );
+		startActivity ( searchFoodIntent );
 	}
 
 	@Override
@@ -146,12 +171,6 @@ public class IdentifyTaskActivity extends Activity implements IdentifyTaskInvoke
 
 	}
 
-	private void startSearchActivity()
-	{
-		Intent searchFoodIntent = new Intent ( this, SearchActivity.class );
-		searchFoodIntent.putExtra ( SearchActivity.EXTRAS_PHOTO_NAME, photoName );
-		startActivity ( searchFoodIntent );
-	}
 	
 	class OnListViewResultsItemClicked implements AdapterView.OnItemClickListener
 	{
@@ -178,7 +197,9 @@ public class IdentifyTaskActivity extends Activity implements IdentifyTaskInvoke
 		@Override
 		public void onClick ( View v )
 		{
-			IdentifyTaskActivity.this.startSearchActivity ();
+			Intent searchFoodIntent = new Intent ( IdentifyTaskActivity.this, SearchActivity.class );
+			searchFoodIntent.putExtra ( SearchActivity.EXTRAS_PHOTO_NAME, photoName );
+			startActivity ( searchFoodIntent );
 		}	
 	}
 }

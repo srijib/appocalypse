@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="title_activity_camera">Calorie Camera</string>
     <string name="camera_error_camera_unavailable">Camera is not available. It is either not present or busy.</string>
 	<string name="camera_error_file_not_saved">Image could not be saved.</string>
 	<string name="camera_image_saved">Image saved.</string>
